@@ -4,7 +4,7 @@ from components.position import PositionComponent
 from systems.movement import MovementSystem
 from systems.render import RenderSystem
 from systems.bullet_system import BulletSystem
-
+from components.bullet import Bullet
 
 WIDTH, HEIGHT = 900, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -27,7 +27,7 @@ class Entity:
         return None
 
 
-def draw_window(entities,bullet_system,width,color):
+def draw_window(entities, bullet_system, width, color):
     WIN.fill(WHITE)
     for entity in entities:
         position_component = entity.get_component(PositionComponent)
@@ -35,8 +35,8 @@ def draw_window(entities,bullet_system,width,color):
             x = position_component.x
             y = position_component.y
             RenderSystem.render(entity, WIN, x, y)  # Pass x and y as arguments
-    
-    bullet_system.render_bullets(WIN,color)
+
+    bullet_system.render_bullets(WIN, color)
     pygame.display.update()
 
 
@@ -54,13 +54,10 @@ def main():
     movement_system = MovementSystem()
     bullet_system_instance = BulletSystem()
 
-
     clock = pygame.time.Clock()
     # Track the state of the space bar
     space_pressed = False
     last_bullet_time = 0  # Initialize the last_bullet_time variable
-
-
 
     run = True
     while run:
@@ -81,18 +78,23 @@ def main():
         time_since_last_bullet = current_time - last_bullet_time
 
         if space_pressed and time_since_last_bullet >= 100:  # Delay of 100 milliseconds (0.1 seconds)
-            bullet_system_instance.create_bullet(yellow.position.x + SPACESHIP_WIDTH, yellow.position.y + SPACESHIP_HEIGHT // 2, 5)
+            bullet_system_instance.create_bullet(
+                yellow.position.x + SPACESHIP_WIDTH, yellow.position.y + SPACESHIP_HEIGHT // 2, 5
+            )
             last_bullet_time = current_time
 
         keys_pressed = pygame.key.get_pressed()
-        movement_system.move(yellow, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
-        draw_window([yellow], bullet_system_instance, WIDTH,BLACK) 
+        movement_system.move(
+            yellow, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT
+        )
+        draw_window([yellow], bullet_system_instance, WIDTH, BLACK)
         bullet_system_instance.update(WIDTH, BLACK, WIN)  # Pass the WIDTH and BLACK values
 
-
         clock.tick(FPS)
+
     pygame.quit()
 
 
 if __name__ == "__main__":
     main()
+
