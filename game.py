@@ -7,7 +7,7 @@ from systems.render import RenderSystem
 from systems.bullet_system import BulletSystem
 from components.bullet import Bullet
 
-WIDTH, HEIGHT = 900, 500
+WIDTH, HEIGHT = 1400, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Game")
 WHITE = (255, 255, 255)
@@ -153,7 +153,7 @@ def display_pause_menu(selected_option):
             cursor_image = pygame.image.load(os.path.join('assets', 'spaceship_yellow.png'))
             cursor_image = pygame.transform.scale(cursor_image, (50, 30))
             cursor_image = pygame.transform.rotate(cursor_image, 90)
-            cursor_rect = cursor_image.get_rect()
+            cursor_rect = cursor_image.get_rect() 
             cursor_rect.center = (WIDTH // 2 - 100, option_y)
             WIN.blit(cursor_image, cursor_rect)
         
@@ -202,41 +202,44 @@ def game_screen():
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
     clock = pygame.time.Clock()
-    space_pressed = False
+    space_pressed = False # check if space bar is pressed is false if not press is true if pressed
     last_bullet_time = 0
-    pause_pressed = False
+    pause_pressed=False # is set to true if p key is pressed
     result = None
-    game_paused = False
+    game_paused = False #false game is running set to true game stops because we are in pause menu
 
     run = True
     while run:
         clock.tick(FPS)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        
+
+        for event in pygame.event.get(): 
+            if event.type == pygame.QUIT: 
                 run = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    if not pause_pressed:
-                        if not game_paused:
-                            space_pressed = True
-                        else:
-                            game_paused = False
-                            result = pause_menu()
-                            if result == "main_menu":
+                if event.key == pygame.K_SPACE:# check if press key is spacebar
+                    if pause_pressed == False:#if pause_pressed == false if not pause_pressed check game is not currently paused
+                        if game_paused == False:#if pause_press == false if not game_pressed check game is not currently paused
+                            space_pressed = True # space bar is being pressed by user
+                        else: #if game_pause is true if game is paused
+                            game_paused = False#game should be resumed 
+                            result = pause_menu()#assign result of pause_menu to variable
+                            if result == "main_menu":#user press spacebar to go back to main menu
                                 return "main_menu"
-                    else:
-                        pause_pressed = False
-                elif event.key == pygame.K_p:
-                    if not pause_pressed:
-                        if not game_paused:
+                    else:# if pause_pressed is true game is currently paused 
+                        pause_pressed = False #pause key has been released by user
+                elif event.key == pygame.K_p: #checks if p key is pressed 
+                    if pause_pressed == False: # checks if game is not already paused. Basically, prevents the game from entering an undesired pause state if the "p" key is pressed multiple times quickly.
+                        if game_paused == False:#checks that the game is not currently paused
                             pause_pressed = True
                             game_paused = True
-                            result = pause_menu()
-                            if result == "resume_game":
-                                pause_pressed = False
-                                game_paused = False
-                                result = None
+                            result = pause_menu() #assign result of pause_menu to variable
+                            if result == "resume_game":#checks if user selects resume_game
+                                pause_pressed = False#the game is resumed
+                                game_paused = False#the game is resumed
+                                result = None#reset value
+                                return "resume_game"
                             elif result == "main_menu":
                                 return "main_menu"
                                 # Exit the game loop and return to the main menu
@@ -246,8 +249,12 @@ def game_screen():
                     space_pressed = False
                     last_bullet_time = 0
 
-        if game_paused:
-            continue
+        if game_paused:# press space bar once to resume game
+            game_paused = False
+            pause_pressed = False
+            result = None
+            #continue
+        
 
         if space_pressed:
             current_time = pygame.time.get_ticks()
@@ -263,7 +270,7 @@ def game_screen():
         movement_system.move(
             yellow, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT
         )
-        draw_window([yellow], bullet_system_instance, background, BLACK)
+        draw_window([yellow], bullet_system_instance, background, WHITE) #WHITE CHANGE COLOR of bullets
         bullet_system_instance.update(WIDTH, BLACK, WIN)
 
         clock.tick(FPS)
@@ -271,10 +278,6 @@ def game_screen():
     pygame.quit()
 
 def tutorial_screen():
-    pygame.font.init()  # Initialize the font module
-    font = pygame.font.Font(None, 30)
-    text_color = (255, 255, 255)
-
     # Create spaceship player
     yellow = Entity(PositionComponent(100, 300))
     yellow.image = pygame.transform.rotate(
@@ -299,16 +302,7 @@ def tutorial_screen():
     result = None
     game_paused = False
 
-
-
-    # Create a separate buffer surface
-    buffer_surface = pygame.Surface((WIDTH, HEIGHT))
-
-    # Render and display the text
-    controls_text = font.render("Controls: W - Move Up, S - Move Down, A - Move Left, D - Move Right", True, text_color)
-    fire_text = font.render("Spacebar - Fire", True, text_color)
-    pause_text = font.render("P - Pause the game", True, text_color)
-    
+    font = pygame.font.Font(None, 24)  # Load a font
 
     run = True
     while run:
@@ -319,8 +313,8 @@ def tutorial_screen():
                 run = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    if not pause_pressed:
-                        if not game_paused:
+                    if pause_pressed == False:
+                        if game_paused == False:
                             space_pressed = True
                         else:
                             game_paused = False
@@ -330,8 +324,8 @@ def tutorial_screen():
                     else:
                         pause_pressed = False
                 elif event.key == pygame.K_p:
-                    if not pause_pressed:
-                        if not game_paused:
+                    if pause_pressed == False:
+                        if game_paused == False:
                             pause_pressed = True
                             game_paused = True
                             result = pause_menu()
@@ -339,9 +333,9 @@ def tutorial_screen():
                                 pause_pressed = False
                                 game_paused = False
                                 result = None
+                                return "resume_game"
                             elif result == "main_menu":
                                 return "main_menu"
-                                # Exit the game loop and return to the main menu
 
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_SPACE:
@@ -349,7 +343,9 @@ def tutorial_screen():
                     last_bullet_time = 0
 
         if game_paused:
-            continue
+            game_paused = False
+            pause_pressed = False
+            result = None
 
         if space_pressed:
             current_time = pygame.time.get_ticks()
@@ -365,47 +361,38 @@ def tutorial_screen():
         movement_system.move(
             yellow, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT
         )
-        bullet_system_instance.update(WIDTH, BLACK, buffer_surface)
+
+        # Create a separate buffer surface
+        buffer_surface = pygame.Surface((WIDTH, HEIGHT))
 
         # Clear the buffer surface
-        buffer_surface.fill(BLACK)
+        buffer_surface.fill((0, 0, 0))
 
         # Draw the background and spaceship on the buffer surface
         buffer_surface.blit(background, (0, 0))
         buffer_surface.blit(yellow.image, (yellow.position.x, yellow.position.y))
 
-        # Draw the text surfaces on the buffer surface
-        buffer_surface.blit(controls_text, (10, 10))
-        buffer_surface.blit(fire_text, (10, 40))
+        # Render and display the text
+        controls_text = font.render("Movement: W - Move Up, S - Move Down, A - Move Left, D - Move Right", True, (255, 255, 255))
+        shoot_text = font.render("Press Spacebar to Shoot", True, (255, 255, 255))
+        pause_text = font.render("Press P to Pause", True, (255, 255, 255))
+        buffer_surface.blit(controls_text, (10, 10))#(x,y)
+        buffer_surface.blit(shoot_text, (10, 40))
         buffer_surface.blit(pause_text, (10, 70))
 
         # Copy the buffer surface to the window surface
         WIN.blit(buffer_surface, (0, 0))
-
-        
         
 
-        '''
-        draw_window([yellow], bullet_system_instance, background, BLACK)
-        WIN.blit(background, (0, 0))
-        WIN.blit(yellow.image, (yellow.position.x, yellow.position.y))
-        WIN.blit(controls_text, (10, 10))
-        WIN.blit(fire_text, (10, 40))
-        WIN.blit(pause_text, (10, 70))
-        bullet_system_instance.update(WIDTH, BLACK, WIN)
-        '''
-        
 
-        
+        bullet_system_instance.update(WIDTH, WHITE, WIN)
 
         pygame.display.update()
 
-
-       
-
-        clock.tick(FPS)
-
     pygame.quit()
+
+
+
 
 
 def main():
