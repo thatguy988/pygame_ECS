@@ -30,20 +30,21 @@ class Entity:
         return None
 
 
-def draw_window(entities, bullet_system, background, color):
+def draw_window(entities, bullet_system, background, color):#responsible for rendering and updating the game window
     WIN.blit(background, (0, 0))  # Draw the background image
 
-    for entity in entities:
+    for entity in entities:# iterates over the entities list, which contains the game entities to be rendered
         position_component = entity.get_component(PositionComponent)
         if position_component:
             x = position_component.x
             y = position_component.y
+            #responsible for rendering the entity onto the game window at the specified coordinates.
             RenderSystem.render(entity, WIN, x, y)  # Pass x and y as arguments
-
+    #responsible for rendering the bullets onto the game window.
     bullet_system.render_bullets(WIN, color)
     pygame.display.update()
 
-def display_menu(selected_option):
+def display_menu(selected_option): #render and display main_menu
     # Clear the screen
     WIN.fill((0, 0, 0))
     
@@ -73,12 +74,71 @@ def display_menu(selected_option):
             cursor_rect.center = (WIDTH // 2 - 100, option_y)
             WIN.blit(cursor_image, cursor_rect)
         
-        option_y += option_spacing
+        option_y += option_spacing #space out main menu options vertically
     
     pygame.display.update()
 
 
-def handle_menu_events(selected_option):
+def select_players_screen():
+    selected_option = 0
+    while True:
+        WIN.fill((0, 0, 0))  # Clear the screen
+
+        # Render the title text
+        title_font = pygame.font.SysFont(None, 60)
+        title_text = title_font.render("Select Players", True, (255, 255, 255))
+        title_rect = title_text.get_rect(center=(WIDTH // 2, HEIGHT // 4))
+        WIN.blit(title_text, title_rect)
+
+        # Render the menu options
+        menu_font = pygame.font.SysFont(None, 40)
+        options = ["1 Player", "2 Players", "Back"]
+        option_y = HEIGHT // 2
+        option_spacing = 60
+
+        for i, option in enumerate(options):
+            option_text = menu_font.render(option, True, (255, 255, 255))
+            option_rect = option_text.get_rect(center=(WIDTH // 2, option_y))
+            WIN.blit(option_text, option_rect)
+
+            # Display cursor image for selected option
+            if i == selected_option:
+                cursor_image = pygame.image.load(os.path.join('assets', 'spaceship_yellow.png'))
+                cursor_image = pygame.transform.scale(cursor_image, (50, 30))
+                cursor_image = pygame.transform.rotate(cursor_image, 90)
+                cursor_rect = cursor_image.get_rect()
+                cursor_rect.center = (WIDTH // 2 - 100, option_y)
+                WIN.blit(cursor_image, cursor_rect)
+
+            option_y += option_spacing
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_w:
+                    selected_option = (selected_option - 1) % 3  # Move up in the options list
+                elif event.key == pygame.K_s:
+                    selected_option = (selected_option + 1) % 3  # Move down in the options list
+                elif event.key == pygame.K_SPACE:
+                    if selected_option == 0:
+                        return 1  # 1 player selected
+                    elif selected_option == 1:
+                        return 2  # 2 players selected
+                    elif selected_option == 2:
+                        return 0  # Back to main menu
+
+
+
+
+
+
+
+def handle_menu_events(selected_option): #responsible for handling the user input events related to the main menu
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -103,8 +163,38 @@ def handle_menu_events(selected_option):
 
     return selected_option
 
-
 def main_menu():
+    selected_option = 0  # Default selected option
+    while True:
+        display_menu(selected_option)
+        selected_option = handle_menu_events(selected_option)
+        if selected_option == "start_game":
+            player_count = select_players_screen()
+            if player_count == 1:
+                game_screen(1)  # Start game with 1 player
+            elif player_count == 2:
+                game_screen(2)  # Start game with 2 players
+            selected_option = 0  # Reset the selected option
+        elif selected_option == "tutorial":
+            tutorial_screen()
+            selected_option = 0
+'''
+def main_menu():
+    selected_option = 0  # Default selected option
+    while True:
+        display_menu(selected_option)
+        selected_option = handle_menu_events(selected_option)
+        if selected_option == "start_game":
+            player_count = select_players_screen()
+            if player_count == 1:
+                game_screen(1)  # Start game with 1 player
+            elif player_count == 2:
+                game_screen(2)  # Start game with 2 players
+            selected_option = 0  # Reset the selected option
+
+
+
+def main_menu(): #main loop for main menu
     selected_option = 0  # Default selected option
     while True:
         display_menu(selected_option)
@@ -115,9 +205,9 @@ def main_menu():
         elif selected_option =="tutorial":
             tutorial_screen()
             selected_option = 0
-                
+'''                
     
-def pause_menu():
+def pause_menu():#main loop for pause menu
     selected_option = 0  # Default selected option
     while True:
         display_pause_menu(selected_option)
@@ -183,9 +273,9 @@ def handle_pause_menu_events(selected_option):
     return selected_option
 
 
-def game_screen():
-    #create spaceship player
-    yellow = Entity(PositionComponent(100, 300))
+def game_screen(player_count):
+    # Create spaceships for players
+    yellow = Entity(PositionComponent(100, 150))
     yellow.image = pygame.transform.rotate(
         pygame.transform.scale(
             pygame.image.load(os.path.join('assets', 'spaceship_yellow.png')),
@@ -195,6 +285,17 @@ def game_screen():
     )
     yellow.position = yellow.get_component(PositionComponent)
 
+    if player_count == 2:
+        red = Entity(PositionComponent(100, 300))
+        red.image = pygame.transform.rotate(
+            pygame.transform.scale(
+                pygame.image.load(os.path.join('assets', 'spaceship_red.png')),
+                (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
+            ),
+            90
+        )
+        red.position = red.get_component(PositionComponent)
+
     movement_system = MovementSystem()
     bullet_system_instance = BulletSystem()
 
@@ -202,59 +303,56 @@ def game_screen():
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
     clock = pygame.time.Clock()
-    space_pressed = False # check if space bar is pressed is false if not press is true if pressed
+    
+    space_pressed = False #player one firing button
+    enter_pressed = False #player two firing button
     last_bullet_time = 0
-    pause_pressed=False # is set to true if p key is pressed
+    pause_pressed = False
     result = None
-    game_paused = False #false game is running set to true game stops because we are in pause menu
+    game_paused = False
 
     run = True
     while run:
         clock.tick(FPS)
 
-        
-
-        for event in pygame.event.get(): 
-            if event.type == pygame.QUIT: 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 run = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:# check if press key is spacebar
-                    if pause_pressed == False:#if pause_pressed == false if not pause_pressed check game is not currently paused
-                        if game_paused == False:#if pause_press == false if not game_pressed check game is not currently paused
-                            space_pressed = True # space bar is being pressed by user
-                        else: #if game_pause is true if game is paused
-                            game_paused = False#game should be resumed 
-                            result = pause_menu()#assign result of pause_menu to variable
-                            if result == "main_menu":#user press spacebar to go back to main menu
+                if event.key == pygame.K_SPACE:
+                    if pause_pressed == False:
+                        if game_paused == False:
+                            space_pressed = True
+                        else:
+                            game_paused = False
+                            result = pause_menu()
+                            if result == "main_menu":
                                 return "main_menu"
-                    else:# if pause_pressed is true game is currently paused 
-                        pause_pressed = False #pause key has been released by user
-                elif event.key == pygame.K_p: #checks if p key is pressed 
-                    if pause_pressed == False: # checks if game is not already paused. Basically, prevents the game from entering an undesired pause state if the "p" key is pressed multiple times quickly.
-                        if game_paused == False:#checks that the game is not currently paused
+                    else:
+                        pause_pressed = False
+                elif event.key == pygame.K_p:
+                    if pause_pressed == False:
+                        if game_paused == False:
                             pause_pressed = True
                             game_paused = True
-                            result = pause_menu() #assign result of pause_menu to variable
-                            if result == "resume_game":#checks if user selects resume_game
-                                pause_pressed = False#the game is resumed
-                                game_paused = False#the game is resumed
-                                result = None#reset value
+                            result = pause_menu()
+                            if result == "resume_game":
+                                pause_pressed = False
+                                game_paused = False
+                                result = None
                                 return "resume_game"
                             elif result == "main_menu":
                                 return "main_menu"
-                                # Exit the game loop and return to the main menu
 
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_SPACE:
                     space_pressed = False
                     last_bullet_time = 0
 
-        if game_paused:# press space bar once to resume game
+        if game_paused:
             game_paused = False
             pause_pressed = False
             result = None
-            #continue
-        
 
         if space_pressed:
             current_time = pygame.time.get_ticks()
@@ -267,15 +365,27 @@ def game_screen():
                 last_bullet_time = current_time
 
         keys_pressed = pygame.key.get_pressed()
-        movement_system.move(
+        movement_system.move_player1(
             yellow, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT
         )
-        draw_window([yellow], bullet_system_instance, background, WHITE) #WHITE CHANGE COLOR of bullets
+
+        if player_count == 2:
+            movement_system.move_player2(
+                red, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT
+            )
+            draw_window([yellow, red], bullet_system_instance, background, WHITE)
+        else:
+            draw_window([yellow], bullet_system_instance, background, WHITE)
+
         bullet_system_instance.update(WIDTH, BLACK, WIN)
 
         clock.tick(FPS)
 
     pygame.quit()
+
+
+
+
 
 def tutorial_screen():
     # Create spaceship player
@@ -358,7 +468,7 @@ def tutorial_screen():
                 last_bullet_time = current_time
 
         keys_pressed = pygame.key.get_pressed()
-        movement_system.move(
+        movement_system.move_player1(
             yellow, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT
         )
 
