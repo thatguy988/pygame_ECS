@@ -5,7 +5,7 @@ from components.position import PositionComponent
 from systems.movement import MovementSystem
 from systems.render import RenderSystem
 from systems.bullet_system import BulletSystem
-from components.bullet import Bullet
+
 
 WIDTH, HEIGHT = 1400, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -133,11 +133,6 @@ def select_players_screen():
                         return 0  # Back to main menu
 
 
-
-
-
-
-
 def handle_menu_events(selected_option): #responsible for handling the user input events related to the main menu
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -163,6 +158,7 @@ def handle_menu_events(selected_option): #responsible for handling the user inpu
 
     return selected_option
 
+
 def main_menu():
     selected_option = 0  # Default selected option
     while True:
@@ -178,35 +174,8 @@ def main_menu():
         elif selected_option == "tutorial":
             tutorial_screen()
             selected_option = 0
-'''
-def main_menu():
-    selected_option = 0  # Default selected option
-    while True:
-        display_menu(selected_option)
-        selected_option = handle_menu_events(selected_option)
-        if selected_option == "start_game":
-            player_count = select_players_screen()
-            if player_count == 1:
-                game_screen(1)  # Start game with 1 player
-            elif player_count == 2:
-                game_screen(2)  # Start game with 2 players
-            selected_option = 0  # Reset the selected option
 
 
-
-def main_menu(): #main loop for main menu
-    selected_option = 0  # Default selected option
-    while True:
-        display_menu(selected_option)
-        selected_option = handle_menu_events(selected_option)
-        if selected_option == "start_game":
-            game_screen()
-            selected_option = 0  # Reset the selected option when returning from the game screen
-        elif selected_option =="tutorial":
-            tutorial_screen()
-            selected_option = 0
-'''                
-    
 def pause_menu():#main loop for pause menu
     selected_option = 0  # Default selected option
     while True:
@@ -216,6 +185,7 @@ def pause_menu():#main loop for pause menu
             return  # Resume the game
         elif selected_option == "main_menu":
             return "main_menu"  # Go back to the main menu
+
 
 def display_pause_menu(selected_option):
     # Clear the screen
@@ -251,6 +221,7 @@ def display_pause_menu(selected_option):
     
     pygame.display.update()
 
+
 def handle_pause_menu_events(selected_option):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -273,8 +244,7 @@ def handle_pause_menu_events(selected_option):
     return selected_option
 
 
-def game_screen(player_count):
-    # Create spaceships for players
+def create_yellow_spaceship():
     yellow = Entity(PositionComponent(100, 150))
     yellow.image = pygame.transform.rotate(
         pygame.transform.scale(
@@ -284,18 +254,75 @@ def game_screen(player_count):
         90
     )
     yellow.position = yellow.get_component(PositionComponent)
+    return yellow
+
+
+def create_red_spaceship():
+    red = Entity(PositionComponent(100, 300))
+    red.image = pygame.transform.rotate(
+        pygame.transform.scale(
+            pygame.image.load(os.path.join('assets', 'spaceship_red.png')),
+            (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
+        ),
+        90
+    )
+    red.position = red.get_component(PositionComponent)
+    return red
+
+
+def fire_bullet(yellow, red, player_count, bullet_system_instance, last_bullet_time, last_bullet_time_2):
+    if player_count >= 1:
+        bullet_pressed = pygame.key.get_pressed()[pygame.K_SPACE]
+        if bullet_pressed:
+            current_time = pygame.time.get_ticks()
+            time_since_last_bullet = current_time - last_bullet_time
+
+            if time_since_last_bullet >= 100:
+                bullet_system_instance.create_bullet(
+                    yellow.position.x + SPACESHIP_WIDTH, yellow.position.y + SPACESHIP_HEIGHT // 2, 5
+                )
+                last_bullet_time = current_time
 
     if player_count == 2:
-        red = Entity(PositionComponent(100, 300))
-        red.image = pygame.transform.rotate(
-            pygame.transform.scale(
-                pygame.image.load(os.path.join('assets', 'spaceship_red.png')),
-                (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
-            ),
-            90
-        )
-        red.position = red.get_component(PositionComponent)
+        bullet_pressed_2 = pygame.key.get_pressed()[pygame.K_RETURN]
+        if bullet_pressed_2:
+            current_time_2 = pygame.time.get_ticks()
+            time_since_last_bullet_2 = current_time_2 - last_bullet_time_2
 
+            if time_since_last_bullet_2 >= 100:
+                bullet_system_instance.create_bullet(
+                    red.position.x + SPACESHIP_WIDTH, red.position.y + SPACESHIP_HEIGHT // 2, 5
+                )
+                last_bullet_time_2 = current_time_2
+    return last_bullet_time, last_bullet_time_2
+
+
+def update_game_state(yellow, red, player_count, keys_pressed, movement_system, bullet_system_instance,background):
+    if player_count >= 1:
+        movement_system.move_player1(
+            yellow, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT
+        )
+
+    if player_count == 2:
+        movement_system.move_player2(
+            red, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT
+        )
+
+    if player_count == 2:
+        draw_window([yellow, red], bullet_system_instance, background, WHITE)
+    else:
+        draw_window([yellow], bullet_system_instance, background, WHITE)
+
+    bullet_system_instance.update(WIDTH, BLACK, WIN)
+
+
+def game_screen(player_count):
+    yellow = create_yellow_spaceship()
+    red=None
+
+    if player_count == 2:
+        red = create_red_spaceship()
+    
     movement_system = MovementSystem()
     bullet_system_instance = BulletSystem()
 
@@ -306,7 +333,8 @@ def game_screen(player_count):
     
     space_pressed = False #player one firing button
     enter_pressed = False #player two firing button
-    last_bullet_time = 0
+    last_bullet_time = 0 #is needed in fire_bullet and update_game_state
+    last_bullet_time_2 = 0 #is needed in fire_bullet and update_game_state
     pause_pressed = False
     result = None
     game_paused = False
@@ -314,7 +342,8 @@ def game_screen(player_count):
     run = True
     while run:
         clock.tick(FPS)
-
+        
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -353,38 +382,16 @@ def game_screen(player_count):
             game_paused = False
             pause_pressed = False
             result = None
-
-        if space_pressed:
-            current_time = pygame.time.get_ticks()
-            time_since_last_bullet = current_time - last_bullet_time
-
-            if time_since_last_bullet >= 100:
-                bullet_system_instance.create_bullet(
-                    yellow.position.x + SPACESHIP_WIDTH, yellow.position.y + SPACESHIP_HEIGHT // 2, 5
-                )
-                last_bullet_time = current_time
+       
 
         keys_pressed = pygame.key.get_pressed()
-        movement_system.move_player1(
-            yellow, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT
-        )
 
-        if player_count == 2:
-            movement_system.move_player2(
-                red, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT
-            )
-            draw_window([yellow, red], bullet_system_instance, background, WHITE)
-        else:
-            draw_window([yellow], bullet_system_instance, background, WHITE)
-
-        bullet_system_instance.update(WIDTH, BLACK, WIN)
-
+        last_bullet_time, last_bullet_time_2 = fire_bullet(yellow, red, player_count, bullet_system_instance, last_bullet_time, last_bullet_time_2) #returning values to variables
+        update_game_state(yellow, red, player_count, keys_pressed, movement_system, bullet_system_instance,background)
+        
         clock.tick(FPS)
 
     pygame.quit()
-
-
-
 
 
 def tutorial_screen():
@@ -500,9 +507,6 @@ def tutorial_screen():
         pygame.display.update()
 
     pygame.quit()
-
-
-
 
 
 def main():
