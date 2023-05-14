@@ -65,15 +65,23 @@ def display_menu(selected_option): #render and display main_menu
         option_rect = option_text.get_rect(center=(WIDTH // 2, option_y))
         WIN.blit(option_text, option_rect)
         
-        # Display cursor image for selected option
+
+       # Display cursor image for selected option
         if i == selected_option:
             cursor_image = pygame.image.load(os.path.join('assets', 'spaceship_yellow.png'))
-            cursor_image = pygame.transform.scale(cursor_image, (50, 30))  # Change size of cursor ship image
-            cursor_image = pygame.transform.rotate(cursor_image, 90)  # Change rotation of cursor ship image
-            cursor_rect = cursor_image.get_rect()
-            cursor_rect.center = (WIDTH // 2 - 100, option_y)
+            cursor_image = pygame.transform.scale(cursor_image, (50, 30))
+            cursor_image = pygame.transform.rotate(cursor_image, 90)
+            cursor_rect = cursor_image.get_rect() 
+            
+            if option == "Start Game":
+                cursor_rect.center = (WIDTH // 2 - 100, option_y)  # Cursor position for "Resume Game"
+            elif option == "Tutorial":
+                cursor_rect.center = (WIDTH // 2 - 80, option_y)  # Cursor position for "Tutorial"
+            elif option == "Quit":
+                cursor_rect.center = (WIDTH // 2 - 60, option_y) # Cursor position for "Quit"
+
             WIN.blit(cursor_image, cursor_rect)
-        
+
         option_y += option_spacing #space out main menu options vertically
     
     pygame.display.update()
@@ -106,12 +114,19 @@ def select_players_screen():
                 cursor_image = pygame.image.load(os.path.join('assets', 'spaceship_yellow.png'))
                 cursor_image = pygame.transform.scale(cursor_image, (50, 30))
                 cursor_image = pygame.transform.rotate(cursor_image, 90)
-                cursor_rect = cursor_image.get_rect()
-                cursor_rect.center = (WIDTH // 2 - 100, option_y)
+                cursor_rect = cursor_image.get_rect() 
+                
+                if option == "1 Player":
+                    cursor_rect.center = (WIDTH // 2 - 80, option_y)  # Cursor position for "Resume Game"
+                elif option == "2 Players":
+                    cursor_rect.center = (WIDTH // 2 - 100, option_y)  # Cursor position for other options
+                elif option == "Back":
+                    cursor_rect.center = (WIDTH // 2 - 60, option_y) # Cursor position for "Back"
+                
                 WIN.blit(cursor_image, cursor_rect)
 
             option_y += option_spacing
-
+        
         pygame.display.update()
 
         for event in pygame.event.get():
@@ -187,6 +202,8 @@ def pause_menu():#main loop for pause menu
             return "main_menu"  # Go back to the main menu
 
 
+
+
 def display_pause_menu(selected_option):
     # Clear the screen
     WIN.fill((0, 0, 0))
@@ -214,9 +231,14 @@ def display_pause_menu(selected_option):
             cursor_image = pygame.transform.scale(cursor_image, (50, 30))
             cursor_image = pygame.transform.rotate(cursor_image, 90)
             cursor_rect = cursor_image.get_rect() 
-            cursor_rect.center = (WIDTH // 2 - 100, option_y)
+            
+            if option == "Resume Game":
+                cursor_rect.center = (WIDTH // 2 - 120, option_y)  # Cursor position for "Resume Game"
+            elif option == "Main Menu":
+                cursor_rect.center = (WIDTH // 2 - 100, option_y)  # Cursor position for other options
+            
             WIN.blit(cursor_image, cursor_rect)
-        
+
         option_y += option_spacing
     
     pygame.display.update()
@@ -316,6 +338,9 @@ def update_game_state(yellow, red, player_count, keys_pressed, movement_system, 
     bullet_system_instance.update(WIDTH, BLACK, WIN)
 
 
+
+
+
 def game_screen(player_count):
     yellow = create_yellow_spaceship()
     red=None
@@ -342,8 +367,8 @@ def game_screen(player_count):
     run = True
     while run:
         clock.tick(FPS)
-        
-        
+
+    
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -383,7 +408,6 @@ def game_screen(player_count):
             pause_pressed = False
             result = None
        
-
         keys_pressed = pygame.key.get_pressed()
 
         last_bullet_time, last_bullet_time_2 = fire_bullet(yellow, red, player_count, bullet_system_instance, last_bullet_time, last_bullet_time_2) #returning values to variables
