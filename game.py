@@ -1,6 +1,7 @@
 import pygame
 import sys
 import os
+import random
 from components.position import PositionComponent
 from systems.movement import MovementSystem
 from systems.render import RenderSystem
@@ -28,7 +29,15 @@ class Entity:
             if isinstance(component, component_type):
                 return component
         return None
-
+    def stop_moving(self):
+        # Stop the movement of the entity
+        # Assuming you have a velocity attribute, you can set it to zero
+        self.velocity = 0
+        # If you have movement flags, you can set them to False
+        self.is_moving_up = False
+        self.is_moving_down = False
+        self.is_moving_left = False
+        self.is_moving_right = False
 
 def draw_window(entities, bullet_system, background, color):#responsible for rendering and updating the game window
     WIN.blit(background, (0, 0))  # Draw the background image
@@ -266,6 +275,27 @@ def handle_pause_menu_events(selected_option):
     return selected_option
 
 
+def create_enemy_spaceship():
+    y=random.randint(25, 475)
+    enemy_ship = Entity(PositionComponent(WIDTH, y))
+    
+    enemy_ship.image = pygame.transform.rotate(
+        pygame.transform.flip(
+            pygame.transform.scale(
+                pygame.image.load(os.path.join('C:/Users/jakob/Desktop/pygame_ECS/Assets/PNG_Parts&Spriter_Animation/Ship1', 'Ship1.png')),
+                (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
+            ),
+            True,
+            False
+        ),
+        0
+    )
+    return enemy_ship
+
+
+
+
+
 def create_yellow_spaceship():
     yellow = Entity(PositionComponent(100, 150))
     yellow.image = pygame.transform.rotate(
@@ -276,7 +306,10 @@ def create_yellow_spaceship():
         90
     )
     yellow.position = yellow.get_component(PositionComponent)
+    yellow.health = 100
+    yellow.alive = True
     return yellow
+
 
 
 def create_red_spaceship():
@@ -289,6 +322,8 @@ def create_red_spaceship():
         90
     )
     red.position = red.get_component(PositionComponent)
+    red.health = 100
+    red.alive = True
     return red
 
 
@@ -299,9 +334,9 @@ def fire_bullet(yellow, red, player_count, bullet_system_instance, last_bullet_t
             current_time = pygame.time.get_ticks()
             time_since_last_bullet = current_time - last_bullet_time
 
-            if time_since_last_bullet >= 100:
+            if time_since_last_bullet >= 300: #millisecond delay
                 bullet_system_instance.create_bullet(
-                    yellow.position.x + SPACESHIP_WIDTH, yellow.position.y + SPACESHIP_HEIGHT // 2, 5
+                    yellow.position.x + SPACESHIP_WIDTH, yellow.position.y + SPACESHIP_HEIGHT // 2, 5, 10
                 )
                 last_bullet_time = current_time
 
@@ -311,15 +346,15 @@ def fire_bullet(yellow, red, player_count, bullet_system_instance, last_bullet_t
             current_time_2 = pygame.time.get_ticks()
             time_since_last_bullet_2 = current_time_2 - last_bullet_time_2
 
-            if time_since_last_bullet_2 >= 100:
+            if time_since_last_bullet_2 >= 300:
                 bullet_system_instance.create_bullet(
-                    red.position.x + SPACESHIP_WIDTH, red.position.y + SPACESHIP_HEIGHT // 2, 5
+                    red.position.x + SPACESHIP_WIDTH, red.position.y + SPACESHIP_HEIGHT // 2, 5, 10        
                 )
                 last_bullet_time_2 = current_time_2
     return last_bullet_time, last_bullet_time_2
 
 
-def update_game_state(yellow, red, player_count, keys_pressed, movement_system, bullet_system_instance,background):
+def update_game_state(yellow, red, enemy_ship, player_count, keys_pressed, movement_system, bullet_system_instance,background):
     if player_count >= 1:
         movement_system.move_player1(
             yellow, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT
@@ -331,19 +366,85 @@ def update_game_state(yellow, red, player_count, keys_pressed, movement_system, 
         )
 
     if player_count == 2:
-        draw_window([yellow, red], bullet_system_instance, background, WHITE)
+        draw_window([yellow, red, enemy_ship], bullet_system_instance, background, WHITE)
     else:
-        draw_window([yellow], bullet_system_instance, background, WHITE)
+        draw_window([yellow, enemy_ship], bullet_system_instance, background, WHITE)
+
+    # Update bullets and check for collisions
+    for bullet in bullet_system_instance.bullets:
+        bullet.update(WIDTH)
+        
+        # Check collision with yellow spaceship
+        if yellow.position.x < bullet.x + bullet.radius < yellow.position.x + SPACESHIP_WIDTH:
+            if yellow.position.y < bullet.y < yellow.position.y + SPACESHIP_HEIGHT:
+                # Collision detected with yellow spaceship
+                yellow.health -= 10
+                bullet_system_instance.remove_bullet(bullet)
+
+                # Check if yellow spaceship's health reaches zero
+                if yellow.health <= 0:
+                    yellow.health = 0
+                    yellow.alive = False
+                    yellow.stop_moving()
+
+                # Check if spaceship is destroyed
+                if not yellow.alive and player_count == 1:
+                    game_over_screen()
+          
+        # Check collision with red spaceship
+        if player_count == 2:
+            if red.position.x < bullet.x + bullet.radius < red.position.x + SPACESHIP_WIDTH:
+                if red.position.y < bullet.y < red.position.y + SPACESHIP_HEIGHT:
+                    # Collision detected with red spaceship
+                    red.health -= 10
+                    bullet_system_instance.remove_bullet(bullet)
+
+                    # Check if red spaceship's health reaches zero
+                    if red.health <= 0:
+                        red.health = 0
+                        red.alive = False
+                        red.stop_moving()
+
+                    # Check if both spaceships are destroyed
+                    if not red.alive:
+                        game_over_screen()
 
     bullet_system_instance.update(WIDTH, BLACK, WIN)
 
 
-
+def game_over_screen():
+    while True:
+        WIN.fill((0, 0, 0))  # Clear the screen
+        
+        # Render the game over message
+        game_over_font = pygame.font.SysFont(None, 60)
+        game_over_text = game_over_font.render("Game Over", True, (255, 255, 255))
+        game_over_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        WIN.blit(game_over_text, game_over_rect)
+        
+        # Render the instructions
+        instructions_font = pygame.font.SysFont(None, 40)
+        instructions_text = instructions_font.render("Press R to return to the main menu", True, (255, 255, 255))
+        instructions_rect = instructions_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
+        WIN.blit(instructions_text, instructions_rect)
+        
+        pygame.display.update()
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+                
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    main_menu()
+                    return # Return to the main menu
 
 
 def game_screen(player_count):
     yellow = create_yellow_spaceship()
     red=None
+    enemy_ship= create_enemy_spaceship()
 
     if player_count == 2:
         red = create_red_spaceship()
@@ -356,63 +457,56 @@ def game_screen(player_count):
 
     clock = pygame.time.Clock()
     
-    space_pressed = False #player one firing button
-    enter_pressed = False #player two firing button
+
     last_bullet_time = 0 #is needed in fire_bullet and update_game_state
     last_bullet_time_2 = 0 #is needed in fire_bullet and update_game_state
     pause_pressed = False
-    result = None
-    game_paused = False
 
+    game_paused = False
+    
     run = True
     while run:
         clock.tick(FPS)
-
-    
-        for event in pygame.event.get():
+        for event in pygame.event.get(): #rewritten to be concise and readable
             if event.type == pygame.QUIT:
                 run = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    if pause_pressed == False:
-                        if game_paused == False:
-                            space_pressed = True
-                        else:
-                            game_paused = False
-                            result = pause_menu()
-                            if result == "main_menu":
-                                return "main_menu"
+                    if not pause_pressed and not game_paused:
+                        pass
                     else:
-                        pause_pressed = False
+                        game_paused = False
+                        result = pause_menu()
+                        if result == "main_menu":
+                            return "main_menu"
+                        
                 elif event.key == pygame.K_p:
-                    if pause_pressed == False:
-                        if game_paused == False:
-                            pause_pressed = True
-                            game_paused = True
-                            result = pause_menu()
-                            if result == "resume_game":
-                                pause_pressed = False
-                                game_paused = False
-                                result = None
-                                return "resume_game"
-                            elif result == "main_menu":
-                                return "main_menu"
+                    if not pause_pressed and not game_paused:
+                        pause_pressed = True
+                        game_paused = True
+                        result = pause_menu()
+                        if result == "resume_game":
+                            pause_pressed = False
+                            game_paused = False
+                            result = None
+                            return "resume_game"
+                        elif result == "main_menu":
+                            return "main_menu"
 
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_SPACE:
-                    space_pressed = False
-                    last_bullet_time = 0
+
 
         if game_paused:
             game_paused = False
             pause_pressed = False
             result = None
-       
+        
         keys_pressed = pygame.key.get_pressed()
 
         last_bullet_time, last_bullet_time_2 = fire_bullet(yellow, red, player_count, bullet_system_instance, last_bullet_time, last_bullet_time_2) #returning values to variables
-        update_game_state(yellow, red, player_count, keys_pressed, movement_system, bullet_system_instance,background)
-        
+        update_game_state(yellow, red, enemy_ship, player_count, keys_pressed, movement_system, bullet_system_instance,background)
+        # Inside the game loop
+        movement_system.move_enemy_ship(enemy_ship, WIDTH, 20)
+
         clock.tick(FPS)
 
     pygame.quit()
@@ -532,7 +626,7 @@ def tutorial_screen():
 
     pygame.quit()
 
-
+              
 def main():
     pygame.init()
     main_menu()

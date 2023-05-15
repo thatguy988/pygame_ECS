@@ -5,13 +5,16 @@ class BulletSystem:
     def __init__(self):
         self.bullets = []
 
-    def create_bullet(self, x, y, velocity):
-        bullet = Bullet(x, y, velocity)
+    def create_bullet(self, x, y, velocity, radius):
+        bullet = Bullet(x, y, velocity, radius)
         self.bullets.append(bullet)
 
     def move_bullets(self):
         for bullet in self.bullets:
             bullet.x += bullet.velocity
+
+    def remove_bullet(self, bullet):
+        self.bullets.remove(bullet)
 
     def remove_offscreen_bullets(self, width):
         self.bullets = [bullet for bullet in self.bullets if bullet.x < width]

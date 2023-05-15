@@ -1,4 +1,5 @@
 import pygame
+import random
 from components.position import PositionComponent
 
 
@@ -29,3 +30,14 @@ class MovementSystem:
                 position_component.x -= vel
             if keys_pressed[pygame.K_l] and position_component.x < width - spaceship_width:  # RIGHT arrow key
                 position_component.x += vel
+
+    @staticmethod
+    def move_enemy_ship(entity, width, vel):
+        position_component = entity.get_component(PositionComponent)
+        if position_component:
+            position_component.x -= vel  # Move the enemy ship to the left
+
+            if position_component.x < -width:
+                # Enemy ship reached the left side, generate a new random y-axis position
+                position_component.x = width  # Reset x-coordinate to the right side
+                position_component.y = random.randint(25, 475)  # Generate a new random y-coordinate
