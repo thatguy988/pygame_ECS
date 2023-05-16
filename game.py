@@ -6,6 +6,9 @@ from components.position import PositionComponent
 from systems.movement import MovementSystem
 from systems.render import RenderSystem
 from systems.bullet_system import BulletSystem
+from components.explosion import Explosion
+from components.dimension import Dimensions
+
 
 
 WIDTH, HEIGHT = 1400, 500
@@ -23,6 +26,9 @@ VEL = 4
 class Entity:
     def __init__(self, *components):
         self.components = list(components)
+        self.visible = True
+        
+        
 
     def get_component(self, component_type):
         for component in self.components:
@@ -38,6 +44,7 @@ class Entity:
         self.is_moving_down = False
         self.is_moving_left = False
         self.is_moving_right = False
+    
 
 def draw_window(entities, bullet_system, background, color):#responsible for rendering and updating the game window
     WIN.blit(background, (0, 0))  # Draw the background image
@@ -47,11 +54,15 @@ def draw_window(entities, bullet_system, background, color):#responsible for ren
         if position_component:
             x = position_component.x
             y = position_component.y
-            #responsible for rendering the entity onto the game window at the specified coordinates.
+
             RenderSystem.render(entity, WIN, x, y)  # Pass x and y as arguments
+    
     #responsible for rendering the bullets onto the game window.
     bullet_system.render_bullets(WIN, color)
     pygame.display.update()
+
+    
+
 
 def display_menu(selected_option): #render and display main_menu
     # Clear the screen
@@ -276,8 +287,14 @@ def handle_pause_menu_events(selected_option):
 
 
 def create_enemy_spaceship():
-    y=random.randint(25, 475)
-    enemy_ship = Entity(PositionComponent(WIDTH, y))
+    
+    enemy_ship = Entity(PositionComponent(WIDTH,HEIGHT))
+
+    
+    
+    
+    
+
     
     enemy_ship.image = pygame.transform.rotate(
         pygame.transform.flip(
@@ -290,6 +307,9 @@ def create_enemy_spaceship():
         ),
         0
     )
+    enemy_ship.position = enemy_ship.get_component(PositionComponent)
+    enemy_ship.health = 10
+    
     return enemy_ship
 
 
@@ -297,6 +317,7 @@ def create_enemy_spaceship():
 
 
 def create_yellow_spaceship():
+    
     yellow = Entity(PositionComponent(100, 150))
     yellow.image = pygame.transform.rotate(
         pygame.transform.scale(
@@ -355,6 +376,9 @@ def fire_bullet(yellow, red, player_count, bullet_system_instance, last_bullet_t
 
 
 def update_game_state(yellow, red, enemy_ship, player_count, keys_pressed, movement_system, bullet_system_instance,background):
+     # Spawn enemy spaceship at a certain interval
+    #if random.randint(1, 120) == 1:  # Adjust the interval as needed
+     #   enemy_ship = create_enemy_spaceship()
     if player_count >= 1:
         movement_system.move_player1(
             yellow, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT
@@ -408,8 +432,27 @@ def update_game_state(yellow, red, enemy_ship, player_count, keys_pressed, movem
                     # Check if both spaceships are destroyed
                     if not red.alive:
                         game_over_screen()
+        # Check collision with yellow spaceship
+        if enemy_ship.position.x < bullet.x + bullet.radius < enemy_ship.position.x + SPACESHIP_WIDTH:
+            if enemy_ship.position.y < bullet.y < enemy_ship.position.y + SPACESHIP_HEIGHT:
+                # Collision detected with yellow spaceship
+                enemy_ship.health -= 10
+                bullet_system_instance.remove_bullet(bullet)
 
+                # Check if enemy spaceship's health reaches zero
+                if enemy_ship.health <= 0:
+                    enemy_ship.stop_moving()
+                    enemy_ship.visible=False
+                    
+
+                    enemy_ship.position.x = WIDTH
+                    enemy_ship.position.y = HEIGHT
+                    enemy_ship.health = 10
+                    enemy_ship.visible = True
+            
     bullet_system_instance.update(WIDTH, BLACK, WIN)
+
+     
 
 
 def game_over_screen():
@@ -441,7 +484,7 @@ def game_over_screen():
                     return # Return to the main menu
 
 
-def game_screen(player_count):
+def game_screen(player_count):#game loop update and render game state
     yellow = create_yellow_spaceship()
     red=None
     enemy_ship= create_enemy_spaceship()
@@ -452,7 +495,7 @@ def game_screen(player_count):
     movement_system = MovementSystem()
     bullet_system_instance = BulletSystem()
 
-    background = pygame.image.load(os.path.join('assets', 'Purple_Nebula_Game.png'))
+    background = pygame.image.load(os.path.join('assets','space.png'))
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
     clock = pygame.time.Clock()
@@ -505,7 +548,11 @@ def game_screen(player_count):
         last_bullet_time, last_bullet_time_2 = fire_bullet(yellow, red, player_count, bullet_system_instance, last_bullet_time, last_bullet_time_2) #returning values to variables
         update_game_state(yellow, red, enemy_ship, player_count, keys_pressed, movement_system, bullet_system_instance,background)
         # Inside the game loop
-        movement_system.move_enemy_ship(enemy_ship, WIDTH, 20)
+        movement_system.move_enemy_ship(enemy_ship, WIDTH, 5)
+        # Assuming you have a ship object named 'enemy_ship'
+        #bullet_system_instance.auto_fire(enemy_ship, -10, 10) 
+        
+
 
         clock.tick(FPS)
 
