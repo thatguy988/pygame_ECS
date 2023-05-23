@@ -1,43 +1,48 @@
 import pygame
 import random
-from components.position import PositionComponent
+
 
 
 
 class MovementSystem:
     @staticmethod
-    def move_player1(entity, keys_pressed, width, height, vel, spaceship_width, spaceship_height):
-        position_component = entity.get_component(PositionComponent)
-        if position_component:
-            if keys_pressed[pygame.K_w] and position_component.y > 0:  # UP
-                position_component.y -= vel
-            if keys_pressed[pygame.K_s] and position_component.y < height - spaceship_height:  # DOWN
-                position_component.y += vel
-            if keys_pressed[pygame.K_a] and position_component.x > 0:  # LEFT
-                position_component.x -= vel
-            if keys_pressed[pygame.K_d] and position_component.x < width - spaceship_width:  # RIGHT
-                position_component.x += vel
+    
+    def move_player1(yellow_ship, keys_pressed, width, height, vel, spaceship_width,spaceship_height):
+        # Access attributes and methods of the yellow_ship object directly
+        if keys_pressed[pygame.K_w] and yellow_ship.position.y > 0:  # UP
+            yellow_ship.position.y -= vel
+        if keys_pressed[pygame.K_s] and yellow_ship.position.y < height-spaceship_height:  # DOWN
+            yellow_ship.position.y += vel
+        if keys_pressed[pygame.K_a] and yellow_ship.position.x > 0:  # LEFT
+            yellow_ship.position.x -= vel
+        if keys_pressed[pygame.K_d] and yellow_ship.position.x < width-spaceship_width:  # RIGHT
+            yellow_ship.position.x += vel
+        
+   
+    @staticmethod
+    def move_player2(red_ship, keys_pressed, width, height, vel, spaceship_width, spaceship_height):
+        # Access attributes and methods of red ship object directly
+            if keys_pressed[pygame.K_i] and red_ship.position.y > 0:  # UP 
+                red_ship.position.y -= vel
+            if keys_pressed[pygame.K_k] and red_ship.position.y < height - spaceship_height:  # DOWN 
+                red_ship.position.y += vel
+            if keys_pressed[pygame.K_j] and red_ship.position.x > 0:  # LEFT 
+                red_ship.position.x -= vel
+            if keys_pressed[pygame.K_l] and red_ship.position.x < width - spaceship_width:  # RIGHT 
+                red_ship.position.x += vel
+
 
     @staticmethod
-    def move_player2(entity, keys_pressed, width, height, vel, spaceship_width, spaceship_height):
-        position_component = entity.get_component(PositionComponent)
-        if position_component:
-            if keys_pressed[pygame.K_i] and position_component.y > 0:  # UP arrow key
-                position_component.y -= vel
-            if keys_pressed[pygame.K_k] and position_component.y < height - spaceship_height:  # DOWN arrow key
-                position_component.y += vel
-            if keys_pressed[pygame.K_j] and position_component.x > 0:  # LEFT arrow key
-                position_component.x -= vel
-            if keys_pressed[pygame.K_l] and position_component.x < width - spaceship_width:  # RIGHT arrow key
-                position_component.x += vel
+    def move_enemy_ships(entities, width, vel):
+        for entity in entities:
+            if hasattr(entity, 'position'):
+                entity.position.x -= vel  # Move the enemy ship to the left
 
-    @staticmethod
-    def move_enemy_ship(entity, width, vel):
-        position_component = entity.get_component(PositionComponent)
-        if position_component:
-            position_component.x -= vel  # Move the enemy ship to the left
+                if entity.position.x < -width:
+                    # Enemy ship reached the left side, generate a new random y-axis position
+                    entity.position.x = width  # Reset x-coordinate to the right side
+                    entity.position.y = random.randint(25, 475)  # Generate a new random y-coordinate
 
-            if position_component.x < -width:
-                # Enemy ship reached the left side, generate a new random y-axis position
-                position_component.x = width  # Reset x-coordinate to the right side
-                position_component.y = random.randint(25, 475)  # Generate a new random y-coordinate
+
+  
+   

@@ -9,6 +9,7 @@ class Bullet:
         self.velocity = velocity
         self.radius = radius
         self.rect = pygame.Rect(self.x, self.y, WIDTH, HEIGHT) 
+        self.active=True
 
 
     def update(self, WIDTH):
