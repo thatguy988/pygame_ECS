@@ -263,38 +263,8 @@ def handle_pause_menu_events(selected_option):
     return selected_option
 
 
-def fire_bullet(yellow, red, player_count, bullet_system_instance, last_bullet_time, last_bullet_time_2):
-    if player_count >= 1:
-        bullet_pressed = pygame.key.get_pressed()[pygame.K_SPACE]
-        if bullet_pressed:
-            current_time = pygame.time.get_ticks()
-            time_since_last_bullet = current_time - last_bullet_time
-
-            if time_since_last_bullet >= 300: #millisecond delay
-                bullet_system_instance.create_bullet(
-                    yellow.position.x + SPACESHIP_WIDTH, yellow.position.y + SPACESHIP_HEIGHT // 2, 5, 10
-                )
-                last_bullet_time = current_time
-
-    if player_count == 2:
-        bullet_pressed_2 = pygame.key.get_pressed()[pygame.K_RETURN]
-        if bullet_pressed_2:
-            current_time_2 = pygame.time.get_ticks()
-            time_since_last_bullet_2 = current_time_2 - last_bullet_time_2
-
-            if time_since_last_bullet_2 >= 300:
-                bullet_system_instance.create_bullet(
-                    red.position.x + SPACESHIP_WIDTH, red.position.y + SPACESHIP_HEIGHT // 2, 5, 10        
-                )
-                last_bullet_time_2 = current_time_2
-    return last_bullet_time, last_bullet_time_2
-
-
 def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance,background):
 
-    # Spawn enemy spaceship at a certain interval
-    #if random.randint(1, 120) == 1:  # Adjust the interval as needed
-     #   enemy_ship = create_enemy_spaceship()
     if player_count >= 1:
         movement_system.move_player1(
             yellow, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT
@@ -310,71 +280,16 @@ def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, move
     else:
         draw_window([yellow] + enemy_ships, bullet_system_instance, background, WHITE)
 
-    # Update bullets and check for collisions
-    for bullet in bullet_system_instance.bullets:
-        bullet.update(WIDTH)
-        
-        # Check collision with yellow spaceship
-        if yellow.position.x < bullet.x + bullet.radius < yellow.position.x + SPACESHIP_WIDTH:
-            if yellow.position.y < bullet.y < yellow.position.y + SPACESHIP_HEIGHT:
-                # Collision detected with yellow spaceship
-                yellow.health -= 10
-                bullet_system_instance.remove_bullet(bullet)
 
-                # Check if yellow spaceship's health reaches zero
-                if yellow.health <= 0:
-                    yellow.health = 0
-                    yellow.alive = False
-                    yellow.stop_moving()
-                
-                    yellow.visible = False
+    
+    bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, WIDTH, yellow, red, player_count,WIN,BLACK,HEIGHT)
 
-                # Check if spaceship is destroyed
-                if not yellow.alive and player_count == 1:
-                    game_over_screen()
-          
-        # Check collision with red spaceship
-        if player_count == 2:
-            if red.position.x < bullet.x + bullet.radius < red.position.x + SPACESHIP_WIDTH:
-                if red.position.y < bullet.y < red.position.y + SPACESHIP_HEIGHT:
-                    # Collision detected with red spaceship
-                    red.health -= 10
-                    bullet_system_instance.remove_bullet(bullet)
+    if not yellow.alive and player_count == 1:
+            game_over_screen()
 
-                    # Check if red spaceship's health reaches zero
-                    if red.health <= 0:
-                        red.health = 0
-                        red.alive = False
-                        red.visible = False
-                        red.stop_moving()
-
-                    # Check if both spaceships are destroyed
-                    if not red.alive and not yellow.alive:
-                        game_over_screen()
-        # Check collision with enemy spaceship
-    for enemy_ship in enemy_ships:
-        for bullet in bullet_system_instance.bullets:
-
-            if enemy_ship.position.x < bullet.x + bullet.radius < enemy_ship.position.x + SPACESHIP_WIDTH:
-                if enemy_ship.position.y < bullet.y < enemy_ship.position.y + SPACESHIP_HEIGHT:
-                    # Collision detected with enemy spaceship
-                    enemy_ship.health -= 10
-                    bullet_system_instance.remove_bullet(bullet)
-
-                    # Check if enemy spaceship's health reaches zero
-                    if enemy_ship.health <= 0:
-                        enemy_ship.stop_moving()
-                        enemy_ship.visible = False
-
-                        enemy_ship.position.x = WIDTH
-                        enemy_ship.position.y = HEIGHT
-                        enemy_ship.health = 10
-                        enemy_ship.visible = True
-
-    bullet_system_instance.update(WIDTH, BLACK, WIN)
-
-
-
+    if player_count == 2:
+        if not red.alive and not yellow.alive:
+                game_over_screen()
 
 def game_over_screen():
     while True:
@@ -473,12 +388,12 @@ def game_screen(player_count):
             enemy_ships.append(enemy_ship)
             last_spawn_time = current_time
 
-        last_bullet_time, last_bullet_time_2 = fire_bullet(yellow, red, player_count, bullet_system_instance, last_bullet_time, last_bullet_time_2)
+        last_bullet_time, last_bullet_time_2 = bullet_system_instance.fire_bullet(yellow, red, player_count, last_bullet_time, last_bullet_time_2)
         update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance, background)
         
-    
 
-        # Inside the game loop
+
+        
         movement_system.move_enemy_ships(enemy_ships, WIDTH, 5)  # Move all enemy ships
         bullet_system_instance.auto_fire(enemy_ships, -50, 5, 300)  # Fire bullets from all enemy ships
         
