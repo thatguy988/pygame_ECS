@@ -47,7 +47,8 @@ class BulletSystem:
             bullet.x += bullet.velocity
 
     def remove_bullet(self, bullet):
-        self.bullets.remove(bullet)
+        if bullet in self.bullets:
+            self.bullets.remove(bullet)
         
 
     def remove_offscreen_bullets(self, width):
@@ -66,6 +67,9 @@ class BulletSystem:
                 bullet_color = (255, 255, 255)  # Default color (white)
 
             pygame.draw.rect(surface, bullet_color, (bullet.x, bullet.y, 5, 5))
+        
+
+        
 
     
 
@@ -78,6 +82,22 @@ class BulletSystem:
     
 
 
+    def auto_fire(self, enemy_ships, last_bullet_time_enemy_ship):
+        delay = 1200
+        current_time = pygame.time.get_ticks()
+        time_since_last_bullet = current_time - last_bullet_time_enemy_ship
+
+        if time_since_last_bullet >= delay:  # millisecond delay
+            for enemy_ship in enemy_ships:
+                self.create_bullet(
+                    enemy_ship.position.x - 1, enemy_ship.position.y + SPACESHIP_HEIGHT // 2, -5, 10, "green"
+                )
+            last_bullet_time_enemy_ship = current_time
+
+        return last_bullet_time_enemy_ship
+
+    
+    '''
     def auto_fire(self, enemy_ship, last_bullet_time_enemy_ship):
         delay = 1200
         current_time = pygame.time.get_ticks()
@@ -90,14 +110,14 @@ class BulletSystem:
             last_bullet_time_enemy_ship = current_time
 
         return last_bullet_time_enemy_ship
-
+    '''
 
     
     
 
 
 
-    def update_bullets_and_check_collisions(self, enemy_ship, WIDTH, yellow, red, player_count, WIN, BLACK, HEIGHT):
+    def update_bullets_and_check_collisions(self, enemy_ships, WIDTH, yellow, red, player_count, WIN, BLACK, HEIGHT):
         # Update bullets and check for collisions
         bullet_damage = 5
         for bullet in self.bullets:
@@ -141,23 +161,23 @@ class BulletSystem:
             #for bullet in self.bullets:
             
 
+            for enemy_ship in enemy_ships:
+                if bullet.owner != "green":
+                    if enemy_ship.position.x < bullet.x + bullet.radius < enemy_ship.position.x + SPACESHIP_WIDTH:
+                        if enemy_ship.position.y < bullet.y < enemy_ship.position.y + SPACESHIP_HEIGHT:
+                            # Collision detected with enemy spaceship
+                            enemy_ship.health -= bullet_damage
+                            self.remove_bullet(bullet)
 
-            if bullet.owner != "green":
-                if enemy_ship.position.x < bullet.x + bullet.radius < enemy_ship.position.x + SPACESHIP_WIDTH:
-                    if enemy_ship.position.y < bullet.y < enemy_ship.position.y + SPACESHIP_HEIGHT:
-                        # Collision detected with enemy spaceship
-                        enemy_ship.health -= bullet_damage
-                        self.remove_bullet(bullet)
+                            # Check if enemy spaceship's health reaches zero
+                            if enemy_ship.health <= 0:
+                                enemy_ship.stop_moving()
+                                enemy_ship.visible = False
 
-                        # Check if enemy spaceship's health reaches zero
-                        if enemy_ship.health <= 0:
-                            enemy_ship.stop_moving()
-                            enemy_ship.visible = False
-
-                            enemy_ship.position.x = WIDTH
-                            enemy_ship.position.y = HEIGHT
-                            enemy_ship.health = 10
-                            enemy_ship.visible = True
+                                enemy_ship.position.x = WIDTH
+                                enemy_ship.position.y = HEIGHT
+                                enemy_ship.health = 10
+                                enemy_ship.visible = True
 
         self.update(WIDTH, BLACK, WIN)
 

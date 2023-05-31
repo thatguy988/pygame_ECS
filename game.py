@@ -1,7 +1,7 @@
 import pygame
 import sys
 import os
-
+import random
 
 from systems.movement import MovementSystem
 from systems.render import RenderSystem
@@ -25,7 +25,7 @@ SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
 
 FPS = 120
 VEL = 4
-GREEN_ENEMY_SHIP_VEL = 2
+GREEN_ENEMY_SHIP_VEL = 4
 ENEMY_SHIP_SPAWN_RATE = 120  # Adjust the spawn rate as needed
 
 
@@ -267,7 +267,7 @@ def handle_pause_menu_events(selected_option):
     return selected_option
 
 
-def update_game_state(yellow, red, enemy_ship, player_count, keys_pressed, movement_system, bullet_system_instance,background):
+def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance,background):
 
     if player_count >= 1:
         movement_system.move_player1(
@@ -280,16 +280,17 @@ def update_game_state(yellow, red, enemy_ship, player_count, keys_pressed, movem
         )
 
     if player_count == 2:
-        draw_window([yellow, red, enemy_ship], bullet_system_instance, background, WHITE)
-        #draw_window([yellow, red]+ enemy_ship, bullet_system_instance, background, WHITE)
+        #draw_window([yellow, red, enemy_ship], bullet_system_instance, background, WHITE)
+        draw_window([yellow, red] + enemy_ships, bullet_system_instance, background, WHITE)
     else:
-        draw_window([yellow,enemy_ship], bullet_system_instance, background, WHITE)
+        #draw_window([yellow,enemy_ship], bullet_system_instance, background, WHITE)
+        draw_window([yellow] + enemy_ships,bullet_system_instance, background, WHITE)
         
 
 
 
     
-    bullet_system_instance.update_bullets_and_check_collisions(enemy_ship, WIDTH, yellow, red, player_count,WIN,BLACK,HEIGHT)
+    bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, WIDTH, yellow, red, player_count,WIN,BLACK,HEIGHT)
 
     if not yellow.alive and player_count == 1:
             game_over_screen()
@@ -345,13 +346,43 @@ def update_health_text(current_time, yellow, red, prev_yellow_health, prev_red_h
     else:
         return yellow_health_text, last_yellow_health_change, prev_yellow_health, red_health_text, last_red_health_change, prev_red_health
 
+
+def spawn_enemy_ships(enemy_ships, spawn_rate, last_spawn_time, stage):
+    current_time = pygame.time.get_ticks()
+
+    if stage == 1 and current_time - last_spawn_time > spawn_rate:
+        # Randomly determine the number of enemy ships to spawn
+        num_ships = random.randint(0, 1)
+
+        for _ in range(num_ships):
+            # Create a new enemy ship and append it to the list
+            new_enemy_ship = create_enemy_ship()
+            enemy_ships.append(new_enemy_ship)
+
+        # Update the last spawn time
+        last_spawn_time = current_time
+
+    elif stage == 2 and current_time - last_spawn_time > spawn_rate:
+        # Randomly determine the number of enemy ships to spawn
+        num_ships = random.randint(1, 2)
+
+        for _ in range(num_ships):
+            # Create a new enemy ship and append it to the list
+            new_enemy_ship = create_enemy_ship()
+            enemy_ships.append(new_enemy_ship)
+
+        # Update the last spawn time
+        last_spawn_time = current_time
+
+    return last_spawn_time
+
         
 def game_screen(player_count):
     yellow = create_yellow_ship()
     red = None
-    enemy_ship = create_enemy_ship()
+    #enemy_ship = create_enemy_ship()
 
-    #enemy_ships = []  # List to store enemy ships
+    enemy_ships = []  # List to store enemy ships
     
     if player_count == 2:
         red = create_red_ship()
@@ -366,9 +397,12 @@ def game_screen(player_count):
 
     last_bullet_time = 0
     last_bullet_time_2 = 0
+
+    
+
     last_bullet_time_enemy_ship = 0
 
-    #last_bullet_time_enemy_ship = 0
+    
     last_spawn_time = 0  # Variable to track the last spawn time
     spawn_rate = 5000  # Time interval (in milliseconds) between enemy ship spawns
 
@@ -391,6 +425,9 @@ def game_screen(player_count):
 
     if player_count == 2:
         red_health_text = font.render("Red Health: " + str(red.health), True, (255, 255, 255))
+
+    stage = 1
+
 
     run = True
     while run:
@@ -428,12 +465,15 @@ def game_screen(player_count):
         
         keys_pressed = pygame.key.get_pressed()
 
-
         
+
+
+        last_spawn_time = spawn_enemy_ships(enemy_ships, spawn_rate, last_spawn_time,stage)
+
 
         last_bullet_time, last_bullet_time_2 = \
             bullet_system_instance.fire_bullet(yellow, red, player_count, last_bullet_time, last_bullet_time_2)
-        update_game_state(yellow, red, enemy_ship, player_count, keys_pressed, movement_system, bullet_system_instance, background)
+        update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance, background)
 
         
         
@@ -457,8 +497,8 @@ def game_screen(player_count):
         pygame.display.flip()
         
 
-        movement_system.move_enemy_ships(enemy_ship, WIDTH, GREEN_ENEMY_SHIP_VEL)  # Move all enemy ships
-        last_bullet_time_enemy_ship = bullet_system_instance.auto_fire(enemy_ship, last_bullet_time_enemy_ship)  # Fire bullets from all enemy ships
+        movement_system.move_enemy_ships(enemy_ships, WIDTH, GREEN_ENEMY_SHIP_VEL)  # Move all enemy ships
+        last_bullet_time_enemy_ship = bullet_system_instance.auto_fire(enemy_ships, last_bullet_time_enemy_ship)  # Fire bullets from all enemy ships
         
 
         clock.tick(FPS)

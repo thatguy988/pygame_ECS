@@ -30,7 +30,7 @@ class MovementSystem:
                 red_ship.position.x -= vel
             if keys_pressed[pygame.K_l] and red_ship.position.x < width - spaceship_width:  # RIGHT 
                 red_ship.position.x += vel
-
+            '''
     @staticmethod
     def move_enemy_ships(enemy_ship, width, vel):
         
@@ -41,8 +41,9 @@ class MovementSystem:
                     # Enemy ship reached the left side, generate a new random y-axis position
                 enemy_ship.position.x = width  # Reset x-coordinate to the right side
                 enemy_ship.position.y = random.randint(25, 475)  # Generate a new random y-coordinate
+                '''
 
-'''
+
     @staticmethod
     def move_enemy_ships(entities, width, vel):
         for entity in entities:
@@ -53,7 +54,7 @@ class MovementSystem:
                     # Enemy ship reached the left side, generate a new random y-axis position
                     entity.position.x = width  # Reset x-coordinate to the right side
                     entity.position.y = random.randint(25, 475)  # Generate a new random y-coordinate
-                    '''
+                    
 
 
   
