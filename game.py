@@ -188,7 +188,7 @@ def main_menu():
                 game_screen(2)  # Start game with 2 players
             selected_option = 0  # Reset the selected option
         elif selected_option == "tutorial":
-            tutorial_screen()
+            #tutorial_screen()
             selected_option = 0
 
 
@@ -376,7 +376,7 @@ def spawn_enemy_ships(enemy_ships, spawn_rate, last_spawn_time, stage):
 
     return last_spawn_time
 
-        
+
 def game_screen(player_count):
     yellow = create_yellow_ship()
     red = None
@@ -507,113 +507,10 @@ def game_screen(player_count):
 
 
 
-def tutorial_screen():
-    yellow = create_yellow_ship()
 
 
-    movement_system = MovementSystem()
-    bullet_system_instance = BulletSystem()
-
-    background = pygame.image.load(os.path.join('assets', 'space.png'))
-    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-
-    clock = pygame.time.Clock()
-    space_pressed = False
-    last_bullet_time = 0
-    pause_pressed = False
-    result = None
-    game_paused = False
-
-    font = pygame.font.Font(None, 24)  # Load a font
-
-    run = True
-    while run:
-        clock.tick(FPS)
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    if pause_pressed == False:
-                        if game_paused == False:
-                            space_pressed = True
-                        else:
-                            game_paused = False
-                            result = pause_menu()
-                            if result == "main_menu":
-                                return "main_menu"
-                    else:
-                        pause_pressed = False
-                elif event.key == pygame.K_p:
-                    if pause_pressed == False:
-                        if game_paused == False:
-                            pause_pressed = True
-                            game_paused = True
-                            result = pause_menu()
-                            if result == "resume_game":
-                                pause_pressed = False
-                                game_paused = False
-                                result = None
-                                return "resume_game"
-                            elif result == "main_menu":
-                                return "main_menu"
-
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_SPACE:
-                    space_pressed = False
-                    last_bullet_time = 0
-
-        if game_paused:
-            game_paused = False
-            pause_pressed = False
-            result = None
-
-        if space_pressed:
-            current_time = pygame.time.get_ticks()
-            time_since_last_bullet = current_time - last_bullet_time
-
-            if time_since_last_bullet >= 100:
-                bullet_system_instance.create_bullet(
-                    yellow.position.x + SPACESHIP_WIDTH, yellow.position.y + SPACESHIP_HEIGHT // 2, 5
-                )
-                last_bullet_time = current_time
-
-        keys_pressed = pygame.key.get_pressed()
-        movement_system.move_player1(
-            yellow, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT
-        )
-
-        # Create a separate buffer surface
-        buffer_surface = pygame.Surface((WIDTH, HEIGHT))
-
-        # Clear the buffer surface
-        buffer_surface.fill((0, 0, 0))
-
-        # Draw the background and spaceship on the buffer surface
-        buffer_surface.blit(background, (0, 0))
-        buffer_surface.blit(yellow.image, (yellow.position.x, yellow.position.y))
-
-        # Render and display the text
-        controls_text = font.render("Movement: W - Move Up, S - Move Down, A - Move Left, D - Move Right", True, (255, 255, 255))
-        shoot_text = font.render("Press Spacebar to Shoot", True, (255, 255, 255))
-        pause_text = font.render("Press P to Pause", True, (255, 255, 255))
-        buffer_surface.blit(controls_text, (10, 10))#(x,y)
-        buffer_surface.blit(shoot_text, (10, 40))
-        buffer_surface.blit(pause_text, (10, 70))
-
-        # Copy the buffer surface to the window surface
-        WIN.blit(buffer_surface, (0, 0))
-        
 
 
-        bullet_system_instance.update(WIDTH, WHITE, WIN)
-
-        pygame.display.update()
-
-    pygame.quit()
-
-              
 def main():
     pygame.init()
     main_menu()

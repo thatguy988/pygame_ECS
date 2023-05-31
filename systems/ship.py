@@ -20,20 +20,6 @@ class Ship:
         self.visible = True
         
 
-    def stop_moving(self):
-        # Stop the movement of the entity
-        # Assuming you have a velocity attribute, you can set it to zero
-        self.velocity = 0
-        # If you have movement flags, you can set them to False
-        self.is_moving_up = False
-        self.is_moving_down = False
-        self.is_moving_left = False
-        self.is_moving_right = False
-
-    def update(self):
-        # Implement ship-specific update logic here
-        pass
-    
 class YellowShip(Ship):
     def __init__(self, position):
         super().__init__(position, os.path.join('assets', 'spaceship_yellow.png'))

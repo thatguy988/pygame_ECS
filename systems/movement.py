@@ -8,19 +8,21 @@ class MovementSystem:
     @staticmethod
     
     def move_player1(yellow_ship, keys_pressed, width, height, vel, spaceship_width,spaceship_height):
-        # Access attributes and methods of the yellow_ship object directly
-        if keys_pressed[pygame.K_w] and yellow_ship.position.y > 0:  # UP
-            yellow_ship.position.y -= vel
-        if keys_pressed[pygame.K_s] and yellow_ship.position.y < height-spaceship_height:  # DOWN
-            yellow_ship.position.y += vel
-        if keys_pressed[pygame.K_a] and yellow_ship.position.x > 0:  # LEFT
-            yellow_ship.position.x -= vel
-        if keys_pressed[pygame.K_d] and yellow_ship.position.x < width-spaceship_width:  # RIGHT
-            yellow_ship.position.x += vel
+        if yellow_ship.alive:
+            # Access attributes and methods of the yellow_ship object directly
+            if keys_pressed[pygame.K_w] and yellow_ship.position.y > 0:  # UP
+                yellow_ship.position.y -= vel
+            if keys_pressed[pygame.K_s] and yellow_ship.position.y < height-spaceship_height:  # DOWN
+                yellow_ship.position.y += vel
+            if keys_pressed[pygame.K_a] and yellow_ship.position.x > 0:  # LEFT
+                yellow_ship.position.x -= vel
+            if keys_pressed[pygame.K_d] and yellow_ship.position.x < width-spaceship_width:  # RIGHT
+                yellow_ship.position.x += vel
         
    
     @staticmethod
     def move_player2(red_ship, keys_pressed, width, height, vel, spaceship_width, spaceship_height):
+        if red_ship.alive:
         # Access attributes and methods of red ship object directly
             if keys_pressed[pygame.K_i] and red_ship.position.y > 0:  # UP 
                 red_ship.position.y -= vel

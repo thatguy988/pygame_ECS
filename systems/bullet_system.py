@@ -17,28 +17,31 @@ class BulletSystem:
 
     def fire_bullet(self, yellow, red, player_count, last_bullet_time, last_bullet_time_2):
         if player_count >= 1:
-            bullet_pressed = pygame.key.get_pressed()[pygame.K_SPACE]
-            if bullet_pressed:
-                current_time = pygame.time.get_ticks()
-                time_since_last_bullet = current_time - last_bullet_time
+            if yellow.alive:
+                bullet_pressed = pygame.key.get_pressed()[pygame.K_SPACE]
+                if bullet_pressed:
+                    current_time = pygame.time.get_ticks()
+                    time_since_last_bullet = current_time - last_bullet_time
 
-                if time_since_last_bullet >= 300: #millisecond delay
-                    self.create_bullet(
-                        yellow.position.x + SPACESHIP_WIDTH, yellow.position.y + SPACESHIP_HEIGHT // 2, 5, 10, "yellow"
-                    )
-                    last_bullet_time = current_time
+                    if time_since_last_bullet >= 300: #millisecond delay
+                        self.create_bullet(
+                            yellow.position.x + SPACESHIP_WIDTH, yellow.position.y + SPACESHIP_HEIGHT // 2, 5, 10, "yellow"
+                        )
+                        last_bullet_time = current_time
+            
 
         if player_count == 2:
-            bullet_pressed_2 = pygame.key.get_pressed()[pygame.K_RETURN]
-            if bullet_pressed_2:
-                current_time_2 = pygame.time.get_ticks()
-                time_since_last_bullet_2 = current_time_2 - last_bullet_time_2
+            if red.alive:
+                bullet_pressed_2 = pygame.key.get_pressed()[pygame.K_RETURN]
+                if bullet_pressed_2:
+                    current_time_2 = pygame.time.get_ticks()
+                    time_since_last_bullet_2 = current_time_2 - last_bullet_time_2
 
-                if time_since_last_bullet_2 >= 300:
-                    self.create_bullet(
-                        red.position.x + SPACESHIP_WIDTH, red.position.y + SPACESHIP_HEIGHT // 2, 5, 10 , "red"       
-                    )
-                    last_bullet_time_2 = current_time_2
+                    if time_since_last_bullet_2 >= 300:
+                        self.create_bullet(
+                            red.position.x + SPACESHIP_WIDTH, red.position.y + SPACESHIP_HEIGHT // 2, 5, 10 , "red"       
+                        )
+                        last_bullet_time_2 = current_time_2
         return last_bullet_time, last_bullet_time_2
     
 
@@ -122,38 +125,37 @@ class BulletSystem:
         bullet_damage = 5
         for bullet in self.bullets:
             bullet.update(WIDTH)
-            
-            # Check collision with yellow spaceship
-            if yellow.position.x < bullet.x + bullet.radius < yellow.position.x + SPACESHIP_WIDTH:
-                if yellow.position.y < bullet.y < yellow.position.y + SPACESHIP_HEIGHT:
-                    # Collision detected with yellow spaceship
-                    yellow.health -= bullet_damage
-                    self.remove_bullet(bullet)
+            if yellow.alive:
+                # Check collision with yellow spaceship
+                if yellow.position.x < bullet.x + bullet.radius < yellow.position.x + SPACESHIP_WIDTH:
+                    if yellow.position.y < bullet.y < yellow.position.y + SPACESHIP_HEIGHT:
+                        # Collision detected with yellow spaceship
+                        yellow.health -= bullet_damage
+                        self.remove_bullet(bullet)
 
-                    # Check if yellow spaceship's health reaches zero
-                    if yellow.health <= 0:
-                        yellow.health = 0
-                        yellow.alive = False
-                        yellow.stop_moving()
-                    
-                        yellow.visible = False
+                        # Check if yellow spaceship's health reaches zero
+                        if yellow.health <= 0:
+                            yellow.health = 0
+                            yellow.alive = False
+                            yellow.visible = False
 
                     
             
             # Check collision with red spaceship
             if player_count == 2:
-                if red.position.x < bullet.x + bullet.radius < red.position.x + SPACESHIP_WIDTH:
-                    if red.position.y < bullet.y < red.position.y + SPACESHIP_HEIGHT:
-                        # Collision detected with red spaceship
-                        red.health -= bullet_damage
-                        self.remove_bullet(bullet)
+                if red.alive:
+                    if red.position.x < bullet.x + bullet.radius < red.position.x + SPACESHIP_WIDTH:
+                        if red.position.y < bullet.y < red.position.y + SPACESHIP_HEIGHT:
+                            # Collision detected with red spaceship
+                            red.health -= bullet_damage
+                            self.remove_bullet(bullet)
 
-                        # Check if red spaceship's health reaches zero
-                        if red.health <= 0:
-                            red.health = 0
-                            red.alive = False
-                            red.visible = False
-                            red.stop_moving()
+                            # Check if red spaceship's health reaches zero
+                            if red.health <= 0:
+                                red.health = 0
+                                red.alive = False
+                                red.visible = False
+                                
 
                         
             # Check collision with enemy spaceship
