@@ -263,7 +263,7 @@ def handle_pause_menu_events(selected_option):
     return selected_option
 
 
-def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance,background):
+def update_game_state(yellow, red, enemy_ship, player_count, keys_pressed, movement_system, bullet_system_instance,background):
 
     if player_count >= 1:
         movement_system.move_player1(
@@ -276,13 +276,14 @@ def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, move
         )
 
     if player_count == 2:
-        draw_window([yellow, red] + enemy_ships, bullet_system_instance, background, WHITE)
+        draw_window([yellow, red, enemy_ship], bullet_system_instance, background, WHITE)
+        #draw_window([yellow, red]+ enemy_ship, bullet_system_instance, background, WHITE)
     else:
-        draw_window([yellow] + enemy_ships, bullet_system_instance, background, WHITE)
+        draw_window([yellow,enemy_ship], bullet_system_instance, background, WHITE)
 
 
     
-    bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, WIDTH, yellow, red, player_count,WIN,BLACK,HEIGHT)
+    bullet_system_instance.update_bullets_and_check_collisions(enemy_ship, WIDTH, yellow, red, player_count,WIN,BLACK,HEIGHT)
 
     if not yellow.alive and player_count == 1:
             game_over_screen()
@@ -318,20 +319,40 @@ def game_over_screen():
                 if event.key == pygame.K_r:
                     main_menu()
                     return # Return to the main menu
-                
 
 
+
+def update_health_text(current_time, yellow, red, prev_yellow_health, prev_red_health, font,
+                       last_yellow_health_change,last_red_health_change,yellow_health_text,red_health_text,player_count):
+    if yellow.health != prev_yellow_health:
+        yellow_health_text = font.render("Yellow Health: " + str(yellow.health), True, (255, 255, 255))
+        prev_yellow_health = yellow.health
+        last_yellow_health_change = current_time
+
+    if red and red.health != prev_red_health:
+        red_health_text = font.render("Red Health: " + str(red.health), True, (255, 255, 255))
+        prev_red_health = red.health
+        last_red_health_change = current_time
+
+    if player_count == 1 :
+        return yellow_health_text, last_yellow_health_change, prev_yellow_health
+    else:
+        return yellow_health_text, last_yellow_health_change, prev_yellow_health, red_health_text, last_red_health_change, prev_red_health
+
+        
 def game_screen(player_count):
     yellow = create_yellow_ship()
     red = None
-    enemy_ships = []  # List to store enemy ships
+    enemy_ship = create_enemy_ship()
+
+    #enemy_ships = []  # List to store enemy ships
     
     if player_count == 2:
         red = create_red_ship()
     
     movement_system = MovementSystem()
     bullet_system_instance = BulletSystem()
-
+   
     background = pygame.image.load(os.path.join('assets', 'space.png'))
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
@@ -344,7 +365,24 @@ def game_screen(player_count):
 
     pause_pressed = False
     game_paused = False
+
+    font = pygame.font.Font(None, 24)  # Load a font
+    text_display_duration= 5000  # In milliseconds
+
+
+    prev_yellow_health = yellow.health
+    prev_red_health = red.health if player_count == 2 else None
+
+    last_yellow_health_change = pygame.time.get_ticks()
+    last_red_health_change = pygame.time.get_ticks() if player_count == 2 else None
     
+    yellow_health_text = font.render("Yellow Health: " + str(yellow.health), True, (255, 255, 255))
+    
+    red_health_text = None 
+
+    if player_count == 2:
+        red_health_text = font.render("Red Health: " + str(red.health), True, (255, 255, 255))
+
     run = True
     while run:
         clock.tick(FPS)
@@ -382,24 +420,42 @@ def game_screen(player_count):
         keys_pressed = pygame.key.get_pressed()
 
 
+        
+
+        last_bullet_time, last_bullet_time_2 = \
+            bullet_system_instance.fire_bullet(yellow, red, player_count, last_bullet_time, last_bullet_time_2)
+        update_game_state(yellow, red, enemy_ship, player_count, keys_pressed, movement_system, bullet_system_instance, background)
+
+        
+        
         current_time = pygame.time.get_ticks()
-        if current_time - last_spawn_time >= spawn_rate:  # Check if it's time to spawn a new enemy ship
-            enemy_ship = create_enemy_ship()
-            enemy_ships.append(enemy_ship)
-            last_spawn_time = current_time
-
-        last_bullet_time, last_bullet_time_2 = bullet_system_instance.fire_bullet(yellow, red, player_count, last_bullet_time, last_bullet_time_2)
-        update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance, background)
+        if(player_count==1):
+            yellow_health_text, last_yellow_health_change, prev_yellow_health = \
+                update_health_text(current_time, yellow, red, prev_yellow_health, prev_red_health, font,
+                            last_yellow_health_change,last_red_health_change,yellow_health_text,red_health_text,player_count)
+        else:
+            yellow_health_text, last_yellow_health_change, prev_yellow_health, red_health_text, last_red_health_change, prev_red_health = \
+                update_health_text(current_time, yellow, red, prev_yellow_health, prev_red_health, font,
+                            last_yellow_health_change,last_red_health_change,yellow_health_text, red_health_text, player_count)
         
 
+        if current_time - last_yellow_health_change < text_display_duration:
+            WIN.blit(yellow_health_text, (10, 10))
 
+        if player_count == 2 and current_time - last_red_health_change < text_display_duration:  
+            WIN.blit(red_health_text, (WIDTH - red_health_text.get_width() - 10, 10))
+    
+        pygame.display.flip()
         
-        movement_system.move_enemy_ships(enemy_ships, WIDTH, 5)  # Move all enemy ships
-        bullet_system_instance.auto_fire(enemy_ships, -50, 5, 300)  # Fire bullets from all enemy ships
+
+        movement_system.move_enemy_ships(enemy_ship, WIDTH, 5)  # Move all enemy ships
+        bullet_system_instance.auto_fire(enemy_ship, -50, 5, 10000)  # Fire bullets from all enemy ships
         
+
         clock.tick(FPS)
 
     pygame.quit()
+
 
 
 def tutorial_screen():
@@ -518,7 +574,7 @@ def main():
         if result == "main_menu":
             main_menu()
 
-    pygame.quit()
+
 
 if __name__ == "__main__":
     main()

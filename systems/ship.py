@@ -15,7 +15,7 @@ class Ship:
             ),
             90
         )
-        self.health = 100
+        self.health = 10000
         self.alive = True
         self.visible = True
         
