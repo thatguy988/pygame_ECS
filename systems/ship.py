@@ -18,6 +18,16 @@ class Ship:
         self.health = 100
         self.alive = True
         self.visible = True
+
+    def stop_moving(self):#used by enemy ship
+        # Stop the movement of the entity
+        # Assuming you have a velocity attribute, you can set it to zero
+        self.velocity = 0
+        # If you have movement flags, you can set them to False
+        self.is_moving_up = False
+        self.is_moving_down = False
+        self.is_moving_left = False
+        self.is_moving_right = False
         
 
 class YellowShip(Ship):

@@ -126,35 +126,37 @@ class BulletSystem:
         for bullet in self.bullets:
             bullet.update(WIDTH)
             if yellow.alive:
+                if bullet.owner != "red" and bullet.owner != "yellow":
                 # Check collision with yellow spaceship
-                if yellow.position.x < bullet.x + bullet.radius < yellow.position.x + SPACESHIP_WIDTH:
-                    if yellow.position.y < bullet.y < yellow.position.y + SPACESHIP_HEIGHT:
-                        # Collision detected with yellow spaceship
-                        yellow.health -= bullet_damage
-                        self.remove_bullet(bullet)
+                    if yellow.position.x < bullet.x + bullet.radius < yellow.position.x + SPACESHIP_WIDTH:
+                        if yellow.position.y < bullet.y < yellow.position.y + SPACESHIP_HEIGHT:
+                            # Collision detected with yellow spaceship
+                            yellow.health -= bullet_damage
+                            self.remove_bullet(bullet)
 
-                        # Check if yellow spaceship's health reaches zero
-                        if yellow.health <= 0:
-                            yellow.health = 0
-                            yellow.alive = False
-                            yellow.visible = False
+                            # Check if yellow spaceship's health reaches zero
+                            if yellow.health <= 0:
+                                yellow.health = 0
+                                yellow.alive = False
+                                yellow.visible = False
 
                     
             
             # Check collision with red spaceship
             if player_count == 2:
                 if red.alive:
-                    if red.position.x < bullet.x + bullet.radius < red.position.x + SPACESHIP_WIDTH:
-                        if red.position.y < bullet.y < red.position.y + SPACESHIP_HEIGHT:
-                            # Collision detected with red spaceship
-                            red.health -= bullet_damage
-                            self.remove_bullet(bullet)
+                    if bullet.owner != "yellow" and bullet.owner != "red":
+                        if red.position.x < bullet.x + bullet.radius < red.position.x + SPACESHIP_WIDTH:
+                            if red.position.y < bullet.y < red.position.y + SPACESHIP_HEIGHT:
+                                # Collision detected with red spaceship
+                                red.health -= bullet_damage
+                                self.remove_bullet(bullet)
 
-                            # Check if red spaceship's health reaches zero
-                            if red.health <= 0:
-                                red.health = 0
-                                red.alive = False
-                                red.visible = False
+                                # Check if red spaceship's health reaches zero
+                                if red.health <= 0:
+                                    red.health = 0
+                                    red.alive = False
+                                    red.visible = False
                                 
 
                         
