@@ -9,8 +9,8 @@ class BulletSystem:
     def __init__(self):
         self.bullets = []
 
-    def create_bullet(self, x, y, velocity, radius):
-        bullet = Bullet(x, y, velocity, radius)
+    def create_bullet(self, x, y, velocity, radius, owner):
+        bullet = Bullet(x, y, velocity, radius, owner)
         self.bullets.append(bullet)
 
     def fire_bullet(self, yellow, red, player_count, last_bullet_time, last_bullet_time_2):
@@ -22,7 +22,7 @@ class BulletSystem:
 
                 if time_since_last_bullet >= 300: #millisecond delay
                     self.create_bullet(
-                        yellow.position.x + SPACESHIP_WIDTH, yellow.position.y + SPACESHIP_HEIGHT // 2, 5, 10
+                        yellow.position.x + SPACESHIP_WIDTH, yellow.position.y + SPACESHIP_HEIGHT // 2, 5, 10, "yellow"
                     )
                     last_bullet_time = current_time
 
@@ -34,7 +34,7 @@ class BulletSystem:
 
                 if time_since_last_bullet_2 >= 300:
                     self.create_bullet(
-                        red.position.x + SPACESHIP_WIDTH, red.position.y + SPACESHIP_HEIGHT // 2, 5, 10        
+                        red.position.x + SPACESHIP_WIDTH, red.position.y + SPACESHIP_HEIGHT // 2, 5, 10 , "red"       
                     )
                     last_bullet_time_2 = current_time_2
         return last_bullet_time, last_bullet_time_2
@@ -51,11 +51,27 @@ class BulletSystem:
     def remove_offscreen_bullets(self, width):
         self.bullets = [bullet for bullet in self.bullets if bullet.x < width]
 
+
+    def render_bullets(self, surface, color):
+        for bullet in self.bullets:
+            if bullet.owner == "yellow":
+                bullet_color = (255, 255, 0)  # Yellow color
+            elif bullet.owner == "red":
+                bullet_color = (255, 0, 0)  # Red color
+            elif bullet.owner == "green":
+                bullet_color = (0,255,0) #green color
+            else:
+                bullet_color = (255, 255, 255)  # Default color (white)
+
+            pygame.draw.rect(surface, bullet_color, (bullet.x, bullet.y, 5, 5))
+
+    
+    '''           
     def render_bullets(self, surface, color):
         for bullet in self.bullets:
 
             pygame.draw.rect(surface, color, (bullet.x, bullet.y, 5, 5))
-
+    '''
     def update(self, width, color, surface):
         self.move_bullets()
         self.remove_offscreen_bullets(width)
@@ -72,7 +88,7 @@ class BulletSystem:
         if current_time - last_fire_time >= delay:
             x = enemy_ship.position.x - 25  # Adjust the position as needed
             y = enemy_ship.position.y + SPACESHIP_HEIGHT // 2  # Adjust the position as needed
-            self.create_bullet(x, y, velocity, radius)
+            self.create_bullet(x, y, velocity, radius, "green")
             last_fire_times[enemy_ship] = current_time
 
     

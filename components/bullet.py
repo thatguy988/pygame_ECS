@@ -3,13 +3,14 @@ WIDTH = 10
 HEIGHT = 10
 class Bullet:
     
-    def __init__(self, x, y, velocity,radius):
+    def __init__(self, x, y, velocity,radius, owner):
         self.x = x
         self.y = y
         self.velocity = velocity
         self.radius = radius
         self.rect = pygame.Rect(self.x, self.y, WIDTH, HEIGHT) 
         self.active=True
+        self.owner = owner
 
 
     def update(self, WIDTH):

@@ -19,6 +19,7 @@ pygame.display.set_caption("Game")
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 YELLOW = (255, 255, 0)    
+RED = (255, 0, 0)
 
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
 
@@ -36,6 +37,8 @@ def draw_window(entities, bullet_system, background, color):
     
     
     bullet_system.render_bullets(WIN, color)
+    
+
     
     pygame.display.update()
 
@@ -280,6 +283,8 @@ def update_game_state(yellow, red, enemy_ship, player_count, keys_pressed, movem
         #draw_window([yellow, red]+ enemy_ship, bullet_system_instance, background, WHITE)
     else:
         draw_window([yellow,enemy_ship], bullet_system_instance, background, WHITE)
+        
+
 
 
     
