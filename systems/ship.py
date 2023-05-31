@@ -47,7 +47,7 @@ class RedShip(Ship):
 class EnemyShip(Ship):
     def __init__(self, position):
         super().__init__(position, os.path.join('assets', 'Ship1.png'))
-        self.health = 10  # overritde initial health value for the enemy ship
+        self.health = 10  # override initial health value for the enemy ship
 
         self.image = pygame.transform.scale(
             pygame.image.load(os.path.join('assets', 'Ship1.png')),

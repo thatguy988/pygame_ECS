@@ -8,6 +8,8 @@ SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
 class BulletSystem:
     def __init__(self):
         self.bullets = []
+        self.last_fire_times = {}  # Dictionary to store the last fire time for each entity
+
 
     def create_bullet(self, x, y, velocity, radius, owner):
         bullet = Bullet(x, y, velocity, radius, owner)
@@ -66,37 +68,38 @@ class BulletSystem:
             pygame.draw.rect(surface, bullet_color, (bullet.x, bullet.y, 5, 5))
 
     
-    '''           
-    def render_bullets(self, surface, color):
-        for bullet in self.bullets:
 
-            pygame.draw.rect(surface, color, (bullet.x, bullet.y, 5, 5))
-    '''
+
     def update(self, width, color, surface):
         self.move_bullets()
         self.remove_offscreen_bullets(width)
         self.render_bullets(surface, color)
 
+    
 
 
-    def auto_fire(self, enemy_ship, velocity, radius, delay):
-        current_time = time.time()
-        last_fire_times = {}  # Dictionary to store the last fire time for each entity
+    def auto_fire(self, enemy_ship, last_bullet_time_enemy_ship):
+        delay = 1200
+        current_time = pygame.time.get_ticks()
+        time_since_last_bullet = current_time - last_bullet_time_enemy_ship
 
-        
-        last_fire_time = last_fire_times.get(enemy_ship, delay)
-        if current_time - last_fire_time >= delay:
-            x = enemy_ship.position.x - 25  # Adjust the position as needed
-            y = enemy_ship.position.y + SPACESHIP_HEIGHT // 2  # Adjust the position as needed
-            self.create_bullet(x, y, velocity, radius, "green")
-            last_fire_times[enemy_ship] = current_time
+        if time_since_last_bullet >= delay: #millisecond delay
+            self.create_bullet(
+                enemy_ship.position.x - 1, enemy_ship.position.y + SPACESHIP_HEIGHT // 2, -5, 10, "green"
+            )
+            last_bullet_time_enemy_ship = current_time
 
+        return last_bullet_time_enemy_ship
+
+
+    
     
 
 
 
     def update_bullets_and_check_collisions(self, enemy_ship, WIDTH, yellow, red, player_count, WIN, BLACK, HEIGHT):
         # Update bullets and check for collisions
+        bullet_damage = 5
         for bullet in self.bullets:
             bullet.update(WIDTH)
             
@@ -104,7 +107,7 @@ class BulletSystem:
             if yellow.position.x < bullet.x + bullet.radius < yellow.position.x + SPACESHIP_WIDTH:
                 if yellow.position.y < bullet.y < yellow.position.y + SPACESHIP_HEIGHT:
                     # Collision detected with yellow spaceship
-                    yellow.health -= 1
+                    yellow.health -= bullet_damage
                     self.remove_bullet(bullet)
 
                     # Check if yellow spaceship's health reaches zero
@@ -122,7 +125,7 @@ class BulletSystem:
                 if red.position.x < bullet.x + bullet.radius < red.position.x + SPACESHIP_WIDTH:
                     if red.position.y < bullet.y < red.position.y + SPACESHIP_HEIGHT:
                         # Collision detected with red spaceship
-                        red.health -= 10
+                        red.health -= bullet_damage
                         self.remove_bullet(bullet)
 
                         # Check if red spaceship's health reaches zero
@@ -136,13 +139,14 @@ class BulletSystem:
             # Check collision with enemy spaceship
         #for enemy_ship in entities:
             #for bullet in self.bullets:
-            if enemy_ship != self:  # Skip collision check with self
+            
 
 
+            if bullet.owner != "green":
                 if enemy_ship.position.x < bullet.x + bullet.radius < enemy_ship.position.x + SPACESHIP_WIDTH:
                     if enemy_ship.position.y < bullet.y < enemy_ship.position.y + SPACESHIP_HEIGHT:
                         # Collision detected with enemy spaceship
-                        enemy_ship.health -= 10
+                        enemy_ship.health -= bullet_damage
                         self.remove_bullet(bullet)
 
                         # Check if enemy spaceship's health reaches zero
@@ -157,19 +161,12 @@ class BulletSystem:
 
         self.update(WIDTH, BLACK, WIN)
 
-'''
-    def auto_fire(self, entities, velocity, radius, delay):
-        current_time = time.time()
-        last_fire_times = {}  # Dictionary to store the last fire time for each entity
 
-        for entity in entities:
-            last_fire_time = last_fire_times.get(entity, 600)
-            if current_time - last_fire_time >= delay:
-                x = entity.position.x  # Adjust the position as needed
-                y = entity.position.y + SPACESHIP_HEIGHT // 2  # Adjust the position as needed
-                self.create_bullet(x, y, velocity, radius)
-                last_fire_times[entity] = current_time
-'''
+
+
+
+
+
 
 
         

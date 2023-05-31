@@ -25,6 +25,7 @@ SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
 
 FPS = 120
 VEL = 4
+GREEN_ENEMY_SHIP_VEL = 2
 ENEMY_SHIP_SPAWN_RATE = 120  # Adjust the spawn rate as needed
 
 
@@ -365,6 +366,9 @@ def game_screen(player_count):
 
     last_bullet_time = 0
     last_bullet_time_2 = 0
+    last_bullet_time_enemy_ship = 0
+
+    #last_bullet_time_enemy_ship = 0
     last_spawn_time = 0  # Variable to track the last spawn time
     spawn_rate = 5000  # Time interval (in milliseconds) between enemy ship spawns
 
@@ -453,8 +457,8 @@ def game_screen(player_count):
         pygame.display.flip()
         
 
-        movement_system.move_enemy_ships(enemy_ship, WIDTH, 5)  # Move all enemy ships
-        bullet_system_instance.auto_fire(enemy_ship, -50, 5, 10000)  # Fire bullets from all enemy ships
+        movement_system.move_enemy_ships(enemy_ship, WIDTH, GREEN_ENEMY_SHIP_VEL)  # Move all enemy ships
+        last_bullet_time_enemy_ship = bullet_system_instance.auto_fire(enemy_ship, last_bullet_time_enemy_ship)  # Fire bullets from all enemy ships
         
 
         clock.tick(FPS)
