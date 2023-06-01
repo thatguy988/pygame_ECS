@@ -56,7 +56,7 @@ class MovementSystem:
                     # Enemy ship reached the left side, generate a new random y-axis position
                     entity.position.x = width  # Reset x-coordinate to the right side
                     entity.position.y = random.randint(25, 475)  # Generate a new random y-coordinate
-                    
+
 
 
   

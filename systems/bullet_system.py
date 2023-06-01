@@ -160,9 +160,7 @@ class BulletSystem:
                                 
 
                         
-            # Check collision with enemy spaceship
-        #for enemy_ship in entities:
-            #for bullet in self.bullets:
+                        
             
 
             for enemy_ship in enemy_ships:
