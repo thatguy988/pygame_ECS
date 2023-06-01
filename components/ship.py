@@ -3,7 +3,7 @@ import os
 import random
 
 from components.position import PositionComponent
-
+GREY = (128,128,128)
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
 WIDTH, HEIGHT = 1400, 500
 class Ship:
@@ -19,8 +19,11 @@ class Ship:
         self.health = 100
         self.alive = True
         self.visible = True
+        self.width=SPACESHIP_WIDTH
+        self.height=SPACESHIP_HEIGHT
+        self.collision_damage=0.25
 
-    def stop_moving(self):#used by enemy ship
+    def stop_moving(self):#used by enemy ship and asteroid
         # Stop the movement of the entity
         # Assuming you have a velocity attribute, you can set it to zero
         self.velocity = 0
@@ -51,10 +54,19 @@ class EnemyShip(Ship):
             (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
         )# Override the rotation angle for the image
         
-
-
-        
         self.image = pygame.transform.flip(self.image, True, False)# Flip the image horizontally
+
+
+
+class Asteroid(Ship):
+    def __init__(self, position):
+        super().__init__(position, os.path.join('assets', 'asteroid.png'))
+        self.health = random.randint(5, 15) 
+
+        self.radius = 30
+        self.image = pygame.transform.rotate(self.image, -90)
+        #self.collision_damage = self.health
+
 
 
 def create_yellow_ship():
@@ -72,32 +84,6 @@ def create_enemy_ship():
     return enemy_ship
 
 
-
-def spawn_enemy_ships(enemy_ships, spawn_rate, last_spawn_time, stage): #move to ship system file
-    current_time = pygame.time.get_ticks()
-
-    if stage == 1 and current_time - last_spawn_time > spawn_rate:
-        # Randomly determine the number of enemy ships to spawns
-        num_ships = random.randint(0, 2)
-
-        for _ in range(num_ships):
-            # Create a new enemy ship and append it to the list
-            new_enemy_ship = create_enemy_ship()
-            enemy_ships.append(new_enemy_ship)
-
-        # Update the last spawn time
-        last_spawn_time = current_time
-
-    elif stage == 2 and current_time - last_spawn_time > spawn_rate:
-        # Randomly determine the number of enemy ships to spawn
-        num_ships = random.randint(1, 2)
-
-        for _ in range(num_ships):
-            # Create a new enemy ship and append it to the list
-            new_enemy_ship = create_enemy_ship()
-            enemy_ships.append(new_enemy_ship)
-
-        # Update the last spawn time
-        last_spawn_time = current_time
-
-    return last_spawn_time
+def create_asteroid():
+    asteroid = Asteroid(PositionComponent(WIDTH, HEIGHT))
+    return asteroid

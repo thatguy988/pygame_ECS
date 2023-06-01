@@ -6,12 +6,13 @@ import os
 from systems.movement import MovementSystem
 from systems.render import RenderSystem
 from systems.bullet_system import BulletSystem
-from systems.ship import create_yellow_ship, create_red_ship,create_enemy_ship, spawn_enemy_ships
+from systems.ship_system import spawn_enemy_ships,spawn_asteroids
 from systems.menu_input_system import MenuHandling
 
 from components.explosion import Explosion
 from components.dimension import Dimensions
-from components.asteroid import Asteroid
+
+from components.ship import create_yellow_ship,create_red_ship, create_asteroid
 
 WIDTH, HEIGHT = 1400, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -20,11 +21,12 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 YELLOW = (255, 255, 0)    
 RED = (255, 0, 0)
-SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
+
 
 FPS = 120
 VEL = 4
-GREEN_ENEMY_SHIP_VEL = 4
+GREEN_ENEMY_SHIP_VEL = 3
+ASTEROID_VEL = 2
 ENEMY_SHIP_SPAWN_RATE = 120  # Adjust the spawn rate as needed
 
 
@@ -119,25 +121,30 @@ def pause_menu():#main loop for pause menu
             return "main_menu"  # Go back to the main menu
 
 
-def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance,background,asteroid):
+def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance,background,asteroids):
 
     if player_count >= 1:
         movement_system.move_player1(
-            yellow, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT
+            yellow, keys_pressed, WIDTH, HEIGHT, VEL, yellow.width, yellow.height
         )
 
     if player_count == 2:
         movement_system.move_player2(
-            red, keys_pressed, WIDTH, HEIGHT, VEL, SPACESHIP_WIDTH, SPACESHIP_HEIGHT
+            red, keys_pressed, WIDTH, HEIGHT, VEL, yellow.width, yellow.height
         )
 
     if player_count == 2:
-        RenderSystem.draw_window([yellow, red] + enemy_ships, bullet_system_instance, background, WHITE,asteroid)
+        RenderSystem.draw_window([yellow, red] + enemy_ships + asteroids, bullet_system_instance, background, WHITE)
     else:
-        RenderSystem.draw_window([yellow] + enemy_ships,bullet_system_instance, background, WHITE,asteroid)
-        
-
-    bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, WIDTH, yellow, red, player_count,WIN,BLACK,HEIGHT)
+        RenderSystem.draw_window([yellow] + enemy_ships + asteroids,bullet_system_instance, background, WHITE)
+    if player_count == 2:
+        bullet_system_instance.handle_ship_asteroid_collision(red, asteroids, WIDTH, HEIGHT)
+        bullet_system_instance.handle_enemyship_ship_collision(red, enemy_ships, WIDTH, HEIGHT)
+    else:
+        bullet_system_instance.handle_ship_asteroid_collision(yellow, asteroids, WIDTH, HEIGHT)
+        bullet_system_instance.handle_enemyship_ship_collision(yellow, enemy_ships, WIDTH, HEIGHT)
+    #bullet_system_instance.handle_enemy_asteroid_collision(enemy_ships,asteroids,WIDTH,HEIGHT)
+    bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, WIDTH, yellow, red, player_count,WIN,BLACK,HEIGHT,asteroids)
 
     if not yellow.alive and player_count == 1:
             game_over_screen()
@@ -148,21 +155,7 @@ def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, move
 
 def game_over_screen():
     while True:
-        WIN.fill((0, 0, 0))  # Clear the screen
-        
-        # Render the game over message
-        game_over_font = pygame.font.SysFont(None, 60)
-        game_over_text = game_over_font.render("Game Over", True, (255, 255, 255))
-        game_over_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-        WIN.blit(game_over_text, game_over_rect)
-        
-        # Render the instructions
-        instructions_font = pygame.font.SysFont(None, 40)
-        instructions_text = instructions_font.render("Press R to return to the main menu", True, (255, 255, 255))
-        instructions_rect = instructions_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
-        WIN.blit(instructions_text, instructions_rect)
-        
-        pygame.display.update()
+        RenderSystem.render_game_over_screen()
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -181,7 +174,8 @@ def game_screen(player_count, stage):
     #enemy_ship = create_enemy_ship()
 
     enemy_ships = []  # List to store enemy ships
-    asteroid = Asteroid(x=100, y=100, x_velocity=0, y_velocity=0, radius=30)
+    asteroids = []
+    #asteroid = create_asteroid()
 
     
 
@@ -263,12 +257,14 @@ def game_screen(player_count, stage):
             result = None
         
         keys_pressed = pygame.key.get_pressed()
-        
-        last_spawn_time = spawn_enemy_ships(enemy_ships, spawn_rate, last_spawn_time,stage)
 
+        
+
+        last_spawn_time = spawn_enemy_ships(enemy_ships, spawn_rate, last_spawn_time,stage)
+        last_asteroid_spawn_time = spawn_asteroids(asteroids, asteroid_spawn_rate, last_asteroid_spawn_time,stage)
         last_bullet_time, last_bullet_time_2 = \
             bullet_system_instance.fire_bullet(yellow, red, player_count, last_bullet_time, last_bullet_time_2)
-        update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance, background,asteroid)
+        update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance, background,asteroids)
 
         current_time = pygame.time.get_ticks()
         if(player_count==1):
@@ -288,6 +284,8 @@ def game_screen(player_count, stage):
     
         pygame.display.flip()
         
+        movement_system.move_asteroid(asteroids, WIDTH, ASTEROID_VEL)
+
         movement_system.move_enemy_ships(enemy_ships, WIDTH, GREEN_ENEMY_SHIP_VEL)  # Move all enemy ships
         last_bullet_time_enemy_ship = bullet_system_instance.auto_fire(enemy_ships, last_bullet_time_enemy_ship)  # Fire bullets from all enemy ships
         

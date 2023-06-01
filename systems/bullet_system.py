@@ -1,9 +1,8 @@
 import pygame
+import random
 from components.bullet import Bullet
 
 from components.dimension import Dimensions
-import time
-SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
 
 class BulletSystem:
     def __init__(self):
@@ -25,7 +24,7 @@ class BulletSystem:
 
                     if time_since_last_bullet >= 300: #millisecond delay
                         self.create_bullet(
-                            yellow.position.x + SPACESHIP_WIDTH, yellow.position.y + SPACESHIP_HEIGHT // 2, 5, 10, "yellow"
+                            yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2, 5, 10, "yellow"
                         )
                         last_bullet_time = current_time
             
@@ -39,7 +38,7 @@ class BulletSystem:
 
                     if time_since_last_bullet_2 >= 300:
                         self.create_bullet(
-                            red.position.x + SPACESHIP_WIDTH, red.position.y + SPACESHIP_HEIGHT // 2, 5, 10 , "red"       
+                            red.position.x + red.width, red.position.y + red.height // 2, 5, 10 , "red"       
                         )
                         last_bullet_time_2 = current_time_2
         return last_bullet_time, last_bullet_time_2
@@ -86,14 +85,14 @@ class BulletSystem:
 
 
     def auto_fire(self, enemy_ships, last_bullet_time_enemy_ship):
-        delay = 1200
+        delay = 3000
         current_time = pygame.time.get_ticks()
         time_since_last_bullet = current_time - last_bullet_time_enemy_ship
 
         if time_since_last_bullet >= delay:  # millisecond delay
             for enemy_ship in enemy_ships:
                 self.create_bullet(
-                    enemy_ship.position.x - 1, enemy_ship.position.y + SPACESHIP_HEIGHT // 2, -5, 10, "green"
+                    enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 10, "green"
                 )
             last_bullet_time_enemy_ship = current_time
 
@@ -117,19 +116,14 @@ class BulletSystem:
 
     
     
-
-
-
-    def update_bullets_and_check_collisions(self, enemy_ships, WIDTH, yellow, red, player_count, WIN, BLACK, HEIGHT):
-        # Update bullets and check for collisions
+    def update_bullets_and_check_collisions(self, enemy_ships, WIDTH, yellow, red, player_count, WIN, BLACK, HEIGHT, asteroids):
         bullet_damage = 5
         for bullet in self.bullets:
             bullet.update(WIDTH)
-            if yellow.alive:
+            if yellow.alive and yellow.visible:
                 if bullet.owner != "red" and bullet.owner != "yellow":
-                # Check collision with yellow spaceship
-                    if yellow.position.x < bullet.x + bullet.radius < yellow.position.x + SPACESHIP_WIDTH:
-                        if yellow.position.y < bullet.y < yellow.position.y + SPACESHIP_HEIGHT:
+                    if yellow.position.x < bullet.x + bullet.radius < yellow.position.x + yellow.width:
+                        if yellow.position.y < bullet.y < yellow.position.y + yellow.height:
                             # Collision detected with yellow spaceship
                             yellow.health -= bullet_damage
                             self.remove_bullet(bullet)
@@ -140,14 +134,11 @@ class BulletSystem:
                                 yellow.alive = False
                                 yellow.visible = False
 
-                    
-            
-            # Check collision with red spaceship
             if player_count == 2:
-                if red.alive:
+                if red.alive and red.visible:
                     if bullet.owner != "yellow" and bullet.owner != "red":
-                        if red.position.x < bullet.x + bullet.radius < red.position.x + SPACESHIP_WIDTH:
-                            if red.position.y < bullet.y < red.position.y + SPACESHIP_HEIGHT:
+                        if red.position.x < bullet.x + bullet.radius < red.position.x + red.width:
+                            if red.position.y < bullet.y < red.position.y + red.height:
                                 # Collision detected with red spaceship
                                 red.health -= bullet_damage
                                 self.remove_bullet(bullet)
@@ -157,16 +148,11 @@ class BulletSystem:
                                     red.health = 0
                                     red.alive = False
                                     red.visible = False
-                                
-
-                        
-                        
-            
 
             for enemy_ship in enemy_ships:
                 if bullet.owner != "green":
-                    if enemy_ship.position.x < bullet.x + bullet.radius < enemy_ship.position.x + SPACESHIP_WIDTH:
-                        if enemy_ship.position.y < bullet.y < enemy_ship.position.y + SPACESHIP_HEIGHT:
+                    if enemy_ship.position.x < bullet.x + bullet.radius < enemy_ship.position.x + enemy_ship.width:
+                        if enemy_ship.position.y < bullet.y < enemy_ship.position.y + enemy_ship.height:
                             # Collision detected with enemy spaceship
                             enemy_ship.health -= bullet_damage
                             self.remove_bullet(bullet)
@@ -180,15 +166,111 @@ class BulletSystem:
                                 enemy_ship.position.y = HEIGHT
                                 enemy_ship.health = 10
                                 enemy_ship.visible = True
+                
 
-        self.update(WIDTH, BLACK, WIN)
+            for asteroid in asteroids:
+                if bullet.owner != "green" and asteroid.alive and asteroid.visible:
+                    if asteroid.position.x < bullet.x + bullet.radius < asteroid.position.x + asteroid.radius * 2:
+                        if asteroid.position.y < bullet.y < asteroid.position.y + asteroid.radius * 2:
+                            # Collision detected with asteroid
+                            asteroid.health -= bullet_damage
+                            asteroid.damage = asteroid.health
+                            self.remove_bullet(bullet)
+
+                            # Check if asteroid's health reaches zero
+                            if asteroid.health <= 0:
+                                asteroid.stop_moving()
+                                asteroid.visible = False
+
+                                asteroid.position.x = WIDTH
+                                asteroid.position.y = HEIGHT
+                                asteroid.health = 5
+                                asteroid.visible = True
+                #green bullet and asteroid collision
+                #elif bullet.owner == "green" and asteroid.alive and asteroid.visible: 
+                 #   if asteroid.position.x < bullet.x + bullet.radius < asteroid.position.x + asteroid.radius * 2:
+                  #      if asteroid.position.y < bullet.y < asteroid.position.y + asteroid.radius * 2:
+                   #         self.remove_bullet(bullet)
+
+
+
+    def handle_ship_asteroid_collision(self, ship, asteroids, WIDTH, HEIGHT):
+        for asteroid in asteroids:
+            if ship.alive and ship.visible and asteroid.alive and asteroid.visible:
+                if ship.position.x < asteroid.position.x + asteroid.radius * 2 and \
+                ship.position.x + ship.width > asteroid.position.x and \
+                ship.position.y < asteroid.position.y + asteroid.radius * 2 and \
+                ship.position.y + ship.height > asteroid.position.y:
+                    # Collision detected between ship and asteroid
+                    ship.health -= asteroid.collision_damage
+                    asteroid.health -= ship.collision_damage
+
+                    # Check if ship's health reaches zero
+                    if ship.health <= 0:
+                        ship.health = 0
+                        ship.alive = False
+                        ship.visible = False
+                    if asteroid.health <= 0:
+                        asteroid.stop_moving()
+                        asteroid.visible = False
+
+                        asteroid.position.x = WIDTH
+                        asteroid.position.y = HEIGHT
+                        asteroid.health = self.health = random.randint(5, 15)
+                        asteroid.visible = True
+    
+    def handle_enemyship_ship_collision(self, ship, enemy_ships, WIDTH, HEIGHT):
+        for enemyship in enemy_ships:
+            if ship.alive and ship.visible and enemyship.alive and enemyship.visible:
+                if ship.position.x < enemyship.position.x + enemyship.width and \
+                        ship.position.x + ship.width > enemyship.position.x and \
+                        ship.position.y < enemyship.position.y + enemyship.height and \
+                        ship.position.y + ship.height > enemyship.position.y:
+                    # Collision detected between yellow player ship and enemy ship
+                    ship.health -= enemyship.collision_damage  # Reduce yellow player ship's health based on enemy ship's damage
+                    enemyship.health -= ship.collision_damage  # Reduce enemy ship's health based on yellow player ship's damage
+
+                    if ship.health <= 0:
+                        ship.alive = False
+                        ship.visible = False
+                        # Handle yellow player ship's destruction
+
+                    if enemyship.health <= 0:
+                        
+                        enemyship.stop_moving()
+                        enemyship.visible = False
+
+                        enemyship.position.x = WIDTH
+                        enemyship.position.y = HEIGHT
+                        enemyship.health = 10
+                        enemyship.visible = True
+
+
+
+
+    def handle_enemy_asteroid_collision(self,enemy_ships,asteroids,WIDTH,HEIGHT):
+        for enemy_ship in enemy_ships:
+            if enemy_ship.alive and enemy_ship.visible:
+                for asteroid in asteroids:
+                    if enemy_ship.alive and enemy_ship.visible and asteroid.alive and asteroid.visible:
+                        if enemy_ship.position.x < asteroid.position.x + asteroid.radius * 2 and \
+                        enemy_ship.position.x + enemy_ship.width > asteroid.position.x and \
+                        enemy_ship.position.y < asteroid.position.y + asteroid.radius * 2 and \
+                        enemy_ship.position.y + enemy_ship.height > asteroid.position.y:
+
+                            asteroid.stop_moving()
+                            asteroid.visible = False
+
+                            asteroid.position.x = WIDTH
+                            asteroid.position.y = HEIGHT
+                            asteroid.health =  self.health = random.randint(5, 15) 
+                            asteroid.visible = True
+
+            
 
 
 
 
 
 
-
-
-
-        
+            

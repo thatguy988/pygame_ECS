@@ -40,19 +40,17 @@ class RenderSystem:
             return background
         
 
-    def draw_window(entities, bullet_system, background, color,asteroid):
+    def draw_window(entities, bullet_system, background, color):
         WIN.blit(background, (0, 0))
         
         for entity in entities:
             RenderSystem.render(entity, WIN)
         
-        
         bullet_system.render_bullets(WIN, color)
-        asteroid.draw(WIN) 
+        #asteroid.draw(WIN) 
 
-
-    
     pygame.display.update()
+
 
     def display_menu(selected_option): #render and display main_menu
         # Clear the screen
@@ -209,4 +207,21 @@ class RenderSystem:
 
             option_y += option_spacing
             
+        pygame.display.update()
+
+    def render_game_over_screen():
+        WIN.fill((0, 0, 0))  # Clear the screen
+        
+        # Render the game over message
+        game_over_font = pygame.font.SysFont(None, 60)
+        game_over_text = game_over_font.render("Game Over", True, (255, 255, 255))
+        game_over_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        WIN.blit(game_over_text, game_over_rect)
+        
+        # Render the instructions
+        instructions_font = pygame.font.SysFont(None, 40)
+        instructions_text = instructions_font.render("Press R to return to the main menu", True, (255, 255, 255))
+        instructions_rect = instructions_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
+        WIN.blit(instructions_text, instructions_rect)
+        
         pygame.display.update()
