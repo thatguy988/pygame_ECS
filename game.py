@@ -1,19 +1,17 @@
 import pygame
 import sys
 import os
-import random
+
 
 from systems.movement import MovementSystem
 from systems.render import RenderSystem
 from systems.bullet_system import BulletSystem
 from systems.ship import create_yellow_ship, create_red_ship,create_enemy_ship, spawn_enemy_ships
-
+from systems.menu_input_system import MenuHandling
 
 from components.explosion import Explosion
 from components.dimension import Dimensions
-
-
-
+from components.asteroid import Asteroid
 
 WIDTH, HEIGHT = 1400, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -22,7 +20,6 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 YELLOW = (255, 255, 0)    
 RED = (255, 0, 0)
-GREY = (128, 128, 128)
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
 
 FPS = 120
@@ -32,25 +29,10 @@ ENEMY_SHIP_SPAWN_RATE = 120  # Adjust the spawn rate as needed
 
 
 
-def draw_window(entities, bullet_system, background, color):
-    WIN.blit(background, (0, 0))
-    
-    for entity in entities:
-        RenderSystem.render(entity, WIN)
-    
-    
-    bullet_system.render_bullets(WIN, color)
-    
-
-    
-    pygame.display.update()
-
-
-
 def select_players_screen():
     selected_option = 0
     while True:
-        display_select_players_screen(selected_option)
+        RenderSystem.display_select_players_screen(selected_option)
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -68,51 +50,13 @@ def select_players_screen():
                             return 2  # 2 players selected
                         elif selected_option == 2:
                             return 0  # Back to main menu
-                        
-def display_select_players_screen(selected_option):
-    WIN.fill((0, 0, 0))  # Clear screen
 
-    # Render the title text
-    title_font = pygame.font.SysFont(None, 60)
-    title_text = title_font.render("Select Players", True, (255, 255, 255))
-    title_rect = title_text.get_rect(center=(WIDTH // 2, HEIGHT // 4))
-    WIN.blit(title_text, title_rect)
 
-    # Render the menu options
-    menu_font = pygame.font.SysFont(None, 40)
-    options = ["1 Player", "2 Players", "Back"]
-    option_y = HEIGHT // 2
-    option_spacing = 60
-
-    for i, option in enumerate(options):
-        option_text = menu_font.render(option, True, (255, 255, 255))
-        option_rect = option_text.get_rect(center=(WIDTH // 2, option_y))
-        WIN.blit(option_text, option_rect)
-
-        # Display cursor image for selected option
-        if i == selected_option:
-            cursor_image = pygame.image.load(os.path.join('assets', 'spaceship_yellow.png'))
-            cursor_image = pygame.transform.scale(cursor_image, (50, 30))
-            cursor_image = pygame.transform.rotate(cursor_image, 90)
-            cursor_rect = cursor_image.get_rect() 
-                
-            if option == "1 Player":
-                cursor_rect.center = (WIDTH // 2 - 80, option_y)  # Cursor position for "Resume Game"
-            elif option == "2 Players":
-                cursor_rect.center = (WIDTH // 2 - 100, option_y)  # Cursor position for other options
-            elif option == "Back":
-                cursor_rect.center = (WIDTH // 2 - 60, option_y) # Cursor position for "Back"
-                
-            WIN.blit(cursor_image, cursor_rect)
-
-        option_y += option_spacing
-        
-    pygame.display.update()
 
 def select_stage_screen():
     selected_option = 0
     while True:
-        display_select_stage_screen(selected_option)
+        RenderSystem.display_select_stage_screen(selected_option)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -138,51 +82,13 @@ def select_stage_screen():
                         return 6  # stage 6
                     elif selected_option == 6:
                         return 0 # back
-                    #return selected_option  # Return the selected stage
-
-
-def display_select_stage_screen(selected_option):
-    WIN.fill((0, 0, 0))  #clear
-
-    # Render the title text
-    title_font = pygame.font.SysFont(None, 60)
-    title_text = title_font.render("Select Stage", True, (255, 255, 255))
-    title_rect = title_text.get_rect(center=(WIDTH // 2, HEIGHT // 12))
-    WIN.blit(title_text, title_rect)
-
-    # Render the stage options
-    menu_font = pygame.font.SysFont(None, 40)
-    stages = ["Stage 1", "Stage 2", "Stage 3", "Stage 4", "Stage 5", "Stage 6", "Back"]
-    option_y = HEIGHT // 5
-    option_spacing = 60
-
-    for i, stage in enumerate(stages):
-        stage_text = menu_font.render(stage, True, (255, 255, 255))
-        stage_rect = stage_text.get_rect(center=(WIDTH // 2, option_y))
-        WIN.blit(stage_text, stage_rect)
-
-        # Display cursor image for selected option
-        if i == selected_option:
-            cursor_image = pygame.image.load(os.path.join('assets', 'spaceship_yellow.png'))
-            cursor_image = pygame.transform.scale(cursor_image, (50, 30))
-            cursor_image = pygame.transform.rotate(cursor_image, 90)
-            cursor_rect = cursor_image.get_rect()
-
-
-            cursor_rect.center = (WIDTH // 2 - 100, option_y)  # Cursor position for other options
-
-            WIN.blit(cursor_image, cursor_rect)
-
-        option_y += option_spacing
-
-    pygame.display.update()
 
 
 def main_menu():
     selected_option = 0  # Default selected option
     while True:
-        display_menu(selected_option)
-        selected_option = handle_menu_events(selected_option)
+        RenderSystem.display_menu(selected_option)
+        selected_option = MenuHandling.handle_menu_events(selected_option)
         if selected_option == "start_game":
             player_count = select_players_screen()
             if player_count == 1:
@@ -201,151 +107,19 @@ def main_menu():
             #tutorial_screen()
             selected_option = 0
 
-def display_menu(selected_option): #render and display main_menu
-    # Clear the screen
-    WIN.fill((0, 0, 0))
-    
-    # Render the title text
-    title_font = pygame.font.SysFont(None, 60)
-    title_text = title_font.render("Main Menu", True, (255, 255, 255))
-    title_rect = title_text.get_rect(center=(WIDTH // 2, HEIGHT // 4))
-    WIN.blit(title_text, title_rect)
-    
-    # Render the menu options
-    menu_font = pygame.font.SysFont(None, 40)
-    options = ["Start Game", "Tutorial", "Quit"]
-    option_y = HEIGHT // 2
-    option_spacing = 60
-    
-    for i, option in enumerate(options):
-        option_text = menu_font.render(option, True, (255, 255, 255))
-        option_rect = option_text.get_rect(center=(WIDTH // 2, option_y))
-        WIN.blit(option_text, option_rect)
-        
-
-       # Display cursor image for selected option
-        if i == selected_option:
-            cursor_image = pygame.image.load(os.path.join('assets', 'spaceship_yellow.png'))
-            cursor_image = pygame.transform.scale(cursor_image, (50, 30))
-            cursor_image = pygame.transform.rotate(cursor_image, 90)
-            cursor_rect = cursor_image.get_rect() 
-            
-            if option == "Start Game":
-                cursor_rect.center = (WIDTH // 2 - 100, option_y)  # Cursor position for "Resume Game"
-            elif option == "Tutorial":
-                cursor_rect.center = (WIDTH // 2 - 80, option_y)  # Cursor position for "Tutorial"
-            elif option == "Quit":
-                cursor_rect.center = (WIDTH // 2 - 60, option_y) # Cursor position for "Quit"
-
-            WIN.blit(cursor_image, cursor_rect)
-
-        option_y += option_spacing #space out main menu options vertically
-    
-    pygame.display.update()
-
-
-def handle_menu_events(selected_option): #responsible for handling the user input events related to the main menu
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:
-                selected_option = (selected_option - 1) % 3  # Move up in the options list
-            elif event.key == pygame.K_s:
-                selected_option = (selected_option + 1) % 3  # Move down in the options list
-            elif event.key == pygame.K_SPACE:
-                if selected_option == 0:
-                    return "start_game"
-                elif selected_option == 1:
-                    return "tutorial"
-                elif selected_option == 2:
-                    pygame.quit()
-                    sys.exit()
-
-    return selected_option
-
-
-
-
 
 def pause_menu():#main loop for pause menu
     selected_option = 0  # Default selected option
     while True:
-        display_pause_menu(selected_option)
-        selected_option = handle_pause_menu_events(selected_option)
+        RenderSystem.display_pause_menu(selected_option)
+        selected_option = MenuHandling.handle_pause_menu_events(selected_option)
         if selected_option == "resume_game":
             return  # Resume the game
         elif selected_option == "main_menu":
             return "main_menu"  # Go back to the main menu
 
 
-
-
-def display_pause_menu(selected_option):
-    # Clear the screen
-    WIN.fill((0, 0, 0))
-    
-    # Render the title text
-    title_font = pygame.font.SysFont(None, 60)
-    title_text = title_font.render("Pause Menu", True, (255, 255, 255))
-    title_rect = title_text.get_rect(center=(WIDTH // 2, HEIGHT // 4))
-    WIN.blit(title_text, title_rect)
-    
-    # Render the menu options
-    menu_font = pygame.font.SysFont(None, 40)
-    options = ["Resume Game", "Main Menu"]
-    option_y = HEIGHT // 2
-    option_spacing = 60
-    
-    for i, option in enumerate(options):
-        option_text = menu_font.render(option, True, (255, 255, 255))
-        option_rect = option_text.get_rect(center=(WIDTH // 2, option_y))
-        WIN.blit(option_text, option_rect)
-        
-        # Display cursor image for selected option
-        if i == selected_option:
-            cursor_image = pygame.image.load(os.path.join('assets', 'spaceship_yellow.png'))
-            cursor_image = pygame.transform.scale(cursor_image, (50, 30))
-            cursor_image = pygame.transform.rotate(cursor_image, 90)
-            cursor_rect = cursor_image.get_rect() 
-            
-            if option == "Resume Game":
-                cursor_rect.center = (WIDTH // 2 - 120, option_y)  # Cursor position for "Resume Game"
-            elif option == "Main Menu":
-                cursor_rect.center = (WIDTH // 2 - 100, option_y)  # Cursor position for other options
-            
-            WIN.blit(cursor_image, cursor_rect)
-
-        option_y += option_spacing
-    
-    pygame.display.update()
-
-
-def handle_pause_menu_events(selected_option):
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:
-                selected_option = (selected_option - 1) % 2  # Move up in the options list
-            elif event.key == pygame.K_s:
-                selected_option = (selected_option + 1) % 2  # Move down in the options list
-            elif event.key == pygame.K_SPACE:
-                if selected_option == 0:
-                    # Resume Game
-                    return "resume_game"
-                elif selected_option == 1:
-                    # Main Menu
-                    return "main_menu"
-
-    return selected_option
-
-
-def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance,background):
+def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance,background,asteroid):
 
     if player_count >= 1:
         movement_system.move_player1(
@@ -358,15 +132,10 @@ def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, move
         )
 
     if player_count == 2:
-        #draw_window([yellow, red, enemy_ship], bullet_system_instance, background, WHITE)
-        draw_window([yellow, red] + enemy_ships, bullet_system_instance, background, WHITE)
+        RenderSystem.draw_window([yellow, red] + enemy_ships, bullet_system_instance, background, WHITE,asteroid)
     else:
-        #draw_window([yellow,enemy_ship], bullet_system_instance, background, WHITE)
-        draw_window([yellow] + enemy_ships,bullet_system_instance, background, WHITE)
+        RenderSystem.draw_window([yellow] + enemy_ships,bullet_system_instance, background, WHITE,asteroid)
         
-
-
-
 
     bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, WIDTH, yellow, red, player_count,WIN,BLACK,HEIGHT)
 
@@ -406,15 +175,14 @@ def game_over_screen():
                     return # Return to the main menu
 
 
-
-
-
 def game_screen(player_count, stage):
     yellow = create_yellow_ship()
     red = None
     #enemy_ship = create_enemy_ship()
 
     enemy_ships = []  # List to store enemy ships
+    asteroid = Asteroid(x=100, y=100, x_velocity=0, y_velocity=0, radius=30)
+
     
 
     if player_count == 2:
@@ -460,9 +228,6 @@ def game_screen(player_count, stage):
     if player_count == 2:
         red_health_text = font.render("Red Health: " + str(red.health), True, (255, 255, 255))
 
-    
-
-
     run = True
     while run:
         clock.tick(FPS)
@@ -499,21 +264,12 @@ def game_screen(player_count, stage):
         
         keys_pressed = pygame.key.get_pressed()
         
-    
-        
-
-
-
-
         last_spawn_time = spawn_enemy_ships(enemy_ships, spawn_rate, last_spawn_time,stage)
-
 
         last_bullet_time, last_bullet_time_2 = \
             bullet_system_instance.fire_bullet(yellow, red, player_count, last_bullet_time, last_bullet_time_2)
-        update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance, background)
+        update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance, background,asteroid)
 
-        
-        
         current_time = pygame.time.get_ticks()
         if(player_count==1):
             yellow_health_text, last_yellow_health_change, prev_yellow_health = \
@@ -524,7 +280,6 @@ def game_screen(player_count, stage):
                 RenderSystem.update_health_text(current_time, yellow, red, prev_yellow_health, prev_red_health, font,
                             last_yellow_health_change,last_red_health_change,yellow_health_text, red_health_text, player_count)
         
-
         if current_time - last_yellow_health_change < text_display_duration:
             WIN.blit(yellow_health_text, (10, 10))
 
@@ -533,21 +288,12 @@ def game_screen(player_count, stage):
     
         pygame.display.flip()
         
-
         movement_system.move_enemy_ships(enemy_ships, WIDTH, GREEN_ENEMY_SHIP_VEL)  # Move all enemy ships
         last_bullet_time_enemy_ship = bullet_system_instance.auto_fire(enemy_ships, last_bullet_time_enemy_ship)  # Fire bullets from all enemy ships
         
-        
-
-
         clock.tick(FPS)
 
     pygame.quit()
-
-
-
-
-
 
 
 def main():
