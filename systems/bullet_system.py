@@ -1,8 +1,11 @@
 import pygame
 import random
 from components.bullet import Bullet
+from components.score import Score
 
 from components.dimension import Dimensions
+
+
 
 class BulletSystem:
     def __init__(self):
@@ -116,7 +119,7 @@ class BulletSystem:
 
     
     
-    def update_bullets_and_check_collisions(self, enemy_ships, WIDTH, yellow, red, player_count, WIN, BLACK, HEIGHT, asteroids):
+    def update_bullets_and_check_collisions(self, enemy_ships, WIDTH, yellow, red, player_count, WIN, BLACK, HEIGHT, asteroids,scoreboard):
         bullet_damage = 5
         for bullet in self.bullets:
             bullet.update(WIDTH)
@@ -166,6 +169,7 @@ class BulletSystem:
                                 enemy_ship.position.y = HEIGHT
                                 enemy_ship.health = 10
                                 enemy_ship.visible = True
+                                scoreboard.increase_score(10)
                 
 
             for asteroid in asteroids:
@@ -186,6 +190,8 @@ class BulletSystem:
                                 asteroid.position.y = HEIGHT
                                 asteroid.health = 5
                                 asteroid.visible = True
+                                scoreboard.increase_score(10)
+
                 #green bullet and asteroid collision
                 #elif bullet.owner == "green" and asteroid.alive and asteroid.visible: 
                  #   if asteroid.position.x < bullet.x + bullet.radius < asteroid.position.x + asteroid.radius * 2:
@@ -194,7 +200,7 @@ class BulletSystem:
 
 
 
-    def handle_ship_asteroid_collision(self, ship, asteroids, WIDTH, HEIGHT):
+    def handle_ship_asteroid_collision(self, ship, asteroids, WIDTH, HEIGHT,scoreboard):
         for asteroid in asteroids:
             if ship.alive and ship.visible and asteroid.alive and asteroid.visible:
                 if ship.position.x < asteroid.position.x + asteroid.radius * 2 and \
@@ -218,8 +224,9 @@ class BulletSystem:
                         asteroid.position.y = HEIGHT
                         asteroid.health = self.health = random.randint(5, 15)
                         asteroid.visible = True
+                        scoreboard.increase_score(10)
     
-    def handle_enemyship_ship_collision(self, ship, enemy_ships, WIDTH, HEIGHT):
+    def handle_enemyship_ship_collision(self, ship, enemy_ships, WIDTH, HEIGHT,scoreboard):
         for enemyship in enemy_ships:
             if ship.alive and ship.visible and enemyship.alive and enemyship.visible:
                 if ship.position.x < enemyship.position.x + enemyship.width and \
@@ -244,6 +251,7 @@ class BulletSystem:
                         enemyship.position.y = HEIGHT
                         enemyship.health = 10
                         enemyship.visible = True
+                        scoreboard.increase_score(10)
 
 
 

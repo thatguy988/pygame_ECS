@@ -11,7 +11,7 @@ from systems.menu_input_system import MenuHandling
 
 from components.explosion import Explosion
 from components.dimension import Dimensions
-
+from components.score import Score
 from components.ship import create_yellow_ship,create_red_ship, create_asteroid
 
 WIDTH, HEIGHT = 1400, 500
@@ -121,7 +121,7 @@ def pause_menu():#main loop for pause menu
             return "main_menu"  # Go back to the main menu
 
 
-def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance,background,asteroids):
+def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance,background,asteroids,scoreboard,font):
 
     if player_count >= 1:
         movement_system.move_player1(
@@ -141,10 +141,10 @@ def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, move
         bullet_system_instance.handle_ship_asteroid_collision(red, asteroids, WIDTH, HEIGHT)
         bullet_system_instance.handle_enemyship_ship_collision(red, enemy_ships, WIDTH, HEIGHT)
     else:
-        bullet_system_instance.handle_ship_asteroid_collision(yellow, asteroids, WIDTH, HEIGHT)
-        bullet_system_instance.handle_enemyship_ship_collision(yellow, enemy_ships, WIDTH, HEIGHT)
+        bullet_system_instance.handle_ship_asteroid_collision(yellow, asteroids, WIDTH, HEIGHT,scoreboard)
+        bullet_system_instance.handle_enemyship_ship_collision(yellow, enemy_ships, WIDTH, HEIGHT,scoreboard)
     #bullet_system_instance.handle_enemy_asteroid_collision(enemy_ships,asteroids,WIDTH,HEIGHT)
-    bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, WIDTH, yellow, red, player_count,WIN,BLACK,HEIGHT,asteroids)
+    bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, WIDTH, yellow, red, player_count,WIN,BLACK,HEIGHT,asteroids,scoreboard)
 
     if not yellow.alive and player_count == 1:
             game_over_screen()
@@ -172,6 +172,7 @@ def game_screen(player_count, stage):
     yellow = create_yellow_ship()
     red = None
     #enemy_ship = create_enemy_ship()
+    scoreboard=Score()
 
     enemy_ships = []  # List to store enemy ships
     asteroids = []
@@ -196,8 +197,8 @@ def game_screen(player_count, stage):
     
 
 
-    last_asteroid_spawn_time = 0
-    asteroid_spawn_rate = 3000
+    last_asteroid_spawn_time = 0 #last spawn time
+    asteroid_spawn_rate = 3000# spawn time interval
 
     last_spawn_time = 0  # Variable to track the last spawn time
     spawn_rate = 5000  # Time interval (in milliseconds) between enemy ship spawns
@@ -207,6 +208,16 @@ def game_screen(player_count, stage):
 
     font = pygame.font.Font(None, 24)  # Load a font
     text_display_duration= 5000  # In milliseconds
+
+    prev_score=scoreboard.score
+    last_score_change = pygame.time.get_ticks()
+
+    score_text = font.render("Score: " + str(scoreboard.score), True, (255, 255, 255))
+    score_rect = score_text.get_rect(midtop=(WIDTH // 2, 10))
+
+
+
+
 
 
     prev_yellow_health = yellow.health
@@ -264,17 +275,26 @@ def game_screen(player_count, stage):
         last_asteroid_spawn_time = spawn_asteroids(asteroids, asteroid_spawn_rate, last_asteroid_spawn_time,stage)
         last_bullet_time, last_bullet_time_2 = \
             bullet_system_instance.fire_bullet(yellow, red, player_count, last_bullet_time, last_bullet_time_2)
-        update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, bullet_system_instance, background,asteroids)
+        update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, 
+                          bullet_system_instance, background,asteroids,scoreboard,font)
 
         current_time = pygame.time.get_ticks()
         if(player_count==1):
             yellow_health_text, last_yellow_health_change, prev_yellow_health = \
                 RenderSystem.update_health_text(current_time, yellow, red, prev_yellow_health, prev_red_health, font,
                             last_yellow_health_change,last_red_health_change,yellow_health_text,red_health_text,player_count)
+            
+            score_text, last_score_change, prev_score = RenderSystem.render_score(scoreboard, font,prev_score,last_score_change,current_time,score_text) 
+
         else:
             yellow_health_text, last_yellow_health_change, prev_yellow_health, red_health_text, last_red_health_change, prev_red_health = \
                 RenderSystem.update_health_text(current_time, yellow, red, prev_yellow_health, prev_red_health, font,
                             last_yellow_health_change,last_red_health_change,yellow_health_text, red_health_text, player_count)
+
+        if current_time - last_score_change < text_display_duration:
+            WIN.blit(score_text, score_rect)
+
+
         
         if current_time - last_yellow_health_change < text_display_duration:
             WIN.blit(yellow_health_text, (10, 10))

@@ -10,6 +10,16 @@ class RenderSystem:
         if entity.alive:
             if hasattr(entity, 'image'):
                 surface.blit(entity.image, (entity.position.x, entity.position.y))
+
+
+    @staticmethod
+    def render_score(scoreboard, font,prev_score,last_score_change,current_time,score_text):
+        if scoreboard.score != prev_score:
+            score_text = font.render("Score: " + str(scoreboard.score), True, (255, 255, 255))
+            prev_score = scoreboard.score
+            last_score_change = current_time
+        return score_text, last_score_change, prev_score,
+            
    
 
 
@@ -19,7 +29,7 @@ class RenderSystem:
             yellow_health_text = font.render("Yellow Health: " + str(yellow.health), True, (255, 255, 255))
             prev_yellow_health = yellow.health
             last_yellow_health_change = current_time
-
+            
         if red and red.health != prev_red_health:
             red_health_text = font.render("Red Health: " + str(red.health), True, (255, 255, 255))
             prev_red_health = red.health
@@ -36,7 +46,8 @@ class RenderSystem:
             background = pygame.transform.scale(background, (WIDTH, HEIGHT))
             return background
         elif(stage == 2):
-            background = False
+            background = pygame.image.load(os.path.join('assets', 'Purple_Nebula_Stage_2.png'))
+            background = pygame.transform.scale(background, (WIDTH, HEIGHT))
             return background
         
 
@@ -47,7 +58,8 @@ class RenderSystem:
             RenderSystem.render(entity, WIN)
         
         bullet_system.render_bullets(WIN, color)
-        #asteroid.draw(WIN) 
+        
+
 
     pygame.display.update()
 
@@ -55,6 +67,10 @@ class RenderSystem:
     def display_menu(selected_option): #render and display main_menu
         # Clear the screen
         WIN.fill((0, 0, 0))
+        background = pygame.image.load(os.path.join('assets', 'Starfield_Menu_Background.png'))
+        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+        WIN.blit(background, (0, 0))
+
         
         # Render the title text
         title_font = pygame.font.SysFont(None, 60)
@@ -97,6 +113,9 @@ class RenderSystem:
 
     def display_select_stage_screen(selected_option):
         WIN.fill((0, 0, 0))  #clear
+        background = pygame.image.load(os.path.join('assets', 'Starfield_Menu_Background.png'))
+        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+        WIN.blit(background, (0, 0))
 
         # Render the title text
         title_font = pygame.font.SysFont(None, 60)
@@ -133,6 +152,9 @@ class RenderSystem:
     def display_pause_menu(selected_option):
         # Clear the screen
         WIN.fill((0, 0, 0))
+        background = pygame.image.load(os.path.join('assets', 'Starfield_Menu_Background.png'))
+        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+        WIN.blit(background, (0, 0))
         
         # Render the title text
         title_font = pygame.font.SysFont(None, 60)
@@ -171,6 +193,9 @@ class RenderSystem:
 
     def display_select_players_screen(selected_option):
         WIN.fill((0, 0, 0))  # Clear screen
+        background = pygame.image.load(os.path.join('assets', 'Starfield_Menu_Background.png'))
+        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+        WIN.blit(background, (0, 0))
 
         # Render the title text
         title_font = pygame.font.SysFont(None, 60)
@@ -211,6 +236,10 @@ class RenderSystem:
 
     def render_game_over_screen():
         WIN.fill((0, 0, 0))  # Clear the screen
+        background = pygame.image.load(os.path.join('assets', 'Starfield_Menu_Background.png'))
+        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+        WIN.blit(background, (0, 0))
+        
         
         # Render the game over message
         game_over_font = pygame.font.SysFont(None, 60)
