@@ -17,12 +17,12 @@ class BulletSystem:
         bullet = Bullet(x, y, velocity, radius, owner)
         self.bullets.append(bullet)
 
-    def fire_bullet(self, yellow, red, player_count, last_bullet_time, last_bullet_time_2):
+    def fire_bullet(self, yellow, red, player_count, last_bullet_time, last_bullet_time_2, pause_duration):
         if player_count >= 1:
             if yellow.alive:
                 bullet_pressed = pygame.key.get_pressed()[pygame.K_SPACE]
                 if bullet_pressed:
-                    current_time = pygame.time.get_ticks()
+                    current_time = pygame.time.get_ticks() - pause_duration
                     time_since_last_bullet = current_time - last_bullet_time
 
                     if time_since_last_bullet >= 300: #millisecond delay
@@ -36,7 +36,7 @@ class BulletSystem:
             if red.alive:
                 bullet_pressed_2 = pygame.key.get_pressed()[pygame.K_RETURN]
                 if bullet_pressed_2:
-                    current_time_2 = pygame.time.get_ticks()
+                    current_time_2 = pygame.time.get_ticks() - pause_duration
                     time_since_last_bullet_2 = current_time_2 - last_bullet_time_2
 
                     if time_since_last_bullet_2 >= 300:
@@ -87,9 +87,9 @@ class BulletSystem:
     
 
 
-    def auto_fire(self, enemy_ships, last_bullet_time_enemy_ship):
+    def auto_fire(self, enemy_ships, last_bullet_time_enemy_ship,pause_duration):
         delay = 3000
-        current_time = pygame.time.get_ticks()
+        current_time = pygame.time.get_ticks() - pause_duration
         time_since_last_bullet = current_time - last_bullet_time_enemy_ship
 
         if time_since_last_bullet >= delay:  # millisecond delay

@@ -97,6 +97,7 @@ def main_menu():
                 stage = select_stage_screen()  # Select the stage
                 if(stage == 0):
                     continue #jump to next iteration of loop skip remaing code skips game_screen and selected option reset
+                print("hello from main menu method")
                 game_screen(1, stage)  # Start game with 1 player
             elif player_count == 2:
                 stage = select_stage_screen()  # Select the stage
@@ -138,8 +139,8 @@ def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, move
     else:
         RenderSystem.draw_window([yellow] + enemy_ships + asteroids,bullet_system_instance, background, WHITE)
     if player_count == 2:
-        bullet_system_instance.handle_ship_asteroid_collision(red, asteroids, WIDTH, HEIGHT)
-        bullet_system_instance.handle_enemyship_ship_collision(red, enemy_ships, WIDTH, HEIGHT)
+        bullet_system_instance.handle_ship_asteroid_collision(red, asteroids, WIDTH, HEIGHT,scoreboard)
+        bullet_system_instance.handle_enemyship_ship_collision(red, enemy_ships, WIDTH, HEIGHT,scoreboard)
     else:
         bullet_system_instance.handle_ship_asteroid_collision(yellow, asteroids, WIDTH, HEIGHT,scoreboard)
         bullet_system_instance.handle_enemyship_ship_collision(yellow, enemy_ships, WIDTH, HEIGHT,scoreboard)
@@ -155,8 +156,7 @@ def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, move
 
 def game_over_screen():
     while True:
-        RenderSystem.render_game_over_screen()
-        
+        RenderSystem.display_game_over_screen()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -168,17 +168,33 @@ def game_over_screen():
                     return # Return to the main menu
 
 
+def next_stage_screen(player_count,stage):
+    while True:
+        RenderSystem.display_next_stage_screen()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+                
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_f:
+                    result = game_screen(player_count,stage)
+                    if result == "main_menu":
+                        return
+
+             
+
 def game_screen(player_count, stage):
     yellow = create_yellow_ship()
     red = None
     #enemy_ship = create_enemy_ship()
-    scoreboard=Score()
+    score_limit = Score.set_score_limit(stage)
+    scoreboard = Score(score_limit)
 
     enemy_ships = []  # List to store enemy ships
-    asteroids = []
+    asteroids = [] # List to store asteroids
     #asteroid = create_asteroid()
 
-    
 
     if player_count == 2:
         red = create_red_ship()
@@ -188,15 +204,12 @@ def game_screen(player_count, stage):
     
     background = RenderSystem.background_render(stage,WIDTH,HEIGHT)
     
-
-    clock = pygame.time.Clock()
+    
 
     last_bullet_time = 0
     last_bullet_time_2 = 0
     last_bullet_time_enemy_ship = 0
     
-
-
     last_asteroid_spawn_time = 0 #last spawn time
     asteroid_spawn_rate = 3000# spawn time interval
 
@@ -206,25 +219,20 @@ def game_screen(player_count, stage):
     pause_pressed = False
     game_paused = False
 
+    
+
     font = pygame.font.Font(None, 24)  # Load a font
     text_display_duration= 5000  # In milliseconds
 
     prev_score=scoreboard.score
-    last_score_change = pygame.time.get_ticks()
+    
 
     score_text = font.render("Score: " + str(scoreboard.score), True, (255, 255, 255))
     score_rect = score_text.get_rect(midtop=(WIDTH // 2, 10))
 
-
-
-
-
-
     prev_yellow_health = yellow.health
     prev_red_health = red.health if player_count == 2 else None
 
-    last_yellow_health_change = pygame.time.get_ticks()
-    last_red_health_change = pygame.time.get_ticks() if player_count == 2 else None
     
     yellow_health_text = font.render("Yellow Health: " + str(yellow.health), True, (255, 255, 255))
     
@@ -234,62 +242,107 @@ def game_screen(player_count, stage):
         red_health_text = font.render("Red Health: " + str(red.health), True, (255, 255, 255))
 
     run = True
+    
+
+    clock = pygame.time.Clock() # reset clock
+
+    
+    pause_duration = 0
+    game_start_time = pygame.time.get_ticks()
+    current_time = pygame.time.get_ticks() - pause_duration - game_start_time
+    
+    last_score_change = pygame.time.get_ticks() - pause_duration - game_start_time
+
+    last_yellow_health_change = pygame.time.get_ticks() - pause_duration - game_start_time
+
+    last_red_health_change = pygame.time.get_ticks() - pause_duration - game_start_time if player_count == 2 else None
+
+
+
+    
+
     while run:
         clock.tick(FPS)
+        if scoreboard.has_score_limit_reached():
+            next_stage_screen(player_count,stage + 1)
+            run =False
+            print("Returning to the main menu...")
+            continue
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    if not pause_pressed and not game_paused:
+                    if not pause_pressed and not game_paused:#in game screen is running we are pressing spacebar to shoot
                         pass
-                    else:
+                    else: #press spacebar to continue game
                         game_paused = False
                         result = pause_menu()
                         if result == "main_menu":
+                            #never reached
                             return "main_menu"
                 elif event.key == pygame.K_p:
-                    if not pause_pressed and not game_paused:
+                    if not pause_pressed and not game_paused:#game pause
                         pause_pressed = True
                         game_paused = True
+                        pause_start_time=pygame.time.get_ticks()
                         result = pause_menu()
                         if result == "resume_game":
                             pause_pressed = False
                             game_paused = False
                             result = None
-                            return "resume_game"
+                            
                         elif result == "main_menu":
+                            print("hello2")
+                            
                             return "main_menu"
 
         if game_paused:
             game_paused = False
             pause_pressed = False
             result = None
-        
+            pause_end_time=pygame.time.get_ticks()
+            pause_duration += pause_end_time - pause_start_time
+            
+
+
         keys_pressed = pygame.key.get_pressed()
+        current_time = pygame.time.get_ticks() - pause_duration - game_start_time
+        
+        #print(pause_duration)
+        #print(current_time)
 
         
 
-        last_spawn_time = spawn_enemy_ships(enemy_ships, spawn_rate, last_spawn_time,stage)
-        last_asteroid_spawn_time = spawn_asteroids(asteroids, asteroid_spawn_rate, last_asteroid_spawn_time,stage)
+
+        last_spawn_time = spawn_enemy_ships(enemy_ships, spawn_rate, last_spawn_time,stage, pause_duration)
+        last_asteroid_spawn_time = spawn_asteroids(asteroids, asteroid_spawn_rate, last_asteroid_spawn_time,stage, pause_duration)
         last_bullet_time, last_bullet_time_2 = \
-            bullet_system_instance.fire_bullet(yellow, red, player_count, last_bullet_time, last_bullet_time_2)
+            bullet_system_instance.fire_bullet(yellow, red, player_count, last_bullet_time, last_bullet_time_2,pause_duration)
         update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system, 
                           bullet_system_instance, background,asteroids,scoreboard,font)
 
-        current_time = pygame.time.get_ticks()
+        #current_time = pygame.time.get_ticks()
+        
+
+
         if(player_count==1):
             yellow_health_text, last_yellow_health_change, prev_yellow_health = \
                 RenderSystem.update_health_text(current_time, yellow, red, prev_yellow_health, prev_red_health, font,
                             last_yellow_health_change,last_red_health_change,yellow_health_text,red_health_text,player_count)
             
-            score_text, last_score_change, prev_score = RenderSystem.render_score(scoreboard, font,prev_score,last_score_change,current_time,score_text) 
+            score_text, last_score_change, prev_score = \
+                RenderSystem.render_score(scoreboard, font,prev_score,
+                                          last_score_change,current_time,score_text) 
 
         else:
             yellow_health_text, last_yellow_health_change, prev_yellow_health, red_health_text, last_red_health_change, prev_red_health = \
                 RenderSystem.update_health_text(current_time, yellow, red, prev_yellow_health, prev_red_health, font,
                             last_yellow_health_change,last_red_health_change,yellow_health_text, red_health_text, player_count)
+            score_text, last_score_change, prev_score = \
+                RenderSystem.render_score(scoreboard, font,prev_score,last_score_change,current_time,score_text) 
+
 
         if current_time - last_score_change < text_display_duration:
             WIN.blit(score_text, score_rect)
@@ -307,21 +360,19 @@ def game_screen(player_count, stage):
         movement_system.move_asteroid(asteroids, WIDTH, ASTEROID_VEL)
 
         movement_system.move_enemy_ships(enemy_ships, WIDTH, GREEN_ENEMY_SHIP_VEL)  # Move all enemy ships
-        last_bullet_time_enemy_ship = bullet_system_instance.auto_fire(enemy_ships, last_bullet_time_enemy_ship)  # Fire bullets from all enemy ships
+        last_bullet_time_enemy_ship = bullet_system_instance.auto_fire(enemy_ships, last_bullet_time_enemy_ship,pause_duration)  # Fire bullets from all enemy ships
         
         clock.tick(FPS)
 
-    pygame.quit()
+    
+
 
 
 def main():
     pygame.init()
     main_menu()
-
-    while True:
-        result = game_screen()
-        if result == "main_menu":
-            main_menu()
+    pygame.quit()
+    sys.exit()
 
 
 

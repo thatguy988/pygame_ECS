@@ -65,12 +65,13 @@ class RenderSystem:
 
 
     def display_menu(selected_option): #render and display main_menu
+        
+
         # Clear the screen
         WIN.fill((0, 0, 0))
         background = pygame.image.load(os.path.join('assets', 'Starfield_Menu_Background.png'))
         background = pygame.transform.scale(background, (WIDTH, HEIGHT))
         WIN.blit(background, (0, 0))
-
         
         # Render the title text
         title_font = pygame.font.SysFont(None, 60)
@@ -234,7 +235,7 @@ class RenderSystem:
             
         pygame.display.update()
 
-    def render_game_over_screen():
+    def display_game_over_screen():
         WIN.fill((0, 0, 0))  # Clear the screen
         background = pygame.image.load(os.path.join('assets', 'Starfield_Menu_Background.png'))
         background = pygame.transform.scale(background, (WIDTH, HEIGHT))
@@ -253,4 +254,25 @@ class RenderSystem:
         instructions_rect = instructions_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
         WIN.blit(instructions_text, instructions_rect)
         
+        pygame.display.update()
+
+    def display_next_stage_screen():
+        WIN.fill((0, 0, 0))  # Clear the screen
+        background = pygame.image.load(os.path.join('assets', 'Starfield_Menu_Background.png'))
+        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+        WIN.blit(background, (0, 0))
+            
+            
+        # Render the game over message
+        game_over_font = pygame.font.SysFont(None, 60)
+        game_over_text = game_over_font.render("Stage Complete", True, (255, 255, 255))
+        game_over_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        WIN.blit(game_over_text, game_over_rect)
+            
+        # Render the instructions
+        instructions_font = pygame.font.SysFont(None, 40)
+        instructions_text = instructions_font.render("Press F to go to next stage", True, (255, 255, 255))
+        instructions_rect = instructions_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
+        WIN.blit(instructions_text, instructions_rect)
+            
         pygame.display.update()
