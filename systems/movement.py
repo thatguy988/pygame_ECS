@@ -32,7 +32,7 @@ class MovementSystem:
             if keys_pressed[pygame.K_l] and red_ship.position.x < width - spaceship_width:  # RIGHT 
                 red_ship.position.x += vel
 
-
+    '''
     @staticmethod
     def move_enemy_ships(entities, width, vel):
         for entity in entities:
@@ -43,13 +43,32 @@ class MovementSystem:
                     # Enemy ship reached the left side, generate a new random y-axis position
                     entity.position.x = width  # Reset x-coordinate to the right side
                     entity.position.y = random.randint(25, 475)  # Generate a new random y-coordinate
+    '''
+    @staticmethod
+    def move_enemy_ships(entities, width):
+        for entity in entities:
+            if hasattr(entity, 'position'):
+                if hasattr(entity, 'ship_color'):
+                    if entity.ship_color == 'green':
+                        entity.position.x -= entity.velocity  # Move green enemy ship with its specific velocity
+                    elif entity.ship_color == 'grey':
+                        entity.position.x -= entity.velocity
+                    elif entity.ship_color == 'orange':
+                        entity.position.x -= entity.velocity  # Move orange enemy ship with its specific velocity
+                else:
+                    entity.position.x -= entity.velocity  # Move other enemy ships with their default velocity
+
+                if entity.position.x < -width:
+                    # Enemy ship reached the left side, generate a new random y-axis position
+                    entity.position.x = width  # Reset x-coordinate to the right side
+                    entity.position.y = random.randint(25, 475)  # Generate a new random y-coordinate
 
     
     @staticmethod           
-    def move_asteroid(asteroids, width, vel):
+    def move_asteroid(asteroids, width):
         for asteroid in asteroids:
             if hasattr(asteroid, 'position'):
-                asteroid.position.x -= vel  # Move the enemy ship to the left
+                asteroid.position.x -= asteroid.velocity  # Move the enemy ship to the left
 
                 if asteroid.position.x < -width:
                     # Enemy ship reached the left side, generate a new random y-axis position
@@ -57,7 +76,7 @@ class MovementSystem:
                     asteroid.position.y = random.randint(25, 475)  # Generate a new random y-coordinate
     
 
-
+    
         
         
         

@@ -276,3 +276,63 @@ class RenderSystem:
         WIN.blit(instructions_text, instructions_rect)
             
         pygame.display.update()
+
+
+
+    def display_story_screen(stage):
+        WIN.fill((0, 0, 0))  # Clear the screen
+        background = pygame.image.load(os.path.join('assets', 'cool_pixel_art_background.png'))
+        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+        WIN.blit(background, (0, 0))
+            
+        if stage == 1:    
+            story_font = pygame.font.SysFont(None, 60)
+            story_text = story_font.render("Story Screen 1", True, (255, 255, 255))
+            story_rect = story_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+            WIN.blit(story_text, story_rect)
+        elif stage == 2:
+            story_font = pygame.font.SysFont(None, 60)
+            story_text = story_font.render("Story Screen 2", True, (255, 255, 255))
+            story_rect = story_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+            WIN.blit(story_text, story_rect)
+        elif stage == 3:
+            story_font = pygame.font.SysFont(None, 60)
+            story_text = story_font.render("Story Screen 3", True, (255, 255, 255))
+            story_rect = story_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+            WIN.blit(story_text, story_rect)
+        elif stage == 4:
+            story_font = pygame.font.SysFont(None, 60)
+            story_text = story_font.render("Story Screen 4", True, (255, 255, 255))
+            story_rect = story_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+            WIN.blit(story_text, story_rect)
+        elif stage == 5:
+            story_font = pygame.font.SysFont(None, 60)
+            story_text = story_font.render("Story Screen 5", True, (255, 255, 255))
+            story_rect = story_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+            WIN.blit(story_text, story_rect)
+        elif stage == 6:
+            story_font = pygame.font.SysFont(None, 60)
+            story_text = story_font.render("Story Screen 6", True, (255, 255, 255))
+            story_rect = story_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+            WIN.blit(story_text, story_rect)
+        else:#ending screen
+            story_font = pygame.font.SysFont(None, 60)
+            story_text = story_font.render("Story Screen Ending", True, (255, 255, 255))
+            story_rect = story_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+            WIN.blit(story_text, story_rect)
+
+
+        if(stage != 7):    
+            # Render the instructions
+            instructions_font = pygame.font.SysFont(None, 40)
+            instructions_text = instructions_font.render("Press F to go to next stage", True, (255, 255, 255))
+            instructions_rect = instructions_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
+            WIN.blit(instructions_text, instructions_rect)
+        else:#ending
+            instructions_font = pygame.font.SysFont(None, 40)
+            instructions_text = instructions_font.render("Press F to go to main menu", True, (255, 255, 255))
+            instructions_rect = instructions_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
+            WIN.blit(instructions_text, instructions_rect)
+
+            
+        pygame.display.update()

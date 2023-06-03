@@ -5,6 +5,7 @@ import random
 from components.ship import create_enemy_ship,create_asteroid
 
 
+
 def spawn_enemy_ships(enemy_ships, spawn_rate, last_spawn_time, stage, pause_duration): #move to ship system file
     current_time = pygame.time.get_ticks() - pause_duration
 

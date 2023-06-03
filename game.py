@@ -25,8 +25,7 @@ RED = (255, 0, 0)
 
 FPS = 120
 VEL = 4
-GREEN_ENEMY_SHIP_VEL = 3
-ASTEROID_VEL = 2
+
 ENEMY_SHIP_SPAWN_RATE = 120  # Adjust the spawn rate as needed
 
 
@@ -98,12 +97,14 @@ def main_menu():
                 if(stage == 0):
                     continue #jump to next iteration of loop skip remaing code skips game_screen and selected option reset
                 print("hello from main menu method")
-                game_screen(1, stage)  # Start game with 1 player
+                story_screen(player_count,stage)
+                #game_screen(1, stage)  # Start game with 1 player
             elif player_count == 2:
                 stage = select_stage_screen()  # Select the stage
                 if(stage == 0):
                     continue
-                game_screen(2, stage)  # Start game with 2 players
+                story_screen(player_count,stage)
+                #game_screen(2, stage)  # Start game with 2 players
 
             selected_option = 0  # Reset the selected option for when player goes back to main menu
         elif selected_option == "tutorial":
@@ -178,10 +179,25 @@ def next_stage_screen(player_count,stage):
                 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_f:
+                    result = story_screen(player_count,stage)
+                    if result == "main_menu":
+                       main_menu()
+                       return
+
+def story_screen(player_count,stage):
+    while True:
+        RenderSystem.display_story_screen(stage)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+                
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_f:
                     result = game_screen(player_count,stage)
                     if result == "main_menu":
+                        main_menu()
                         return
-
              
 
 def game_screen(player_count, stage):
@@ -210,10 +226,10 @@ def game_screen(player_count, stage):
     last_bullet_time_2 = 0
     last_bullet_time_enemy_ship = 0
     
-    last_asteroid_spawn_time = 0 #last spawn time
+    last_asteroid_spawn_time = 0 #last spawn time of asteroid
     asteroid_spawn_rate = 3000# spawn time interval
 
-    last_spawn_time = 0  # Variable to track the last spawn time
+    last_spawn_time = 0  # Variable to track the last spawn time of green enemy ship
     spawn_rate = 5000  # Time interval (in milliseconds) between enemy ship spawns
     
     pause_pressed = False
@@ -267,7 +283,8 @@ def game_screen(player_count, stage):
             next_stage_screen(player_count,stage + 1)
             run =False
             print("Returning to the main menu...")
-            continue
+            run = False
+            break
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -357,9 +374,9 @@ def game_screen(player_count, stage):
     
         pygame.display.flip()
         
-        movement_system.move_asteroid(asteroids, WIDTH, ASTEROID_VEL)
+        movement_system.move_asteroid(asteroids, WIDTH)
 
-        movement_system.move_enemy_ships(enemy_ships, WIDTH, GREEN_ENEMY_SHIP_VEL)  # Move all enemy ships
+        movement_system.move_enemy_ships(enemy_ships, WIDTH)  # Move all enemy ships
         last_bullet_time_enemy_ship = bullet_system_instance.auto_fire(enemy_ships, last_bullet_time_enemy_ship,pause_duration)  # Fire bullets from all enemy ships
         
         clock.tick(FPS)

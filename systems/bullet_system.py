@@ -84,9 +84,27 @@ class BulletSystem:
         self.remove_offscreen_bullets(width)
         self.render_bullets(surface, color)
 
-    
+    #double bullets
+    def auto_fire(self, enemy_ships, last_bullet_time_enemy_ship, pause_duration):
+        delay = 3000
+        current_time = pygame.time.get_ticks() - pause_duration
+        time_since_last_bullet = current_time - last_bullet_time_enemy_ship
+
+        if time_since_last_bullet >= delay:
+            for enemy_ship in enemy_ships:
+                self.create_bullet(
+                    enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 10, -5, 10, "green"
+                )
+                self.create_bullet(
+                    enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 10, -5, 10, "green"
+                )
+            last_bullet_time_enemy_ship = current_time
+
+        return last_bullet_time_enemy_ship
 
 
+    #single bullets
+    '''
     def auto_fire(self, enemy_ships, last_bullet_time_enemy_ship,pause_duration):
         delay = 3000
         current_time = pygame.time.get_ticks() - pause_duration
@@ -100,7 +118,7 @@ class BulletSystem:
             last_bullet_time_enemy_ship = current_time
 
         return last_bullet_time_enemy_ship
-
+    '''
     
     '''
     def auto_fire(self, enemy_ship, last_bullet_time_enemy_ship):
@@ -169,7 +187,7 @@ class BulletSystem:
                                 enemy_ship.position.y = HEIGHT
                                 enemy_ship.health = 10
                                 enemy_ship.visible = True
-                                scoreboard.increase_score(10)
+                                scoreboard.increase_score(100)
                 
 
             for asteroid in asteroids:
@@ -190,7 +208,7 @@ class BulletSystem:
                                 asteroid.position.y = HEIGHT
                                 asteroid.health = 5
                                 asteroid.visible = True
-                                scoreboard.increase_score(10)
+                                scoreboard.increase_score(100)
 
                 #green bullet and asteroid collision
                 #elif bullet.owner == "green" and asteroid.alive and asteroid.visible: 
@@ -224,7 +242,7 @@ class BulletSystem:
                         asteroid.position.y = HEIGHT
                         asteroid.health = self.health = random.randint(5, 15)
                         asteroid.visible = True
-                        scoreboard.increase_score(10)
+                        scoreboard.increase_score(100)
     
     def handle_enemyship_ship_collision(self, ship, enemy_ships, WIDTH, HEIGHT,scoreboard):
         for enemyship in enemy_ships:
@@ -251,7 +269,7 @@ class BulletSystem:
                         enemyship.position.y = HEIGHT
                         enemyship.health = 10
                         enemyship.visible = True
-                        scoreboard.increase_score(10)
+                        scoreboard.increase_score(100)
 
 
 

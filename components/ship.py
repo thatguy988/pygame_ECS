@@ -6,6 +6,9 @@ from components.position import PositionComponent
 GREY = (128,128,128)
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
 WIDTH, HEIGHT = 1400, 500
+GREEN_ENEMY_SHIP_VEL = 3
+ASTEROID_VEL = 2
+
 class Ship:
     def __init__(self, position, image_path):
         self.position = position
@@ -55,6 +58,8 @@ class EnemyShip(Ship):
         )# Override the rotation angle for the image
         
         self.image = pygame.transform.flip(self.image, True, False)# Flip the image horizontally
+        self.ship_color = 'green'
+        self.velocity = GREEN_ENEMY_SHIP_VEL
 
 
 
@@ -65,7 +70,9 @@ class Asteroid(Ship):
 
         self.radius = 30
         self.image = pygame.transform.rotate(self.image, -90)
-        #self.collision_damage = self.health
+        #self.ship_color = 'grey'
+        self.velocity = ASTEROID_VEL
+        
 
 
 
