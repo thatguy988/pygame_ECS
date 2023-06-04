@@ -5,10 +5,17 @@ from components.score import Score
 
 from components.dimension import Dimensions
 
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+YELLOW = (255, 255, 0)    
+RED = (255, 0, 0)
+GREEN = (0,255,0)
+ORANGE = (255, 165, 0)
 
 
 green_ship_points = 10
 asteroid_points = 5
+
 
 
 class BulletSystem:
@@ -22,6 +29,7 @@ class BulletSystem:
         self.bullets.append(bullet)
 
     def fire_bullet(self, yellow, red, player_count, last_bullet_time, last_bullet_time_2, pause_duration):
+        player_bullet_delay = 300
         if player_count >= 1:
             if yellow.alive:
                 bullet_pressed = pygame.key.get_pressed()[pygame.K_SPACE]
@@ -29,7 +37,7 @@ class BulletSystem:
                     current_time = pygame.time.get_ticks() - pause_duration
                     time_since_last_bullet = current_time - last_bullet_time
 
-                    if time_since_last_bullet >= 300: #millisecond delay
+                    if time_since_last_bullet >= player_bullet_delay: #millisecond delay
                         self.create_bullet(
                             yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2, 5, 10, "yellow"
                         )
@@ -43,7 +51,7 @@ class BulletSystem:
                     current_time_2 = pygame.time.get_ticks() - pause_duration
                     time_since_last_bullet_2 = current_time_2 - last_bullet_time_2
 
-                    if time_since_last_bullet_2 >= 300:
+                    if time_since_last_bullet_2 >= player_bullet_delay:
                         self.create_bullet(
                             red.position.x + red.width, red.position.y + red.height // 2, 5, 10 , "red"       
                         )
@@ -67,15 +75,15 @@ class BulletSystem:
     def render_bullets(self, surface, color):
         for bullet in self.bullets:
             if bullet.owner == "yellow":
-                bullet_color = (255, 255, 0)  # Yellow color
+                bullet_color = YELLOW  # Yellow color
             elif bullet.owner == "red":
-                bullet_color = (255, 0, 0)  # Red color
+                bullet_color = RED  # Red color
             elif bullet.owner == "green":
-                bullet_color = (0,255,0) #green color
+                bullet_color = GREEN #green color
             elif bullet.owner == "orange":
-                bullet_color = (255, 165, 0)
+                bullet_color = ORANGE
             else:
-                bullet_color = (255, 255, 255)  # Default color (white)
+                bullet_color = WHITE  # Default color (white)
 
             pygame.draw.rect(surface, bullet_color, (bullet.x, bullet.y, 5, 5))
         
@@ -170,7 +178,7 @@ class BulletSystem:
 
                                 enemy_ship.position.x = WIDTH
                                 enemy_ship.position.y = HEIGHT
-                                enemy_ship.health = 10
+                                enemy_ship.health = enemy_ship.initial_health
                                 enemy_ship.visible = True
                                 scoreboard.reward_points(enemy_ship.ship_color)
                 
@@ -199,7 +207,7 @@ class BulletSystem:
 
                         enemy_ship.position.x = WIDTH
                         enemy_ship.position.y = HEIGHT
-                        enemy_ship.health = 10
+                        enemy_ship.health = enemy_ship.initial_health
                         enemy_ship.visible = True
                         scoreboard.reward_points(enemy_ship.ship_color)
 

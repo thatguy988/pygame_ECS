@@ -1,6 +1,8 @@
 import pygame
 import random
-
+WIDTH, HEIGHT = 1400, 500
+maximum_y_value = HEIGHT - 25
+minimum_y_value = HEIGHT - maximum_y_value
 
 class MovementSystem:
 
@@ -49,7 +51,7 @@ class MovementSystem:
                 if entity.position.x < -width:
                     # Enemy ship reached the left side, generate a new random y-axis position
                     entity.position.x = width  # Reset x-coordinate to the right side
-                    entity.position.y = random.randint(25, 475)  # Generate a new random y-coordinate
+                    entity.position.y = random.randint(minimum_y_value, maximum_y_value)  # Generate a new random y-coordinate
     
 
     

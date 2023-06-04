@@ -6,8 +6,19 @@ from components.position import PositionComponent
 GREY = (128,128,128)
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
 WIDTH, HEIGHT = 1400, 500
+
+DEFAULT_HEALTH = 100
+
+GREEN_ENEMY_SHIP_HEALTH = 10
 GREEN_ENEMY_SHIP_VEL = 3
+
 ASTEROID_VEL = 2
+ASTEROID_RADIUS = 30
+ASTEROID_HEALTH_MIN = 5
+ASTEROID_HEALTH_MAX = 15
+
+COLLISION_DAMAGE = 0.25
+
 Starting_Position_Width_Player_1, Starting_Position_Height_Player_1 = 100, 150
 Starting_Position_Width_Player_2, Starting_Position_Height_Player_2 = 100, 300
 
@@ -25,12 +36,12 @@ class Ship:
     def __init__(self, position, image):
         self.position = position
         self.image = image
-        self.health = 100
+        self.health = DEFAULT_HEALTH
         self.alive = True
         self.visible = True
         self.width = SPACESHIP_WIDTH
         self.height = SPACESHIP_HEIGHT
-        self.collision_damage = 0.25
+        self.collision_damage = COLLISION_DAMAGE
 
     def stop_moving(self):
         self.velocity = 0
@@ -59,7 +70,8 @@ class EnemyShip(Ship):
 
     def __init__(self, position):
         super().__init__(position, pygame.transform.flip(self.enemy_ship_image, True, False))
-        self.health = 10
+        self.initial_health = GREEN_ENEMY_SHIP_HEALTH
+        self.health=self.initial_health
         self.ship_color = 'green'
         self.velocity = GREEN_ENEMY_SHIP_VEL
 
@@ -68,8 +80,9 @@ class Asteroid(Ship):
 
     def __init__(self, position):
         super().__init__(position, pygame.transform.rotate(pygame.transform.scale(self.asteroid_image, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 0))
-        self.health = random.randint(5, 15)
-        self.radius = 30
+        self.initial_health = random.randint(ASTEROID_HEALTH_MIN, ASTEROID_HEALTH_MAX)
+        self.health = self.initial_health
+        self.radius = ASTEROID_RADIUS
         self.ship_color = 'grey'
         self.velocity = ASTEROID_VEL
 
