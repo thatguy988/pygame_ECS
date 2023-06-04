@@ -1,6 +1,6 @@
-import pygame
 import os
 import random
+import pygame
 
 from components.position import PositionComponent
 GREY = (128,128,128)
@@ -8,89 +8,84 @@ SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
 WIDTH, HEIGHT = 1400, 500
 GREEN_ENEMY_SHIP_VEL = 3
 ASTEROID_VEL = 2
+Starting_Position_Width_Player_1, Starting_Position_Height_Player_1 = 100, 150
+Starting_Position_Width_Player_2, Starting_Position_Height_Player_2 = 100, 300
+
+
 
 class Ship:
-    def __init__(self, position, image_path):
+    ship_image = pygame.transform.rotate(
+        pygame.transform.scale(
+            pygame.image.load(os.path.join('assets', 'spaceship_grey.png')),
+            (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
+        ),
+        90
+    )
+
+    def __init__(self, position, image):
         self.position = position
-        self.image = pygame.transform.rotate(
-            pygame.transform.scale(
-                pygame.image.load(image_path),
-                (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
-            ),
-            90
-        )
+        self.image = image
         self.health = 100
         self.alive = True
         self.visible = True
-        self.width=SPACESHIP_WIDTH
-        self.height=SPACESHIP_HEIGHT
-        self.collision_damage=0.25
+        self.width = SPACESHIP_WIDTH
+        self.height = SPACESHIP_HEIGHT
+        self.collision_damage = 0.25
 
-    def stop_moving(self):#used by enemy ship and asteroid
-        # Stop the movement of the entity
-        # Assuming you have a velocity attribute, you can set it to zero
+    def stop_moving(self):
         self.velocity = 0
-        # If you have movement flags, you can set them to False
         self.is_moving_up = False
         self.is_moving_down = False
         self.is_moving_left = False
         self.is_moving_right = False
-        
 
 class YellowShip(Ship):
-    def __init__(self, position):
-        super().__init__(position, os.path.join('assets', 'spaceship_yellow.png'))
+    yellow_ship_image = pygame.image.load(os.path.join('assets', 'spaceship_yellow.png'))#allow loading og image outside of constructor once then reuse
 
+    def __init__(self, position):
+        super().__init__(position, pygame.transform.rotate(pygame.transform.scale(self.yellow_ship_image, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 90))
 
 class RedShip(Ship):
-    def __init__(self, position):
-        super().__init__(position, os.path.join('assets', 'spaceship_red.png'))
+    red_ship_image = pygame.image.load(os.path.join('assets', 'spaceship_red.png'))
 
+    def __init__(self, position):
+        super().__init__(position, pygame.transform.rotate(pygame.transform.scale(self.red_ship_image, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 90))
 
 class EnemyShip(Ship):
-    def __init__(self, position):
-        super().__init__(position, os.path.join('assets', 'Ship1.png'))
-        self.health = 10  # override initial health value for the enemy ship
+    enemy_ship_image = pygame.transform.scale(
+        pygame.image.load(os.path.join('assets', 'Ship1.png')),
+        (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
+    )
 
-        self.image = pygame.transform.scale(
-            pygame.image.load(os.path.join('assets', 'Ship1.png')),
-            (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
-        )# Override the rotation angle for the image
-        
-        self.image = pygame.transform.flip(self.image, True, False)# Flip the image horizontally
+    def __init__(self, position):
+        super().__init__(position, pygame.transform.flip(self.enemy_ship_image, True, False))
+        self.health = 10
         self.ship_color = 'green'
         self.velocity = GREEN_ENEMY_SHIP_VEL
 
-
-
 class Asteroid(Ship):
+    asteroid_image = pygame.image.load(os.path.join('assets', 'asteroid.png'))
+
     def __init__(self, position):
-        super().__init__(position, os.path.join('assets', 'asteroid.png'))
-        self.health = random.randint(5, 15) 
-
+        super().__init__(position, pygame.transform.rotate(pygame.transform.scale(self.asteroid_image, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 0))
+        self.health = random.randint(5, 15)
         self.radius = 30
-        self.image = pygame.transform.rotate(self.image, -90)
-        #self.ship_color = 'grey'
+        self.ship_color = 'grey'
         self.velocity = ASTEROID_VEL
-        
 
+class ShipCreation:
+    @staticmethod
+    def create_yellow_ship():
+        return YellowShip(PositionComponent(Starting_Position_Width_Player_1, Starting_Position_Height_Player_1))
 
+    @staticmethod
+    def create_red_ship():
+        return RedShip(PositionComponent(Starting_Position_Width_Player_2, Starting_Position_Height_Player_2))
 
-def create_yellow_ship():
-    yellow = YellowShip(PositionComponent(100, 150))
-    return yellow
+    @staticmethod
+    def create_enemy_ship():
+        return EnemyShip(PositionComponent(WIDTH, HEIGHT))
 
-
-def create_red_ship():
-    red = RedShip(PositionComponent(100, 300))
-    return red
-
-
-def create_enemy_ship():
-    enemy_ship = EnemyShip(PositionComponent(WIDTH, HEIGHT))
-    return enemy_ship
-
-
-def create_asteroid():
-    asteroid = Asteroid(PositionComponent(WIDTH, HEIGHT))
-    return asteroid
+    @staticmethod
+    def create_asteroid():
+        return Asteroid(PositionComponent(WIDTH, HEIGHT))

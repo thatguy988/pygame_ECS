@@ -1,67 +1,84 @@
 import pygame
-import os
 import random
 
-from components.ship import create_enemy_ship,create_asteroid
+from components.ship import ShipCreation
+
+
+asteroid_spawn_rate = 3000 # spawn time interval
+
+green_ship_spawn_rate = 5000  # Time interval (in milliseconds) between enemy ship spawns
+
+
+green_ship_min_stage_1 = 0
+green_ship_max_stage_1 = 2
+
+green_ship_min_stage_2 = 1
+green_ship_max_stage_2 = 2
+
+asteroid_min_stage_1 = 1
+asteroid_max_stage_1 = 2
+asteroid_min_stage_2 = 0
+asteroid_max_stage_2 = 1
+
+def create_ships(enemy_ships,last_spawn_time_green_ships,last_asteroid_spawn_time,stage,pause_duration):
+    if stage == 1:
+        last_spawn_time_green_ships = SpawnSystem.spawn_enemy_ships(enemy_ships, green_ship_spawn_rate, last_spawn_time_green_ships,stage, pause_duration)
+        last_asteroid_spawn_time = SpawnSystem.spawn_asteroids(enemy_ships, asteroid_spawn_rate, last_asteroid_spawn_time,stage, pause_duration)
 
 
 
-def spawn_enemy_ships(enemy_ships, spawn_rate, last_spawn_time, stage, pause_duration): #move to ship system file
-    current_time = pygame.time.get_ticks() - pause_duration
-
-    if stage == 1 and current_time - last_spawn_time > spawn_rate:
-        # Randomly determine the number of enemy ships to spawns
-        num_ships = random.randint(0, 2)
-
-        for _ in range(num_ships):
-            # Create a new enemy ship and append it to the list
-            new_enemy_ship = create_enemy_ship()
-            enemy_ships.append(new_enemy_ship)
-
-        # Update the last spawn time
-        last_spawn_time = current_time
-
-    elif stage == 2 and current_time - last_spawn_time > spawn_rate:
-        # Randomly determine the number of enemy ships to spawn
-        num_ships = random.randint(1, 2)
-
-        for _ in range(num_ships):
-            # Create a new enemy ship and append it to the list
-            new_enemy_ship = create_enemy_ship()
-            enemy_ships.append(new_enemy_ship)
-
-        # Update the last spawn time
-        last_spawn_time = current_time
-
-    return last_spawn_time
+        return last_spawn_time_green_ships, last_asteroid_spawn_time
+    elif stage == 2:
+        last_spawn_time_green_ships = SpawnSystem.spawn_enemy_ships(enemy_ships, green_ship_spawn_rate, last_spawn_time_green_ships,stage, pause_duration)
+        last_asteroid_spawn_time = SpawnSystem.spawn_asteroids(enemy_ships, asteroid_spawn_rate, last_asteroid_spawn_time,stage, pause_duration)
 
 
 
-def spawn_asteroids(asteroids, spawn_rate, last_spawn_time, stage, pause_duration): #move to ship system file
-    current_time = pygame.time.get_ticks() - pause_duration
+        return last_spawn_time_green_ships, last_asteroid_spawn_time
+        
 
-    if stage == 1 and current_time - last_spawn_time > spawn_rate:
-        # Randomly determine the number of enemy ships to spawns
-        num_asteroids = random.randint(0, 2)
 
-        for _ in range(num_asteroids):
-            # Create a new enemy ship and append it to the list
-            asteroid = create_asteroid()
-            asteroids.append(asteroid)
 
-        # Update the last spawn time
-        last_spawn_time = current_time
 
-    elif stage == 2 and current_time - last_spawn_time > spawn_rate:
-        # Randomly determine the number of enemy ships to spawns
-        num_asteroids = random.randint(1, 2)
+class SpawnSystem:
+    def spawn_enemy_ships(entities, spawn_rate, last_spawn_time, stage, pause_duration):
+        current_time = pygame.time.get_ticks() - pause_duration
 
-        for _ in range(num_asteroids):
-            # Create a new enemy ship and append it to the list
-            asteroid = create_asteroid()
-            asteroids.append(asteroid)
+        if stage == 1 and current_time - last_spawn_time > spawn_rate:
+            num_ships = random.randint(green_ship_min_stage_1, green_ship_max_stage_1)
+            for _ in range(num_ships):
+                new_enemy_ship = ShipCreation.create_enemy_ship()
+                entities.append(new_enemy_ship)
 
-        # Update the last spawn time
-        last_spawn_time = current_time
+            last_spawn_time = current_time
 
-    return last_spawn_time
+        elif stage == 2 and current_time - last_spawn_time > spawn_rate:
+            num_ships = random.randint(green_ship_min_stage_2, green_ship_max_stage_2)
+            for _ in range(num_ships):
+                new_enemy_ship = ShipCreation.create_enemy_ship()
+                entities.append(new_enemy_ship)
+
+            last_spawn_time = current_time
+
+        return last_spawn_time
+
+    def spawn_asteroids(entities, spawn_rate, last_spawn_time, stage, pause_duration):
+        current_time = pygame.time.get_ticks() - pause_duration
+
+        if stage == 1 and current_time - last_spawn_time > spawn_rate:
+            num_asteroids = random.randint(asteroid_min_stage_1, asteroid_max_stage_1)
+            for _ in range(num_asteroids):
+                asteroid = ShipCreation.create_asteroid()
+                entities.append(asteroid)
+
+            last_spawn_time = current_time
+
+        elif stage == 2 and current_time - last_spawn_time > spawn_rate:
+            num_asteroids = random.randint(asteroid_min_stage_2, asteroid_max_stage_2)
+            for _ in range(num_asteroids):
+                asteroid = ShipCreation.create_asteroid()
+                entities.append(asteroid)
+
+            last_spawn_time = current_time
+
+        return last_spawn_time

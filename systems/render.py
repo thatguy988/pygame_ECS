@@ -22,7 +22,7 @@ class RenderSystem:
             
    
 
-
+    @staticmethod
     def update_health_text(current_time, yellow, red, prev_yellow_health, prev_red_health, font,
                        last_yellow_health_change,last_red_health_change,yellow_health_text,red_health_text,player_count):
         if yellow.health != prev_yellow_health:
@@ -39,7 +39,7 @@ class RenderSystem:
             return yellow_health_text, last_yellow_health_change, prev_yellow_health
         else:
             return yellow_health_text, last_yellow_health_change, prev_yellow_health, red_health_text, last_red_health_change, prev_red_health
-        
+    @staticmethod    
     def background_render(stage,WIDTH,HEIGHT):
         if(stage == 1):
             background = pygame.image.load(os.path.join('assets', 'space.png'))
@@ -50,7 +50,7 @@ class RenderSystem:
             background = pygame.transform.scale(background, (WIDTH, HEIGHT))
             return background
         
-
+    @staticmethod
     def draw_window(entities, bullet_system, background, color):
         WIN.blit(background, (0, 0))
         
