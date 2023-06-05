@@ -8,9 +8,19 @@ SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
 WIDTH, HEIGHT = 1400, 500
 
 DEFAULT_HEALTH = 100
+player_bullet_damage = 5
+
+green_enemy_ship_bullet_damage = 5
+
+orange_enemy_ship_bullet_damage = 10
+
+
 
 GREEN_ENEMY_SHIP_HEALTH = 10
 GREEN_ENEMY_SHIP_VEL = 3
+
+orange_enemy_ship_health = 20
+orange_enemy_ship_vel = 2
 
 ASTEROID_VEL = 2
 ASTEROID_RADIUS = 30
@@ -42,6 +52,7 @@ class Ship:
         self.width = SPACESHIP_WIDTH
         self.height = SPACESHIP_HEIGHT
         self.collision_damage = COLLISION_DAMAGE
+        self.bullet_damage = player_bullet_damage
 
     def stop_moving(self):
         self.velocity = 0
@@ -74,6 +85,22 @@ class EnemyShip(Ship):
         self.health=self.initial_health
         self.ship_color = 'green'
         self.velocity = GREEN_ENEMY_SHIP_VEL
+        self.bullet_damage = green_enemy_ship_bullet_damage 
+
+class OrangeEnemyShip(Ship):
+    enemy_ship_image = pygame.transform.scale(
+        pygame.image.load(os.path.join('assets', 'Ship4.png')),
+        (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
+    )
+
+    def __init__(self, position):
+        super().__init__(position, pygame.transform.flip(self.enemy_ship_image, True, False))
+        self.initial_health = orange_enemy_ship_health
+        self.health=self.initial_health
+        self.ship_color = 'orange'
+        self.velocity = orange_enemy_ship_vel
+        self.bullet_damage = orange_enemy_ship_bullet_damage
+
 
 class Asteroid(Ship):
     asteroid_image = pygame.image.load(os.path.join('assets', 'asteroid.png'))
@@ -98,7 +125,12 @@ class ShipCreation:
     @staticmethod
     def create_enemy_ship():
         return EnemyShip(PositionComponent(WIDTH, HEIGHT))
+    
+    @staticmethod
+    def create_orange_enemy_ship():
+        return OrangeEnemyShip(PositionComponent(WIDTH, HEIGHT))
 
     @staticmethod
     def create_asteroid():
         return Asteroid(PositionComponent(WIDTH, HEIGHT))
+    

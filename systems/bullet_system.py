@@ -2,8 +2,8 @@ import pygame
 import random
 from components.bullet import Bullet
 from components.score import Score
+from components.explosion import Explosion, load_explosion_images
 
-from components.dimension import Dimensions
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -11,6 +11,9 @@ YELLOW = (255, 255, 0)
 RED = (255, 0, 0)
 GREEN = (0,255,0)
 ORANGE = (255, 165, 0)
+WIDTH, HEIGHT = 1400, 500
+WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+
 
 
 green_ship_points = 10
@@ -94,9 +97,10 @@ class BulletSystem:
         self.render_bullets(surface, color)
 
     
-    def auto_fire(self, enemy_ships, last_bullet_time_enemy_ship, pause_duration):
+    def auto_fire(self, enemy_ships, last_bullet_time_green_ship, last_bullet_time_orange_ship, pause_duration):
         current_time = pygame.time.get_ticks() - pause_duration
-        time_since_last_bullet = current_time - last_bullet_time_enemy_ship
+        time_since_last_bullet_green = current_time - last_bullet_time_green_ship
+        time_since_last_bullet_orange = current_time - last_bullet_time_orange_ship
 
         # Define the color-delay mapping
         color_delays = {
@@ -105,41 +109,44 @@ class BulletSystem:
             
         }
 
+
         for enemy_ship in enemy_ships:
             if hasattr(enemy_ship, "ship_color") and enemy_ship.ship_color in color_delays:
                 delay = color_delays[enemy_ship.ship_color]
-                if time_since_last_bullet >= delay:
-                    if enemy_ship.ship_color == "green":
+                
+                if enemy_ship.ship_color == "green" and time_since_last_bullet_green >=delay:
                         # Fire two bullets for green enemy ships
-                        self.create_bullet(
+                    self.create_bullet(
                             enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 10, -5, 10, "green"
                         )
-                        self.create_bullet(
+                    self.create_bullet(
                             enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 10, -5, 10, "green"
                         )
-                    elif enemy_ship.ship_color == "orange":
+                    last_bullet_time_green_ship = current_time
+                elif enemy_ship.ship_color == "orange" and time_since_last_bullet_orange>=delay:
                         # Fire a single bullet for orange enemy ships
-                        self.create_bullet(
+                    self.create_bullet(
                             enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 10, "orange"
                         )
-                    last_bullet_time_enemy_ship = current_time
+                    last_bullet_time_orange_ship = current_time
                     # Break the loop if you want to fire bullets for only one enemy ship at a time
                     # break
 
-        return last_bullet_time_enemy_ship
+        return last_bullet_time_green_ship, last_bullet_time_orange_ship
+    
+    
+    
+    def update_bullets_and_check_collisions(self, enemy_ships, WIDTH, yellow, red, player_count, background, HEIGHT, scoreboard, explosions):
+        
 
-    
-    
-    def update_bullets_and_check_collisions(self, enemy_ships, WIDTH, yellow, red, player_count, WIN, BLACK, HEIGHT, scoreboard):
-        bullet_damage = 5
         for bullet in self.bullets:
             bullet.update(WIDTH)
             if yellow.alive and yellow.visible:
                 if bullet.owner != "red" and bullet.owner != "yellow":
                     if yellow.position.x < bullet.x + bullet.radius < yellow.position.x + yellow.width:
                         if yellow.position.y < bullet.y < yellow.position.y + yellow.height:
-                            # Collision detected with yellow spaceship
-                            yellow.health -= bullet_damage
+                            # Collision detected with yellow spaceship bullet from enemy ship
+                            yellow.health -= enemy_ship.bullet_damage
                             self.remove_bullet(bullet)
 
                             # Check if yellow spaceship's health reaches zero
@@ -147,6 +154,7 @@ class BulletSystem:
                                 yellow.health = 0
                                 yellow.alive = False
                                 yellow.visible = False
+                                
 
             if player_count == 2:
                 if red.alive and red.visible:
@@ -154,7 +162,7 @@ class BulletSystem:
                         if red.position.x < bullet.x + bullet.radius < red.position.x + red.width:
                             if red.position.y < bullet.y < red.position.y + red.height:
                                 # Collision detected with red spaceship
-                                red.health -= bullet_damage
+                                red.health -= enemy_ship.bullet_damage
                                 self.remove_bullet(bullet)
 
                                 # Check if red spaceship's health reaches zero
@@ -162,27 +170,62 @@ class BulletSystem:
                                     red.health = 0
                                     red.alive = False
                                     red.visible = False
+                                    
 
             for enemy_ship in enemy_ships:
-                if bullet.owner != "green":
+                if bullet.owner != "green" and bullet.owner != "orange":
                     if enemy_ship.position.x < bullet.x + bullet.radius < enemy_ship.position.x + enemy_ship.width:
                         if enemy_ship.position.y < bullet.y < enemy_ship.position.y + enemy_ship.height:
                             # Collision detected with enemy spaceship
-                            enemy_ship.health -= bullet_damage
+                            enemy_ship.health -= yellow.bullet_damage
                             self.remove_bullet(bullet)
 
                             # Check if enemy spaceship's health reaches zero
                             if enemy_ship.health <= 0:
+                                # Create an explosion at (x, y) and add it to the list
+                                explosion = Explosion(enemy_ship.position.x, enemy_ship.position.y)
+                                enemy_rect = pygame.Rect(enemy_ship.position.x, enemy_ship.position.y, enemy_ship.width, enemy_ship.height)
+
+                                explosions.append(explosion)
+
+    
+                                for explosion in explosions:
+                                    explosion.update()
+                                    explosion.draw(background)
+                                    # Update the game display
+                                    pygame.display.update(enemy_rect)
+
+                                    
+                                    
                                 enemy_ship.stop_moving()
                                 enemy_ship.visible = False
-
                                 enemy_ship.position.x = WIDTH
                                 enemy_ship.position.y = HEIGHT
+                                
+                            
                                 enemy_ship.health = enemy_ship.initial_health
                                 enemy_ship.visible = True
                                 scoreboard.reward_points(enemy_ship.ship_color)
+
+        
+        
+            
+            
+        
+
+            
+
+
+        
+
+        
+
+
+        
+            
+                                
                 
-                
+               
     
     def handle_enemyship_ship_collision(self, ship, enemy_ships, WIDTH, HEIGHT,scoreboard):
         for enemy_ship in enemy_ships:

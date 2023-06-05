@@ -39,6 +39,38 @@ class RenderSystem:
             return yellow_health_text, last_yellow_health_change, prev_yellow_health
         else:
             return yellow_health_text, last_yellow_health_change, prev_yellow_health, red_health_text, last_red_health_change, prev_red_health
+        
+
+    @staticmethod
+    def display_tutorial_instructions(player_count):
+        
+        if player_count == 1:
+            
+            instructions_font = pygame.font.SysFont(None, 40)
+            instructions_text = instructions_font.render("Player 1: Press W A S D to move and press spacebar to shoot", True, (255, 255, 255))
+            instructions_rect = instructions_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
+            WIN.blit(instructions_text, instructions_rect)
+
+            
+            pygame.display.update(instructions_rect)
+        else:
+            instructions_font = pygame.font.SysFont(None, 40)
+
+            instructions_text1 = instructions_font.render("Player 1: Press W A S D to move and press spacebar to shoot", True, (255, 255, 255))
+            instructions_text2 = instructions_font.render("Player 2: Press I J K L to move and press enter to shoot", True, (255, 255, 255))
+
+            instructions_rect1 = instructions_text1.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
+            instructions_rect2 = instructions_text2.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 140))
+
+            WIN.blit(instructions_text1, instructions_rect1)
+            WIN.blit(instructions_text2, instructions_rect2)
+
+            
+            pygame.display.update([instructions_rect1, instructions_rect2])
+
+
+
+
     @staticmethod    
     def background_render(stage,WIDTH,HEIGHT):
         if(stage == 1):
@@ -49,6 +81,14 @@ class RenderSystem:
             background = pygame.image.load(os.path.join('assets', 'Purple_Nebula_Stage_2.png'))
             background = pygame.transform.scale(background, (WIDTH, HEIGHT))
             return background
+        
+        elif(stage == 8):
+            #background = pygame.image.load(os.path.join('assets', 'space.png'))
+
+            background = pygame.image.load(os.path.join('assets', 'Tutorial_Background.png'))
+            background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+            return background
+
         
     @staticmethod
     def draw_window(entities, bullet_system, background, color):
@@ -62,6 +102,9 @@ class RenderSystem:
 
 
     pygame.display.update()
+
+
+
 
 
     def display_menu(selected_option): #render and display main_menu

@@ -9,8 +9,7 @@ from systems.bullet_system import BulletSystem
 from systems.ship_system import create_ships
 from systems.menu_input_system import MenuHandling
 
-from components.explosion import Explosion
-from components.dimension import Dimensions
+from components.explosion import Explosion, load_explosion_images
 from components.score import Score
 from components.ship import ShipCreation
 
@@ -107,6 +106,8 @@ def main_menu():
 
             selected_option = 0  # Reset the selected option for when player goes back to main menu
         elif selected_option == "tutorial":
+            player_count = select_players_screen()
+            game_screen(player_count,8)
             #tutorial_screen()
             selected_option = 0
 
@@ -123,7 +124,7 @@ def pause_menu():#main loop for pause menu
 
 
 def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, 
-                      movement_system_instance, bullet_system_instance, render_system_instance, background,scoreboard,font):
+                      movement_system_instance, bullet_system_instance, render_system_instance, background,scoreboard,explosions):
 
     if player_count >= 1:
         movement_system_instance.move_player1(
@@ -144,7 +145,7 @@ def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed,
     else:
         bullet_system_instance.handle_enemyship_ship_collision(yellow, enemy_ships, WIDTH, HEIGHT,scoreboard)
 
-    bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, WIDTH, yellow, red, player_count,WIN,BLACK,HEIGHT,scoreboard)
+    bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, WIDTH, yellow, red, player_count,background,HEIGHT,scoreboard,explosions)
 
     if not yellow.alive and player_count == 1:
             game_over_screen()
@@ -206,6 +207,13 @@ def game_screen(player_count, stage):
     scoreboard = Score(score_limit)
 
     enemy_ships = []  # List to store enemy ships
+    
+
+    
+
+    
+
+
 
     if player_count == 2:
         red = ShipCreation.create_red_ship()
@@ -220,13 +228,21 @@ def game_screen(player_count, stage):
 
     last_bullet_time = 0
     last_bullet_time_2 = 0
-    last_bullet_time_enemy_ship = 0 #last bullet fired by green ship
+    last_bullet_time_green_ship = 0 #last bullet fired by green ship
+    last_bullet_time_orange_ship = 0
+
+
+    
+    load_explosion_images()
+    explosions=[]
 
 
     last_asteroid_spawn_time = 0 #last spawn time of asteroid
 
 
     last_spawn_time_green_ships = 0  # Variable to track the last spawn time of green enemy ship
+
+    last_spawn_time_orange_ships = 0
     
     
     
@@ -277,6 +293,8 @@ def game_screen(player_count, stage):
 
     while run:
         clock.tick(FPS)
+        
+        
         if scoreboard.has_score_limit_reached():
             next_stage_screen(player_count,stage + 1)
             run =False
@@ -328,19 +346,19 @@ def game_screen(player_count, stage):
         #print(pause_duration)
         #print(current_time)
 
+
+
         
 
 
-        last_spawn_time_green_ships, last_asteroid_spawn_time = \
-            create_ships(enemy_ships, last_spawn_time_green_ships, last_asteroid_spawn_time, stage, pause_duration)
+        last_spawn_time_green_ships, last_asteroid_spawn_time, last_spawn_time_orange_ships = \
+            create_ships(enemy_ships, last_spawn_time_green_ships, last_spawn_time_orange_ships,last_asteroid_spawn_time, stage, pause_duration)
         
         last_bullet_time, last_bullet_time_2 = \
             bullet_system_instance.fire_bullet(yellow, red, player_count, last_bullet_time, last_bullet_time_2,pause_duration)
         update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system_instance, 
-                          bullet_system_instance, render_system_instance, background,scoreboard,font)
-
+                          bullet_system_instance, render_system_instance, background,scoreboard,explosions)
         
-    
         if(player_count==1):
             yellow_health_text, last_yellow_health_change, prev_yellow_health = \
                 render_system_instance.update_health_text(current_time, yellow, red, prev_yellow_health, prev_red_health, font,
@@ -368,13 +386,35 @@ def game_screen(player_count, stage):
 
         if player_count == 2 and current_time - last_red_health_change < text_display_duration:  
             WIN.blit(red_health_text, (WIDTH - red_health_text.get_width() - 10, 10))
+        if stage == 8:
+            render_system_instance.display_tutorial_instructions(player_count)
+
+        
     
         pygame.display.flip()
+        '''
+        # Create an explosion at (x, y) and add it to the list
+        explosion = Explosion(200, 200)
+        explosions.append(explosion)
+
         
+
+        for explosion in explosions:
+            explosion.update()
+            explosion.draw(background)
+            
+
+          
+
+        # Update the game display
+        pygame.display.update()
+        
+        '''
         
 
         movement_system_instance.move_enemy_ships(enemy_ships, WIDTH)  # Move all enemy ships
-        last_bullet_time_enemy_ship = bullet_system_instance.auto_fire(enemy_ships, last_bullet_time_enemy_ship,pause_duration)  # Fire bullets for green enemy ships
+        last_bullet_time_green_ship, last_bullet_time_orange_ship = \
+            bullet_system_instance.auto_fire(enemy_ships, last_bullet_time_green_ship, last_bullet_time_orange_ship, pause_duration)  # Fire bullets for green enemy ships
         
         clock.tick(FPS)
 
