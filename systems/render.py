@@ -81,12 +81,35 @@ class RenderSystem:
             background = pygame.image.load(os.path.join('assets', 'Purple_Nebula_Stage_2.png'))
             background = pygame.transform.scale(background, (WIDTH, HEIGHT))
             return background
-        
-        elif(stage == 8):
-            #background = pygame.image.load(os.path.join('assets', 'space.png'))
-
+        elif(stage == 3):
+            background = pygame.image.load(os.path.join('assets', 'Green_Nebula_Stage_3.png'))
+            background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+            return background
+        elif(stage == 4):
+            background = pygame.image.load(os.path.join('assets', 'Blue_Nebula_Stage_4.png'))
+            background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+            return background
+        elif(stage == 5):
+            background = pygame.image.load(os.path.join('assets', 'Green_Nebula_Stage_5.png'))
+            background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+            return background
+        elif(stage == 6):
+            background = pygame.image.load(os.path.join('assets', 'Purple_Nebula_Stage_6.png'))
+            background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+            return background
+        elif(stage == 7):
+            background = pygame.image.load(os.path.join('assets', 'Purple_Nebula_Boss_Level.png'))
+            background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+            return background
+        elif(stage == 0):
             background = pygame.image.load(os.path.join('assets', 'Tutorial_Background.png'))
             background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+            return background
+        else:
+            background = pygame.image.load(os.path.join('assets', 'Starfield_Default.png'))
+            background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+
+
             return background
 
         
@@ -169,9 +192,9 @@ class RenderSystem:
 
         # Render the stage options
         menu_font = pygame.font.SysFont(None, 40)
-        stages = ["Stage 1", "Stage 2", "Stage 3", "Stage 4", "Stage 5", "Stage 6", "Back"]
-        option_y = HEIGHT // 5
-        option_spacing = 60
+        stages = ["Stage 1", "Stage 2", "Stage 3", "Stage 4", "Stage 5", "Stage 6", "Boss Level", "Back"]
+        option_y = HEIGHT // 6
+        option_spacing = 50
 
         for i, stage in enumerate(stages):
             stage_text = menu_font.render(stage, True, (255, 255, 255))
@@ -306,13 +329,13 @@ class RenderSystem:
         WIN.blit(background, (0, 0))
             
             
-        # Render the game over message
+        # Render Stage Complete
         game_over_font = pygame.font.SysFont(None, 60)
         game_over_text = game_over_font.render("Stage Complete", True, (255, 255, 255))
         game_over_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
         WIN.blit(game_over_text, game_over_rect)
             
-        # Render the instructions
+        # Render instructions
         instructions_font = pygame.font.SysFont(None, 40)
         instructions_text = instructions_font.render("Press F to go to next stage", True, (255, 255, 255))
         instructions_rect = instructions_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
@@ -328,54 +351,69 @@ class RenderSystem:
         background = pygame.transform.scale(background, (WIDTH, HEIGHT))
         WIN.blit(background, (0, 0))
             
+        story_font = pygame.font.SysFont(None, 60)
+        story_rect = story_font.render("", True, (255, 255, 255)).get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        instructions_font = pygame.font.SysFont(None, 40)
+        instructions_text = instructions_font.render("", True, (255, 255, 255))
+        instructions_rect = instructions_text.get_rect(center=(WIDTH // 2 - 175, HEIGHT // 2 + 100)) #adjust instruction position
+        instructions_text = instructions_font.render("Press F to go to next stage", True, (255, 255, 255))
+
+        story_rect.centerx = WIDTH // 2 - 280 # Move story_text width
+        story_rect.centery = HEIGHT // 2 - 100  # Move story_text height
+
+
+
         if stage == 1:    
-            story_font = pygame.font.SysFont(None, 60)
-            story_text = story_font.render("Story Screen 1", True, (255, 255, 255))
-            story_rect = story_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-            WIN.blit(story_text, story_rect)
+            story_text = story_font.render("Stage 1: The Journey Begins", True, (255, 255, 255))
+            story_paragraph = "In the year 25XX, the galaxy was in turmoil as a group of space bandits terrorized its inhabitants. Three brave spaceships, piloted by our courageous heroes, rose to the occasion to put an end to their tyranny. Determined and armed with their advanced weaponry, they embarked on their mission, setting a course towards the bandits' home planet."
         elif stage == 2:
-            story_font = pygame.font.SysFont(None, 60)
-            story_text = story_font.render("Story Screen 2", True, (255, 255, 255))
-            story_rect = story_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-            WIN.blit(story_text, story_rect)
+            story_text = story_font.render("Stage 2: The New Arsenal", True, (255, 255, 255))
+            story_paragraph = "As they progressed through space, our heroes discovered a valuable upgrade for their ships—a cutting-edge weapon system that unleashed a barrage of double bullets. With this powerful new arsenal at their disposal, they became even more formidable. But the bandits were not ones to be easily defeated."
         elif stage == 3:
-            story_font = pygame.font.SysFont(None, 60)
-            story_text = story_font.render("Story Screen 3", True, (255, 255, 255))
-            story_rect = story_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-            WIN.blit(story_text, story_rect)
+            story_text = story_font.render("Stage 3: Uncharted Territories", True, (255, 255, 255))
+            story_paragraph = "While traversing the vastness of space, our heroes found themselves venturing into uncharted territories. They encountered strange celestial phenomena and unexpected dangers, pushing their skills and teamwork to the limit. It was in this stage that they truly learned the value of trust and cooperation, strengthening their bond as they overcame each obstacle together."  
         elif stage == 4:
-            story_font = pygame.font.SysFont(None, 60)
-            story_text = story_font.render("Story Screen 4", True, (255, 255, 255))
-            story_rect = story_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-            WIN.blit(story_text, story_rect)
+            story_text = story_font.render("Stage 4: The Betrayal", True, (255, 255, 255))
+            story_paragraph = ""
         elif stage == 5:
-            story_font = pygame.font.SysFont(None, 60)
-            story_text = story_font.render("Story Screen 5", True, (255, 255, 255))
-            story_rect = story_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-            WIN.blit(story_text, story_rect)
+            story_text = story_font.render("Stage 5: The Final Stand", True, (255, 255, 255))
+            story_paragraph = "As they drew closer to the bandits' home planet, the intensity of the battles escalated. The bandits, aware of the approaching threat, deployed their most advanced ships and defenses.  The fate of the galaxy hung in the balance as they pressed forward, never losing sight of their ultimate goal."
         elif stage == 6:
-            story_font = pygame.font.SysFont(None, 60)
-            story_text = story_font.render("Story Screen 6", True, (255, 255, 255))
-            story_rect = story_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-            WIN.blit(story_text, story_rect)
-        else:#ending screen
-            story_font = pygame.font.SysFont(None, 60)
-            story_text = story_font.render("Story Screen Ending", True, (255, 255, 255))
-            story_rect = story_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-            WIN.blit(story_text, story_rect)
-
-
-        if(stage != 7):    
-            # Render the instructions
-            instructions_font = pygame.font.SysFont(None, 40)
-            instructions_text = instructions_font.render("Press F to go to next stage", True, (255, 255, 255))
-            instructions_rect = instructions_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
-            WIN.blit(instructions_text, instructions_rect)
-        else:#ending
-            instructions_font = pygame.font.SysFont(None, 40)
+            story_text = story_font.render("Stage 6: A Desperate Gamble", True, (255, 255, 255))
+            story_paragraph = "In the penultimate stage, our heroes found themselves faced with a seemingly insurmountable challenge. They were outnumbered and outgunned, their ships battered and resources dwindling. In a desperate gamble, they devised a daring plan, utilizing their remaining strength to outmaneuver the bandits. The outcome of this critical stage would determine whether their mission was a success or a devastating failure."
+        elif stage == 7:
+            story_text = story_font.render("Stage 7: Boss Level", True, (255, 255, 255))
+            story_paragraph = "This is it the moment we've all been waiting for. Our heroes reached the heart of the bandits' stronghold, facing off against the ruthless leader who had orchestrated so much chaos. In a showdown of epic proportions, they engaged in a battle of wits and skill. The odds were against them, but their determination and unwavering resolve propelled them forward. They fought with every ounce of strength, knowing that the fate of the galaxy rested on their shoulders."
+        else:  # ending screen
+            story_text = story_font.render("Ending Scene: Victorious Return", True, (255, 255, 255))
+            story_paragraph = "Victory was hard-fought but well-deserved. Our heroes emerged triumphant, having defeated the space bandits and restored peace to the galaxy. Exhausted but filled with a sense of accomplishment, they set a course back to their home world. The galaxy hailed them as saviors, and their names would be forever etched in the annals of history. As they journeyed home, their ships glimmering against the backdrop of the cosmos, they knew that their mission was complete."
             instructions_text = instructions_font.render("Press F to go to main menu", True, (255, 255, 255))
-            instructions_rect = instructions_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
-            WIN.blit(instructions_text, instructions_rect)
-
             
+
+        WIN.blit(story_text, story_rect)
+
+        # Render the story paragraph with word wrapping to avoid spliting words
+        paragraph_font = pygame.font.SysFont(None, 30)
+        paragraph_words = story_paragraph.split()
+        paragraph_lines = []
+        current_line = paragraph_words[0]
+        for word in paragraph_words[1:]:
+            test_line = current_line + " " + word
+            test_width, _ = paragraph_font.size(test_line)
+            if test_width < WIDTH - 200:  # Adjust the width limit here
+                current_line = test_line
+            else:
+                paragraph_lines.append(current_line)
+                current_line = word
+        paragraph_lines.append(current_line)
+
+        paragraph_y = story_rect.bottom + 20
+        for line in paragraph_lines:
+            paragraph_text = paragraph_font.render(line, True, (255, 255, 255))
+            paragraph_rect = paragraph_text.get_rect(center=(WIDTH // 2, paragraph_y))
+            WIN.blit(paragraph_text, paragraph_rect)
+            paragraph_y += 30
+        WIN.blit(instructions_text, instructions_rect)
+
+
         pygame.display.update()

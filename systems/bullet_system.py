@@ -11,6 +11,9 @@ YELLOW = (255, 255, 0)
 RED = (255, 0, 0)
 GREEN = (0,255,0)
 ORANGE = (255, 165, 0)
+PURPLE = (128, 0, 128)
+BLUE = (0, 0, 255)
+BROWN = (165, 42, 42)
 WIDTH, HEIGHT = 1400, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 
@@ -27,11 +30,11 @@ class BulletSystem:
         self.last_fire_times = {}  # Dictionary to store the last fire time for each entity
 
 
-    def create_bullet(self, x, y, velocity, radius, owner):
-        bullet = Bullet(x, y, velocity, radius, owner)
+    def create_bullet(self, x, y, x_velocity, y_velocity, radius, owner):
+        bullet = Bullet(x, y, x_velocity, y_velocity, radius, owner)
         self.bullets.append(bullet)
 
-    def fire_bullet(self, yellow, red, player_count, last_bullet_time, last_bullet_time_2, pause_duration):
+    def fire_bullet(self, yellow, red, player_count, last_bullet_time, last_bullet_time_2, pause_duration,stage):
         player_bullet_delay = 300
         if player_count >= 1:
             if yellow.alive:
@@ -41,9 +44,37 @@ class BulletSystem:
                     time_since_last_bullet = current_time - last_bullet_time
 
                     if time_since_last_bullet >= player_bullet_delay: #millisecond delay
-                        self.create_bullet(
-                            yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2, 5, 10, "yellow"
-                        )
+                        #x,y,xvelocity,yvelocity,radius,owner
+                        if stage <= 1: #stage 0, 1
+                            self.create_bullet(
+                                yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2, 5, 0, 10, "yellow"
+                            )
+                        if stage >= 2:#stage 2, 3 ,4
+                            self.create_bullet(
+                                yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 - 5, 5, 0, 10, "yellow"
+                            )
+                            self.create_bullet(
+                                yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 + 10, 5, 0, 10, "yellow"
+                            )
+                        if stage >= 5:#stage 5, 6
+                            
+                            self.create_bullet(
+                                yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 - 7, 5, -0.25, 10, "yellow"
+                            )
+                            
+                            self.create_bullet(
+                                yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 + 12, 5, 0.25, 10, "yellow"
+                            )
+                        if stage >= 7:
+                            self.create_bullet(
+                                yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 - 7, 5, -0.5, 10, "yellow"
+                            )
+                            self.create_bullet(
+                                yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 + 12, 5, 0.5, 10, "yellow"
+                            )
+                        
+
+
                         last_bullet_time = current_time
             
 
@@ -55,9 +86,34 @@ class BulletSystem:
                     time_since_last_bullet_2 = current_time_2 - last_bullet_time_2
 
                     if time_since_last_bullet_2 >= player_bullet_delay:
-                        self.create_bullet(
-                            red.position.x + red.width, red.position.y + red.height // 2, 5, 10 , "red"       
-                        )
+                        #x,y,xvelocity,yvelocity,radius,owner
+                        if stage <= 1: #stage 0, 1
+                            self.create_bullet(
+                                yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2, 5, 0, 10, "red"
+                            )
+                        if stage >= 2:#stage 2, 3 ,4
+                            self.create_bullet(
+                                yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 - 5, 5, 0, 10, "red"
+                            )
+                            self.create_bullet(
+                                yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 + 10, 5, 0, 10, "red"
+                            )
+                        if stage >= 5:#stage 5, 6
+                            
+                            self.create_bullet(
+                                yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 - 7, 5, -0.25, 10, "red"
+                            )
+                            
+                            self.create_bullet(
+                                yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 + 12, 5, 0.25, 10, "red"
+                            )
+                        if stage >= 7:
+                            self.create_bullet(
+                                yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 - 7, 5, -0.5, 10, "red"
+                            )
+                            self.create_bullet(
+                                yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 + 12, 5, 0.5, 10, "red"
+                            )
                         last_bullet_time_2 = current_time_2
         return last_bullet_time, last_bullet_time_2
     
@@ -85,6 +141,12 @@ class BulletSystem:
                 bullet_color = GREEN #green color
             elif bullet.owner == "orange":
                 bullet_color = ORANGE
+            elif bullet.owner == "purple":
+                bullet_color == PURPLE
+            elif bullet.owner == "blue":
+                bullet_color == BLUE
+            elif bullet.owner == "brown":
+                bullet_color == BROWN
             else:
                 bullet_color = WHITE  # Default color (white)
 
@@ -101,12 +163,16 @@ class BulletSystem:
         current_time = pygame.time.get_ticks() - pause_duration
         time_since_last_bullet_green = current_time - last_bullet_time_green_ship
         time_since_last_bullet_orange = current_time - last_bullet_time_orange_ship
+        
 
         # Define the color-delay mapping
         color_delays = {
             "green": 2000,  # Delay for green enemy ships
             "orange": 1000,   # Delay for orange enemy ships
-            
+            "purple": 600,
+            "blue": 1200,
+            "brown": 1600,
+            "white": 1800,
         }
 
 
@@ -117,20 +183,19 @@ class BulletSystem:
                 if enemy_ship.ship_color == "green" and time_since_last_bullet_green >=delay:
                         # Fire two bullets for green enemy ships
                     self.create_bullet(
-                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 10, -5, 10, "green"
+                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 10, -5, 0, 10, "green"
                         )
                     self.create_bullet(
-                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 10, -5, 10, "green"
+                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 10, -5, 0, 10, "green"
                         )
                     last_bullet_time_green_ship = current_time
                 elif enemy_ship.ship_color == "orange" and time_since_last_bullet_orange>=delay:
                         # Fire a single bullet for orange enemy ships
                     self.create_bullet(
-                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 10, "orange"
+                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0, 10, "orange"
                         )
                     last_bullet_time_orange_ship = current_time
-                    # Break the loop if you want to fire bullets for only one enemy ship at a time
-                    # break
+
 
         return last_bullet_time_green_ship, last_bullet_time_orange_ship
     
@@ -182,6 +247,7 @@ class BulletSystem:
 
                             # Check if enemy spaceship's health reaches zero
                             if enemy_ship.health <= 0:
+                                '''
                                 # Create an explosion at (x, y) and add it to the list
                                 explosion = Explosion(enemy_ship.position.x, enemy_ship.position.y)
                                 enemy_rect = pygame.Rect(enemy_ship.position.x, enemy_ship.position.y, enemy_ship.width, enemy_ship.height)
@@ -194,6 +260,7 @@ class BulletSystem:
                                     explosion.draw(background)
                                     # Update the game display
                                     pygame.display.update(enemy_rect)
+                                '''
 
                                     
                                     

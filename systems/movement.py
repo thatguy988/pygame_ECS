@@ -45,6 +45,12 @@ class MovementSystem:
                         entity.position.x -= entity.velocity
                     elif entity.ship_color == 'orange':
                         entity.position.x -= entity.velocity  # Move orange enemy ship with attribute velocity
+                    elif entity.ship_color == 'purple':
+                        entity.position.x -= entity.velocity  # Move orange enemy ship with attribute velocity
+                    elif entity.ship_color == 'blue':
+                        entity.position.x -= entity.velocity  # Move orange enemy ship with attribute velocity
+                    elif entity.ship_color == 'brown':
+                        entity.position.x -= entity.velocity  # Move orange enemy ship with attribute velocity
                 else:
                     entity.position.x -= entity.velocity  # Move other enemy ships with default
 

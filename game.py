@@ -63,9 +63,9 @@ def select_stage_screen():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_w:
-                    selected_option = (selected_option - 1) % 7  # 7 for 7 options
+                    selected_option = (selected_option - 1) % 8  # 7 for 7 options
                 elif event.key == pygame.K_s:
-                    selected_option = (selected_option + 1) % 7  
+                    selected_option = (selected_option + 1) % 8  
                 elif event.key == pygame.K_SPACE:
                     if selected_option == 0:
                         return 1  # stage 1
@@ -80,6 +80,8 @@ def select_stage_screen():
                     elif selected_option == 5:
                         return 6  # stage 6
                     elif selected_option == 6:
+                        return 7 #boss level
+                    elif selected_option == 7:
                         return 0 # back
 
 
@@ -107,7 +109,7 @@ def main_menu():
             selected_option = 0  # Reset the selected option for when player goes back to main menu
         elif selected_option == "tutorial":
             player_count = select_players_screen()
-            game_screen(player_count,8)
+            game_screen(player_count,0)
             #tutorial_screen()
             selected_option = 0
 
@@ -208,13 +210,6 @@ def game_screen(player_count, stage):
 
     enemy_ships = []  # List to store enemy ships
     
-
-    
-
-    
-
-
-
     if player_count == 2:
         red = ShipCreation.create_red_ship()
     
@@ -230,6 +225,10 @@ def game_screen(player_count, stage):
     last_bullet_time_2 = 0
     last_bullet_time_green_ship = 0 #last bullet fired by green ship
     last_bullet_time_orange_ship = 0
+    last_bullet_time_purple_ship = 0
+    last_bullet_time_blue_ship = 0
+    last_bullet_time_brown_ship = 0
+    last_bullet_time_boss_ship = 0
 
 
     
@@ -241,8 +240,10 @@ def game_screen(player_count, stage):
 
 
     last_spawn_time_green_ships = 0  # Variable to track the last spawn time of green enemy ship
-
     last_spawn_time_orange_ships = 0
+    last_spawn_time_purple_ships = 0
+    last_spawn_time_blue_ships = 0
+    last_spawn_time_brown_ships = 0
     
     
     
@@ -342,20 +343,94 @@ def game_screen(player_count, stage):
 
         keys_pressed = pygame.key.get_pressed()
         current_time = pygame.time.get_ticks() - pause_duration - game_start_time
-        
+        '''      
         #print(pause_duration)
         #print(current_time)
+        results = \
+            create_ships(enemy_ships, pause_duration, stage, last_spawn_time_green_ships, last_asteroid_spawn_time, last_spawn_time_orange_ships,
+                            last_spawn_time_purple_ships,last_spawn_time_blue_ships,last_spawn_time_brown_ships )
 
+        
+        if stage == 1:
+            #results = create_ships(enemy_ships, pause_duration, stage, last_spawn_time_green_ships, last_asteroid_spawn_time)
+            last_spawn_time_green_ships = results[0]
+            last_asteroid_spawn_time = results[1]
+
+        
+
+        elif (stage == 2):
+            last_spawn_time_green_ships = results[0]
+            last_asteroid_spawn_time = results[1]
+            last_spawn_time_orange_ships = results[2]
+        elif (stage == 3):
+           
+            last_spawn_time_green_ships = results[0]
+            last_spawn_time_orange_ships = results[2]
+            last_spawn_time_purple_ships = results[3]
+
+        elif (stage == 4):
+            
+            last_spawn_time_orange_ships = results[2]
+            last_spawn_time_purple_ships = results[3]
+            last_spawn_time_blue_ships = results[4]
+        elif (stage == 5):
+            last_spawn_time_orange_ships = results[2]
+            last_spawn_time_purple_ships = results[3]
+            last_spawn_time_blue_ships = results[4]
+            last_spawn_time_brown_ships = results[5]
+
+        elif (stage == 6):
+            last_spawn_time_purple_ships = results[3]
+            last_spawn_time_blue_ships = results[4]
+            last_spawn_time_brown_ships = results[5]
+        elif (stage == 7):
+            last_asteroid_spawn_time = \
+                create_ships(enemy_ships, pause_duration, stage, last_asteroid_spawn_time)
+
+        '''
 
 
         
 
+        results = create_ships(enemy_ships, pause_duration, stage, last_spawn_time_green_ships, last_asteroid_spawn_time, last_spawn_time_orange_ships,
+                       last_spawn_time_purple_ships, last_spawn_time_blue_ships, last_spawn_time_brown_ships)
 
-        last_spawn_time_green_ships, last_asteroid_spawn_time, last_spawn_time_orange_ships = \
-            create_ships(enemy_ships, last_spawn_time_green_ships, last_spawn_time_orange_ships,last_asteroid_spawn_time, stage, pause_duration)
+
+        if stage == 1:
+            last_spawn_time_green_ships = results[0]
+            last_spawn_time_orange_ships = results[2]
+            last_asteroid_spawn_time = results[1]
+        elif stage == 2:
+            last_spawn_time_green_ships = results[0]
+            #last_asteroid_spawn_time = results[1]
+            last_spawn_time_orange_ships = results[2]
+        elif stage == 3:
+            print("Results:", results)
+            print("Results length:", len(results))
+            last_spawn_time_green_ships = results[0]
+            last_spawn_time_orange_ships = results[1]
+            last_spawn_time_purple_ships = results[2]
+        elif stage == 4:
+            last_spawn_time_orange_ships = results[2]
+            last_spawn_time_purple_ships = results[3]
+            last_spawn_time_blue_ships = results[4]
+        elif stage == 5:
+            last_spawn_time_orange_ships = results[2]
+            last_spawn_time_purple_ships = results[3]
+            last_spawn_time_blue_ships = results[4]
+            last_spawn_time_brown_ships = results[5]
+        elif stage == 6:
+            last_spawn_time_purple_ships = results[3]
+            last_spawn_time_blue_ships = results[4]
+            last_spawn_time_brown_ships = results[5]
+
+        
+        
+        
+        
         
         last_bullet_time, last_bullet_time_2 = \
-            bullet_system_instance.fire_bullet(yellow, red, player_count, last_bullet_time, last_bullet_time_2,pause_duration)
+            bullet_system_instance.fire_bullet(yellow, red, player_count, last_bullet_time, last_bullet_time_2,pause_duration,stage)
         update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system_instance, 
                           bullet_system_instance, render_system_instance, background,scoreboard,explosions)
         
@@ -386,7 +461,7 @@ def game_screen(player_count, stage):
 
         if player_count == 2 and current_time - last_red_health_change < text_display_duration:  
             WIN.blit(red_health_text, (WIDTH - red_health_text.get_width() - 10, 10))
-        if stage == 8:
+        if stage == 0:
             render_system_instance.display_tutorial_instructions(player_count)
 
         
