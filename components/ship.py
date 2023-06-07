@@ -5,30 +5,28 @@ import pygame
 from components.position import PositionComponent
 GREY = (128,128,128)
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
+BOSS_SHIP_WIDTH, BOSS_SHIP_HEIGHT = 200,200
 WIDTH, HEIGHT = 1400, 500
+maximum_y_value = HEIGHT - 25
+minimum_y_value = HEIGHT - maximum_y_value
+
 
 DEFAULT_HEALTH = 100
-player_bullet_damage = 5
 
-green_enemy_ship_bullet_damage = 5
 
-orange_enemy_ship_bullet_damage = 10
-
-purple_enemy_ship_bullet_damage = 3
 purple_enemy_ship_health = 30
 purple_enemy_ship_velocity = 4
 
-blue_enemy_ship_bullet_damage = 3
 blue_enemy_ship_health = 20
 blue_enemy_ship_velocity = 3
 
-brown_enemy_ship_bullet_damage = 3
+
 brown_enemy_ship_health = 20
 brown_enemy_ship_velocity = 3
 
-boss_enemy_ship_bullet_damage = 3
+
 boss_enemy_ship_health = 300
-boss_enemy_ship_velocity = 2
+boss_enemy_ship_velocity = 1
 
 
 GREEN_ENEMY_SHIP_HEALTH = 10
@@ -67,7 +65,6 @@ class Ship:
         self.width = SPACESHIP_WIDTH
         self.height = SPACESHIP_HEIGHT
         self.collision_damage = COLLISION_DAMAGE
-        self.bullet_damage = player_bullet_damage
 
     def stop_moving(self):
         self.velocity = 0
@@ -99,8 +96,7 @@ class GreenEnemyShip(Ship):
         self.initial_health = GREEN_ENEMY_SHIP_HEALTH
         self.health=self.initial_health
         self.ship_color = 'green'
-        self.velocity = GREEN_ENEMY_SHIP_VEL
-        self.bullet_damage = green_enemy_ship_bullet_damage 
+        self.velocity = GREEN_ENEMY_SHIP_VEL 
 
 class OrangeEnemyShip(Ship):
     enemy_ship_image = pygame.transform.scale(
@@ -114,7 +110,6 @@ class OrangeEnemyShip(Ship):
         self.health=self.initial_health
         self.ship_color = 'orange'
         self.velocity = orange_enemy_ship_vel
-        self.bullet_damage = orange_enemy_ship_bullet_damage
 
 class PurpleEnemyShip(Ship):
     enemy_ship_image = pygame.transform.scale(
@@ -128,7 +123,7 @@ class PurpleEnemyShip(Ship):
         self.health=self.initial_health
         self.ship_color = 'purple'
         self.velocity = purple_enemy_ship_velocity
-        self.bullet_damage = purple_enemy_ship_bullet_damage
+        self.bullet_switch = True
 
 class BlueEnemyShip(Ship):
     enemy_ship_image = pygame.transform.scale(
@@ -142,7 +137,7 @@ class BlueEnemyShip(Ship):
         self.health=self.initial_health
         self.ship_color = 'blue'
         self.velocity = blue_enemy_ship_velocity
-        self.bullet_damage = blue_enemy_ship_bullet_damage
+        self.bullet_count = 0
 
 class BrownEnemyShip(Ship):
     enemy_ship_image = pygame.transform.scale(
@@ -156,12 +151,11 @@ class BrownEnemyShip(Ship):
         self.health=self.initial_health
         self.ship_color = 'brown'
         self.velocity = brown_enemy_ship_velocity
-        self.bullet_damage = brown_enemy_ship_bullet_damage
 
 class BossEnemyShip(Ship):
     enemy_ship_image = pygame.transform.scale(
         pygame.image.load(os.path.join('assets/PNG_Parts&Spriter_Animation/Ship3', 'Ship3.png')),
-        (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
+        (BOSS_SHIP_WIDTH, BOSS_SHIP_HEIGHT)
     )
 
     def __init__(self, position):
@@ -170,7 +164,7 @@ class BossEnemyShip(Ship):
         self.health=self.initial_health
         self.ship_color = 'white'
         self.velocity = boss_enemy_ship_velocity
-        self.bullet_damage = boss_enemy_ship_bullet_damage
+        self.bullet_change = 0
 
 class Asteroid(Ship):
     asteroid_image = pygame.image.load(os.path.join('assets', 'asteroid.png'))
@@ -194,29 +188,29 @@ class ShipCreation:
 
     @staticmethod
     def create_green_enemy_ship():
-        return GreenEnemyShip(PositionComponent(WIDTH, HEIGHT))
+        return GreenEnemyShip(PositionComponent(WIDTH, random.randint(minimum_y_value, maximum_y_value)))
     
     @staticmethod
     def create_orange_enemy_ship():
-        return OrangeEnemyShip(PositionComponent(WIDTH, HEIGHT))
+        return OrangeEnemyShip(PositionComponent(WIDTH, random.randint(minimum_y_value, maximum_y_value)))
     
     @staticmethod
     def create_purple_enemy_ship():
-        return PurpleEnemyShip(PositionComponent(WIDTH, HEIGHT))
+        return PurpleEnemyShip(PositionComponent(WIDTH, random.randint(minimum_y_value, maximum_y_value)))
     
     @staticmethod
     def create_blue_enemy_ship():
-        return BlueEnemyShip(PositionComponent(WIDTH, HEIGHT))
+        return BlueEnemyShip(PositionComponent(WIDTH, random.randint(minimum_y_value, maximum_y_value)))
     
     @staticmethod
     def create_brown_enemy_ship():
-        return BrownEnemyShip(PositionComponent(WIDTH, HEIGHT))
+        return BrownEnemyShip(PositionComponent(WIDTH, random.randint(minimum_y_value, maximum_y_value)))
     
     @staticmethod
     def create_boss_enemy_ship():
-        return BossEnemyShip(PositionComponent(WIDTH, HEIGHT))
+        return BossEnemyShip(PositionComponent(WIDTH, HEIGHT / 2))
     
     @staticmethod
     def create_asteroid():
-        return Asteroid(PositionComponent(WIDTH, HEIGHT))
+        return Asteroid(PositionComponent(WIDTH, random.randint(minimum_y_value, maximum_y_value)))
     

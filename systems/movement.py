@@ -51,6 +51,11 @@ class MovementSystem:
                         entity.position.x -= entity.velocity  # Move orange enemy ship with attribute velocity
                     elif entity.ship_color == 'brown':
                         entity.position.x -= entity.velocity  # Move orange enemy ship with attribute velocity
+                    elif entity.ship_color == 'white':
+                        entity.position.x -= entity.velocity  # Move orange enemy ship with attribute velocity
+                        if entity.position.x < width - (width/4):  # Check if boss ship has reached the desired width
+                            entity.velocity = 0
+
                 else:
                     entity.position.x -= entity.velocity  # Move other enemy ships with default
 

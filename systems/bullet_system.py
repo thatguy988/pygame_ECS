@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 from components.bullet import Bullet
 from components.score import Score
 from components.explosion import Explosion, load_explosion_images
@@ -16,6 +17,9 @@ BLUE = (0, 0, 255)
 BROWN = (165, 42, 42)
 WIDTH, HEIGHT = 1400, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+
+maximum_y_value = HEIGHT - 25
+minimum_y_value = HEIGHT - maximum_y_value
 
 
 
@@ -49,14 +53,14 @@ class BulletSystem:
                             self.create_bullet(
                                 yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2, 5, 0, 10, "yellow"
                             )
-                        if stage >= 2:#stage 2, 3 ,4
+                        if stage >= 2:#stage 2, 3 
                             self.create_bullet(
                                 yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 - 5, 5, 0, 10, "yellow"
                             )
                             self.create_bullet(
                                 yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 + 10, 5, 0, 10, "yellow"
                             )
-                        if stage >= 5:#stage 5, 6
+                        if stage >= 4:#stage 4, 5
                             
                             self.create_bullet(
                                 yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 - 7, 5, -0.25, 10, "yellow"
@@ -65,7 +69,7 @@ class BulletSystem:
                             self.create_bullet(
                                 yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 + 12, 5, 0.25, 10, "yellow"
                             )
-                        if stage >= 7:
+                        if stage >= 6: #stage 6, 7 
                             self.create_bullet(
                                 yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 - 7, 5, -0.5, 10, "yellow"
                             )
@@ -91,14 +95,14 @@ class BulletSystem:
                             self.create_bullet(
                                 yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2, 5, 0, 10, "red"
                             )
-                        if stage >= 2:#stage 2, 3 ,4
+                        if stage >= 2:#stage 2, 3 
                             self.create_bullet(
                                 yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 - 5, 5, 0, 10, "red"
                             )
                             self.create_bullet(
                                 yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 + 10, 5, 0, 10, "red"
                             )
-                        if stage >= 5:#stage 5, 6
+                        if stage >= 4:#stage 4,5
                             
                             self.create_bullet(
                                 yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 - 7, 5, -0.25, 10, "red"
@@ -107,7 +111,7 @@ class BulletSystem:
                             self.create_bullet(
                                 yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 + 12, 5, 0.25, 10, "red"
                             )
-                        if stage >= 7:
+                        if stage >= 6: #stage 6,7
                             self.create_bullet(
                                 yellow.position.x + yellow.width, yellow.position.y + yellow.height // 2 - 7, 5, -0.5, 10, "red"
                             )
@@ -142,11 +146,11 @@ class BulletSystem:
             elif bullet.owner == "orange":
                 bullet_color = ORANGE
             elif bullet.owner == "purple":
-                bullet_color == PURPLE
+                bullet_color = PURPLE
             elif bullet.owner == "blue":
-                bullet_color == BLUE
+                bullet_color = BLUE
             elif bullet.owner == "brown":
-                bullet_color == BROWN
+                bullet_color = BROWN
             else:
                 bullet_color = WHITE  # Default color (white)
 
@@ -158,25 +162,32 @@ class BulletSystem:
         self.remove_offscreen_bullets(width)
         self.render_bullets(surface, color)
 
-    
-    def auto_fire(self, enemy_ships, last_bullet_time_green_ship, last_bullet_time_orange_ship, pause_duration):
-        current_time = pygame.time.get_ticks() - pause_duration
+
+
+
+    def auto_fire(self, enemy_ships, pause_duration, game_start_time, last_bullet_time_green_ship, last_bullet_time_orange_ship,last_bullet_time_purple_ship, last_bullet_time_blue_ship,last_bullet_time_brown_ship, last_bullet_time_white_ship):
+        current_time = pygame.time.get_ticks() - pause_duration - game_start_time
         time_since_last_bullet_green = current_time - last_bullet_time_green_ship
         time_since_last_bullet_orange = current_time - last_bullet_time_orange_ship
-        
+        time_since_last_bullet_purple = current_time - last_bullet_time_purple_ship
+        time_since_last_bullet_blue = current_time - last_bullet_time_blue_ship
+        time_since_last_bullet_brown = current_time - last_bullet_time_brown_ship
+        time_since_last_bullet_white = current_time - last_bullet_time_white_ship
 
         # Define the color-delay mapping
         color_delays = {
             "green": 2000,  # Delay for green enemy ships
-            "orange": 1000,   # Delay for orange enemy ships
-            "purple": 600,
-            "blue": 1200,
+            "orange": 1500,   # Delay for orange enemy ships
+            "purple": 1200,
+            "blue": 700,
             "brown": 1600,
             "white": 1800,
         }
 
 
         for enemy_ship in enemy_ships:
+            #if not enemy_ship.alive:
+             #   continue
             if hasattr(enemy_ship, "ship_color") and enemy_ship.ship_color in color_delays:
                 delay = color_delays[enemy_ship.ship_color]
                 
@@ -195,9 +206,80 @@ class BulletSystem:
                             enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0, 10, "orange"
                         )
                     last_bullet_time_orange_ship = current_time
+                elif enemy_ship.ship_color == "purple" and time_since_last_bullet_purple>=delay:
+                    if enemy_ship.bullet_switch:
+                        self.create_bullet(
+                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, -0.5, 10, "purple"
+                            )
+                        last_bullet_time_purple_ship = current_time
+                        enemy_ship.bullet_switch=False
+                    else:
+                        self.create_bullet(
+                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0.5, 10, "purple"
+                            )
+                        last_bullet_time_purple_ship = current_time
+                        enemy_ship.bullet_switch=True
+                elif enemy_ship.ship_color == "blue" and time_since_last_bullet_blue>=delay:
+                    if enemy_ship.bullet_count < 3:
+                        if time_since_last_bullet_blue >= enemy_ship.bullet_count * 0.0001:  # Adjust the delay time as needed
+                            self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0, 10, "blue"
+                            )
+                            enemy_ship.bullet_count += 1
+                            last_bullet_time_blue_ship = current_time
+                    else:
+                        enemy_ship.bullet_count = 0
+                
+
+                elif enemy_ship.ship_color == "brown" and time_since_last_bullet_brown>=delay:
+                    self.create_bullet(
+                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 7, -5, -0.5, 10, "brown"
+                        )
+                    self.create_bullet(
+                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0, 10, "brown"
+                        )
+                    self.create_bullet(
+                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 7, -5, 0.5, 10, "brown"
+                        )
+                    last_bullet_time_brown_ship = current_time
+                elif enemy_ship.ship_color == "white" and time_since_last_bullet_white >= delay:
+                    if(enemy_ship.bullet_change ==0):
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 9, -5, -1.25, 10, "white"
+                            )
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 8, -5, -1, 10, "white"
+                            )
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 7, -5, -0.5, 10, "white"
+                            )
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0, 10, "white"
+                            )
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 7, -5, 0.5, 10, "white"
+                            )
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 8, -5, 1, 10, "white"
+                            )
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 9, -5, 1.25, 10, "white"
+                            )
+                        enemy_ship.bullet_change += 1
+                        last_bullet_time_white_ship = current_time
+                    elif(enemy_ship.bullet_change == 1):
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0, 10, "white"
+                            )
+                        
+                        enemy_ship.bullet_change = 0
+                        last_bullet_time_white_ship = current_time
 
 
-        return last_bullet_time_green_ship, last_bullet_time_orange_ship
+                
+
+
+        return last_bullet_time_green_ship, last_bullet_time_orange_ship,last_bullet_time_purple_ship ,last_bullet_time_blue_ship,last_bullet_time_brown_ship, last_bullet_time_white_ship
     
     
     
@@ -211,7 +293,7 @@ class BulletSystem:
                     if yellow.position.x < bullet.x + bullet.radius < yellow.position.x + yellow.width:
                         if yellow.position.y < bullet.y < yellow.position.y + yellow.height:
                             # Collision detected with yellow spaceship bullet from enemy ship
-                            yellow.health -= enemy_ship.bullet_damage
+                            yellow.health -= bullet.get_bullet_damage()
                             self.remove_bullet(bullet)
 
                             # Check if yellow spaceship's health reaches zero
@@ -227,7 +309,7 @@ class BulletSystem:
                         if red.position.x < bullet.x + bullet.radius < red.position.x + red.width:
                             if red.position.y < bullet.y < red.position.y + red.height:
                                 # Collision detected with red spaceship
-                                red.health -= enemy_ship.bullet_damage
+                                red.health -= bullet.get_bullet_damage()
                                 self.remove_bullet(bullet)
 
                                 # Check if red spaceship's health reaches zero
@@ -238,11 +320,11 @@ class BulletSystem:
                                     
 
             for enemy_ship in enemy_ships:
-                if bullet.owner != "green" and bullet.owner != "orange":
+                if bullet.owner != "green" and bullet.owner != "orange" and bullet.owner != "purple" and bullet.owner != "blue" and bullet.owner != "brown" and bullet.owner != "white":
                     if enemy_ship.position.x < bullet.x + bullet.radius < enemy_ship.position.x + enemy_ship.width:
                         if enemy_ship.position.y < bullet.y < enemy_ship.position.y + enemy_ship.height:
                             # Collision detected with enemy spaceship
-                            enemy_ship.health -= yellow.bullet_damage
+                            enemy_ship.health -= bullet.get_bullet_damage()
                             self.remove_bullet(bullet)
 
                             # Check if enemy spaceship's health reaches zero
@@ -265,34 +347,16 @@ class BulletSystem:
                                     
                                     
                                 enemy_ship.stop_moving()
-                                enemy_ship.visible = False
+                                #enemy_ship.visible = False
+                                enemy_ship.alive = False
                                 enemy_ship.position.x = WIDTH
                                 enemy_ship.position.y = HEIGHT
                                 
                             
                                 enemy_ship.health = enemy_ship.initial_health
-                                enemy_ship.visible = True
+                                #enemy_ship.visible = True
                                 scoreboard.reward_points(enemy_ship.ship_color)
-
-        
-        
-            
-            
-        
-
-            
-
-
-        
-
-        
-
-
-        
-            
-                                
-                
-               
+       
     
     def handle_enemyship_ship_collision(self, ship, enemy_ships, WIDTH, HEIGHT,scoreboard):
         for enemy_ship in enemy_ships:

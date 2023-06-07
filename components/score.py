@@ -1,5 +1,5 @@
 
-max_points_stage_1 = 10000
+max_points_stage_1 = 100
 max_points_stage_2 = 200
 max_points_stage_3 = 300 
 max_points_stage_4 = 400
@@ -9,13 +9,13 @@ max_points_stage_7 = 1
 max_points_stage_tutorial = 99999
 
 
-asteroid_points = 10
+asteroid_points = 0
 green_ship_points = 20
 orange_ship_points = 5
 purple_ship_points = 5
 blue_ship_points = 5
 brown_ship_points = 5
-white_ship_points = 1
+boss_ship_points = 1
 
 
 
@@ -48,7 +48,7 @@ class Score:
         elif ship_color == "brown":
             self.increase_score(brown_ship_points)
         elif ship_color == "white":
-            self.increase_score(white_ship_points)
+            self.increase_score(boss_ship_points)
         
     
     @staticmethod
