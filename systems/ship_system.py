@@ -9,7 +9,7 @@ from components.ship import ShipCreation
 spawn_rates = {
     "green": 8000,
     "orange": 5000,
-    "purple": 500,
+    "purple": 2000,
     "blue": 4000,
     "brown": 3000,
     "grey": 3000,
@@ -20,9 +20,9 @@ ship_numbers = {
     "green": {
         1: (1, 2),
         2: (1, 2),
+        3: (1,3),
     },
     "orange": {
-        1: (1,2),
         2: (1, 2),
         3: (1, 1),
         4: (1, 2),

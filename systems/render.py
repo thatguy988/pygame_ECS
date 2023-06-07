@@ -374,7 +374,7 @@ class RenderSystem:
             story_paragraph = "While traversing the vastness of space, our heroes found themselves venturing into uncharted territories. They encountered strange celestial phenomena and unexpected dangers, pushing their skills and teamwork to the limit. It was in this stage that they truly learned the value of trust and cooperation, strengthening their bond as they overcame each obstacle together."  
         elif stage == 4:
             story_text = story_font.render("Stage 4: The Betrayal", True, (255, 255, 255))
-            story_paragraph = ""
+            story_paragraph = "Just when our heroes thought they were making progress, they were confronted by a betrayal within their own ranks. A crew member, once loyal, had been secretly working for the space bandits all along. In a heart-wrenching turn of events, they had to face the harsh reality that not everyone could be trusted. With heavy hearts, they pressed on, determined to see their mission through to the end."
         elif stage == 5:
             story_text = story_font.render("Stage 5: The Final Stand", True, (255, 255, 255))
             story_paragraph = "As they drew closer to the bandits' home planet, the intensity of the battles escalated. The bandits, aware of the approaching threat, deployed their most advanced ships and defenses.  The fate of the galaxy hung in the balance as they pressed forward, never losing sight of their ultimate goal."
