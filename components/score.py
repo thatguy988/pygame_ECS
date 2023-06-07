@@ -1,5 +1,5 @@
 
-max_points_stage_1 = 100
+max_points_stage_1 = 10000
 max_points_stage_2 = 200
 max_points_stage_3 = 300 
 max_points_stage_4 = 400

@@ -343,51 +343,10 @@ def game_screen(player_count, stage):
 
         keys_pressed = pygame.key.get_pressed()
         current_time = pygame.time.get_ticks() - pause_duration - game_start_time
-        '''      
+              
         #print(pause_duration)
         #print(current_time)
-        results = \
-            create_ships(enemy_ships, pause_duration, stage, last_spawn_time_green_ships, last_asteroid_spawn_time, last_spawn_time_orange_ships,
-                            last_spawn_time_purple_ships,last_spawn_time_blue_ships,last_spawn_time_brown_ships )
-
         
-        if stage == 1:
-            #results = create_ships(enemy_ships, pause_duration, stage, last_spawn_time_green_ships, last_asteroid_spawn_time)
-            last_spawn_time_green_ships = results[0]
-            last_asteroid_spawn_time = results[1]
-
-        
-
-        elif (stage == 2):
-            last_spawn_time_green_ships = results[0]
-            last_asteroid_spawn_time = results[1]
-            last_spawn_time_orange_ships = results[2]
-        elif (stage == 3):
-           
-            last_spawn_time_green_ships = results[0]
-            last_spawn_time_orange_ships = results[2]
-            last_spawn_time_purple_ships = results[3]
-
-        elif (stage == 4):
-            
-            last_spawn_time_orange_ships = results[2]
-            last_spawn_time_purple_ships = results[3]
-            last_spawn_time_blue_ships = results[4]
-        elif (stage == 5):
-            last_spawn_time_orange_ships = results[2]
-            last_spawn_time_purple_ships = results[3]
-            last_spawn_time_blue_ships = results[4]
-            last_spawn_time_brown_ships = results[5]
-
-        elif (stage == 6):
-            last_spawn_time_purple_ships = results[3]
-            last_spawn_time_blue_ships = results[4]
-            last_spawn_time_brown_ships = results[5]
-        elif (stage == 7):
-            last_asteroid_spawn_time = \
-                create_ships(enemy_ships, pause_duration, stage, last_asteroid_spawn_time)
-
-        '''
 
 
         
@@ -397,19 +356,25 @@ def game_screen(player_count, stage):
 
 
         if stage == 1:
+            print("Results:", results)
+            print("Results length:", len(results))
             last_spawn_time_green_ships = results[0]
-            last_spawn_time_orange_ships = results[2]
+            
             last_asteroid_spawn_time = results[1]
+            last_spawn_time_orange_ships = results[2]
+
+            
         elif stage == 2:
             last_spawn_time_green_ships = results[0]
-            #last_asteroid_spawn_time = results[1]
-            last_spawn_time_orange_ships = results[2]
+            last_spawn_time_orange_ships = results[1]
         elif stage == 3:
             print("Results:", results)
             print("Results length:", len(results))
             last_spawn_time_green_ships = results[0]
             last_spawn_time_orange_ships = results[1]
             last_spawn_time_purple_ships = results[2]
+
+            last_spawn_time_orange_ships = results[1]
         elif stage == 4:
             last_spawn_time_orange_ships = results[2]
             last_spawn_time_purple_ships = results[3]
@@ -423,6 +388,11 @@ def game_screen(player_count, stage):
             last_spawn_time_purple_ships = results[3]
             last_spawn_time_blue_ships = results[4]
             last_spawn_time_brown_ships = results[5]
+        elif stage == 0:
+            print("Results:", results)
+            print("Results length:", len(results))
+            last_asteroid_spawn_time = results[0]
+
 
         
         
