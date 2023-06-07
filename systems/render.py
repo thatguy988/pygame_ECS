@@ -337,7 +337,7 @@ class RenderSystem:
             
         # Render instructions
         instructions_font = pygame.font.SysFont(None, 40)
-        instructions_text = instructions_font.render("Press F to go to next stage", True, (255, 255, 255))
+        instructions_text = instructions_font.render("Press F to continue", True, (255, 255, 255))
         instructions_rect = instructions_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
         WIN.blit(instructions_text, instructions_rect)
             

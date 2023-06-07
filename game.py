@@ -195,7 +195,10 @@ def story_screen(player_count,stage):
                 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_f:
-                    result = game_screen(player_count,stage)
+                    if(stage != 8):
+                        result = game_screen(player_count,stage)
+                    else:
+                        result = main_menu()
                     if result == "main_menu":
                         main_menu()
                         return
@@ -307,8 +310,7 @@ def game_screen(player_count, stage):
         if scoreboard.has_score_limit_reached():
             next_stage_screen(player_count,stage + 1)
             run =False
-            print("Returning to the main menu...")
-            run = False
+            
             break
 
         for event in pygame.event.get():

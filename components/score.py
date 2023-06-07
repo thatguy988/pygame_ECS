@@ -9,7 +9,7 @@ max_points_stage_7 = 1
 max_points_stage_tutorial = 99999
 
 
-asteroid_points = 0
+asteroid_points = 1
 green_ship_points = 20
 orange_ship_points = 5
 purple_ship_points = 5
