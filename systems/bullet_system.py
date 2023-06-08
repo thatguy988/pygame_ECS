@@ -83,7 +83,6 @@ class BulletSystem:
 
                         last_bullet_time = current_time
             
-
         if player_count == 2:
             if red.alive:
                 bullet_pressed_2 = pygame.key.get_pressed()[pygame.K_RETURN]
@@ -123,7 +122,6 @@ class BulletSystem:
                         last_bullet_time_2 = current_time_2
         return last_bullet_time, last_bullet_time_2
     
-
     def move_bullets(self):
         for bullet in self.bullets:
             bullet.x += bullet.velocity
@@ -132,10 +130,8 @@ class BulletSystem:
         if bullet in self.bullets:
             self.bullets.remove(bullet)
         
-
     def remove_offscreen_bullets(self, width):
         self.bullets = [bullet for bullet in self.bullets if bullet.x < width]
-
 
     def render_bullets(self, surface, color):
         for bullet in self.bullets:
@@ -158,7 +154,6 @@ class BulletSystem:
 
             pygame.draw.rect(surface, bullet_color, (bullet.x, bullet.y, 5, 5))
         
-
     def update(self, width, color, surface):
         self.move_bullets()
         self.remove_offscreen_bullets(width)
@@ -178,9 +173,7 @@ class BulletSystem:
         for enemy_ship in enemy_ships:
             if hasattr(enemy_ship, "ship_color") and enemy_ship.ship_color in color_delays:
                 delay = color_delays[enemy_ship.ship_color]
-
                 if enemy_ship.ship_color == "green" and time_since_last_bullets[0] >= delay:
-                    # Fire two bullets for green enemy ships
                     self.create_bullet(
                         enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 10, -5, 0, 10, "green"
                     )
@@ -192,7 +185,6 @@ class BulletSystem:
                     last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
 
                 elif enemy_ship.ship_color == "orange" and time_since_last_bullets[1] >= delay:
-                    # Fire a single bullet for orange enemy ships
                     self.create_bullet(
                         enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0, 10, "orange"
                     )
@@ -215,26 +207,15 @@ class BulletSystem:
                     enemy_ship.bullet_switch = not enemy_ship.bullet_switch
 
                 elif enemy_ship.ship_color == "blue" and time_since_last_bullets[3] >= delay:
-                    
-                            #self.create_bullet(
-                             #   enemy_ship.position.x +10, enemy_ship.position.y + enemy_ship.height // 2, 4, -0.5, 10, "blue"
-                            #)
-                            #self.create_bullet(
-                            #    enemy_ship.position.x + 10, enemy_ship.position.y + enemy_ship.height // 2, 4, 0.5, 10, "blue"
-                            #)
                             self.create_bullet(
                                 enemy_ship.position.x + 10 , enemy_ship.position.y + enemy_ship.height // 2, 0, 1, 10, "blue"
                             )
                             self.create_bullet(
                                 enemy_ship.position.x + 10 , enemy_ship.position.y + enemy_ship.height // 2, 0, 1, 10, "blue"
                             )
-                            
-                            
                             last_bullet_times = list(last_bullet_times)  # Convert tuple to list
                             last_bullet_times[3] = current_time  # Update the fourth item
                             last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
-                    
-
                 elif enemy_ship.ship_color == "brown" and time_since_last_bullets[4] >= delay:
                     self.create_bullet(
                             enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 7, -5, -0.5, 10, "brown"
@@ -337,13 +318,6 @@ class BulletSystem:
                             last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
         return last_bullet_times
 
-
-        
-
-
-
-
-    
     def update_bullets_and_check_collisions(self, enemy_ships, WIDTH, yellow, red, player_count, background, HEIGHT, scoreboard, explosions):
         
 
@@ -405,15 +379,12 @@ class BulletSystem:
                                     pygame.display.update(enemy_rect)
                                 '''
 
-                                    
-                                    
                                 enemy_ship.stop_moving()
                                 #enemy_ship.visible = False
                                 enemy_ship.alive = False
                                 enemy_ship.position.x = WIDTH
                                 enemy_ship.position.y = HEIGHT
                                 
-                            
                                 enemy_ship.health = enemy_ship.initial_health
                                 #enemy_ship.visible = True
                                 scoreboard.reward_points(enemy_ship.ship_color)
@@ -445,18 +416,3 @@ class BulletSystem:
                         enemy_ship.health = enemy_ship.initial_health
                         enemy_ship.visible = True
                         scoreboard.reward_points(enemy_ship.ship_color)
-
-
-
-
-
-    
-
-            
-
-
-
-
-
-
-            
