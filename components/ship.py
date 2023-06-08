@@ -18,14 +18,14 @@ purple_enemy_ship_health = 30
 purple_enemy_ship_velocity = 4
 
 blue_enemy_ship_health = 20
-blue_enemy_ship_velocity = 3
+blue_enemy_ship_velocity = 8
 
 
 brown_enemy_ship_health = 20
 brown_enemy_ship_velocity = 3
 
 
-boss_enemy_ship_health = 300
+boss_enemy_ship_health = 1000
 boss_enemy_ship_velocity = 1
 
 
@@ -137,7 +137,7 @@ class BlueEnemyShip(Ship):
         self.health=self.initial_health
         self.ship_color = 'blue'
         self.velocity = blue_enemy_ship_velocity
-        self.bullet_count = 0
+        
 
 class BrownEnemyShip(Ship):
     enemy_ship_image = pygame.transform.scale(
@@ -164,7 +164,18 @@ class BossEnemyShip(Ship):
         self.health=self.initial_health
         self.ship_color = 'white'
         self.velocity = boss_enemy_ship_velocity
-        self.bullet_change = 0
+        #attributes for bullet behavior of ship
+        self.bullet_change = random.randint(0,2)
+        self.bullet_beam = 0
+        self.beam_1_y_position=0
+        self.beam_2_y_position=0
+        self.beam_3_y_position=0
+        self.beam_4_y_position=0
+        self.beam_5_y_position=0
+        self.bullet_count= 0
+        self.bullet_count_limit = random.randint(20,35)
+        
+        
 
 class Asteroid(Ship):
     asteroid_image = pygame.image.load(os.path.join('assets', 'asteroid.png'))

@@ -226,12 +226,7 @@ def game_screen(player_count, stage):
 
     last_bullet_time = 0
     last_bullet_time_2 = 0
-    last_bullet_time_green_ship = 0 
-    last_bullet_time_orange_ship = 0
-    last_bullet_time_purple_ship = 0
-    last_bullet_time_blue_ship = 0
-    last_bullet_time_brown_ship = 0
-    last_bullet_time_white_ship = 0
+    
     if stage == 7:
         boss=ShipCreation.create_boss_enemy_ship()
         enemy_ships.append(boss)
@@ -244,7 +239,7 @@ def game_screen(player_count, stage):
     load_explosion_images()
     explosions=[]
 
-
+    
     last_asteroid_spawn_time = 0 #last spawn time of asteroid
 
 
@@ -254,6 +249,23 @@ def game_screen(player_count, stage):
     last_spawn_time_blue_ships = 0
     last_spawn_time_brown_ships = 0
 
+
+
+    
+    last_bullet_time_green_ship = 0 
+    last_bullet_time_orange_ship = 0
+    last_bullet_time_purple_ship = 0
+    last_bullet_time_blue_ship = 0
+    last_bullet_time_brown_ship = 0
+    last_bullet_time_white_ship = 0
+
+    
+    
+    
+    
+    
+
+    
     
     
     
@@ -363,16 +375,38 @@ def game_screen(player_count, stage):
 
         results = create_ships(enemy_ships, pause_duration, game_start_time, stage, last_spawn_time_green_ships, last_asteroid_spawn_time, last_spawn_time_orange_ships,
                        last_spawn_time_purple_ships, last_spawn_time_blue_ships, last_spawn_time_brown_ships)
-        
+        '''
         last_bullet_time_green_ship, last_bullet_time_orange_ship , last_bullet_time_purple_ship, last_bullet_time_blue_ship, last_bullet_time_brown_ship, last_bullet_time_white_ship = \
             bullet_system_instance.auto_fire(enemy_ships, pause_duration, game_start_time,
                                              last_bullet_time_green_ship, last_bullet_time_orange_ship,
                                              last_bullet_time_purple_ship, last_bullet_time_blue_ship, last_bullet_time_brown_ship, last_bullet_time_white_ship)  
+        '''
+        (
+                last_bullet_time_green_ship,
+                last_bullet_time_orange_ship,
+                last_bullet_time_purple_ship,
+                last_bullet_time_blue_ship,
+                last_bullet_time_brown_ship,
+                last_bullet_time_white_ship,
+            ) = bullet_system_instance.auto_fire(
+                enemy_ships,
+                pause_duration,
+                game_start_time,
+                last_bullet_time_green_ship,
+                last_bullet_time_orange_ship,
+                last_bullet_time_purple_ship,
+                last_bullet_time_blue_ship,
+                last_bullet_time_brown_ship,
+                last_bullet_time_white_ship,
+            )
+
+
         
 
         if stage == 1:
             last_spawn_time_green_ships = results[0]
             last_asteroid_spawn_time = results[1]
+
         elif stage == 2:
             last_spawn_time_green_ships = results[0]
             last_spawn_time_orange_ships = results[1]
@@ -393,8 +427,8 @@ def game_screen(player_count, stage):
             last_spawn_time_purple_ships = results[0]
             last_spawn_time_blue_ships = results[1]
             last_spawn_time_brown_ships = results[2]
-        elif stage == 7:
-            last_asteroid_spawn_time= results[0]
+        #elif stage == 7:
+         #   last_asteroid_spawn_time= results[0]
         elif stage == 0:
             last_asteroid_spawn_time = results[0]
 

@@ -33,10 +33,12 @@ class BulletSystem:
         self.bullets = []
         self.last_fire_times = {}  # Dictionary to store the last fire time for each entity
 
-
+    
     def create_bullet(self, x, y, x_velocity, y_velocity, radius, owner):
         bullet = Bullet(x, y, x_velocity, y_velocity, radius, owner)
         self.bullets.append(bullet)
+    
+
 
     def fire_bullet(self, yellow, red, player_count, last_bullet_time, last_bullet_time_2, pause_duration,stage):
         player_bullet_delay = 300
@@ -161,77 +163,79 @@ class BulletSystem:
         self.move_bullets()
         self.remove_offscreen_bullets(width)
         self.render_bullets(surface, color)
-
-
-
-
-    def auto_fire(self, enemy_ships, pause_duration, game_start_time, last_bullet_time_green_ship, last_bullet_time_orange_ship,last_bullet_time_purple_ship, last_bullet_time_blue_ship,last_bullet_time_brown_ship, last_bullet_time_white_ship):
+        
+    def auto_fire(self, enemy_ships, pause_duration, game_start_time, *last_bullet_times):
         current_time = pygame.time.get_ticks() - pause_duration - game_start_time
-        time_since_last_bullet_green = current_time - last_bullet_time_green_ship
-        time_since_last_bullet_orange = current_time - last_bullet_time_orange_ship
-        time_since_last_bullet_purple = current_time - last_bullet_time_purple_ship
-        time_since_last_bullet_blue = current_time - last_bullet_time_blue_ship
-        time_since_last_bullet_brown = current_time - last_bullet_time_brown_ship
-        time_since_last_bullet_white = current_time - last_bullet_time_white_ship
-
-        # Define the color-delay mapping
+        time_since_last_bullets = [current_time - last_bullet_time for last_bullet_time in last_bullet_times]
         color_delays = {
-            "green": 2000,  # Delay for green enemy ships
-            "orange": 1500,   # Delay for orange enemy ships
+            "green": 2000,  
+            "orange": 1500,  
             "purple": 1200,
-            "blue": 700,
+            "blue": 500,
             "brown": 1600,
             "white": 1800,
         }
-
-
         for enemy_ship in enemy_ships:
-            #if not enemy_ship.alive:
-             #   continue
             if hasattr(enemy_ship, "ship_color") and enemy_ship.ship_color in color_delays:
                 delay = color_delays[enemy_ship.ship_color]
-                
-                if enemy_ship.ship_color == "green" and time_since_last_bullet_green >=delay:
-                        # Fire two bullets for green enemy ships
+
+                if enemy_ship.ship_color == "green" and time_since_last_bullets[0] >= delay:
+                    # Fire two bullets for green enemy ships
                     self.create_bullet(
-                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 10, -5, 0, 10, "green"
-                        )
+                        enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 10, -5, 0, 10, "green"
+                    )
                     self.create_bullet(
-                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 10, -5, 0, 10, "green"
-                        )
-                    last_bullet_time_green_ship = current_time
-                elif enemy_ship.ship_color == "orange" and time_since_last_bullet_orange>=delay:
-                        # Fire a single bullet for orange enemy ships
+                        enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 10, -5, 0, 10, "green"
+                    )
+                    last_bullet_times = list(last_bullet_times)  # Convert tuple to list
+                    last_bullet_times[0] = current_time  # Update the first item
+                    last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
+
+                elif enemy_ship.ship_color == "orange" and time_since_last_bullets[1] >= delay:
+                    # Fire a single bullet for orange enemy ships
                     self.create_bullet(
-                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0, 10, "orange"
-                        )
-                    last_bullet_time_orange_ship = current_time
-                elif enemy_ship.ship_color == "purple" and time_since_last_bullet_purple>=delay:
+                        enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0, 10, "orange"
+                    )
+                    last_bullet_times = list(last_bullet_times)  # Convert tuple to list
+                    last_bullet_times[1] = current_time  # Update the second item
+                    last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
+
+                elif enemy_ship.ship_color == "purple" and time_since_last_bullets[2] >= delay:
                     if enemy_ship.bullet_switch:
                         self.create_bullet(
                             enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, -0.5, 10, "purple"
-                            )
-                        last_bullet_time_purple_ship = current_time
-                        enemy_ship.bullet_switch=False
+                        )
                     else:
                         self.create_bullet(
                             enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0.5, 10, "purple"
-                            )
-                        last_bullet_time_purple_ship = current_time
-                        enemy_ship.bullet_switch=True
-                elif enemy_ship.ship_color == "blue" and time_since_last_bullet_blue>=delay:
-                    if enemy_ship.bullet_count < 3:
-                        if time_since_last_bullet_blue >= enemy_ship.bullet_count * 0.0001:  # Adjust the delay time as needed
-                            self.create_bullet(
-                                enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0, 10, "blue"
-                            )
-                            enemy_ship.bullet_count += 1
-                            last_bullet_time_blue_ship = current_time
-                    else:
-                        enemy_ship.bullet_count = 0
-                
+                        )
+                    last_bullet_times = list(last_bullet_times)  # Convert tuple to list
+                    last_bullet_times[2] = current_time  # Update the third item
+                    last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
+                    enemy_ship.bullet_switch = not enemy_ship.bullet_switch
 
-                elif enemy_ship.ship_color == "brown" and time_since_last_bullet_brown>=delay:
+                elif enemy_ship.ship_color == "blue" and time_since_last_bullets[3] >= delay:
+                    
+                            #self.create_bullet(
+                             #   enemy_ship.position.x +10, enemy_ship.position.y + enemy_ship.height // 2, 4, -0.5, 10, "blue"
+                            #)
+                            #self.create_bullet(
+                            #    enemy_ship.position.x + 10, enemy_ship.position.y + enemy_ship.height // 2, 4, 0.5, 10, "blue"
+                            #)
+                            self.create_bullet(
+                                enemy_ship.position.x + 10 , enemy_ship.position.y + enemy_ship.height // 2, 0, 1, 10, "blue"
+                            )
+                            self.create_bullet(
+                                enemy_ship.position.x + 10 , enemy_ship.position.y + enemy_ship.height // 2, 0, 1, 10, "blue"
+                            )
+                            
+                            
+                            last_bullet_times = list(last_bullet_times)  # Convert tuple to list
+                            last_bullet_times[3] = current_time  # Update the fourth item
+                            last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
+                    
+
+                elif enemy_ship.ship_color == "brown" and time_since_last_bullets[4] >= delay:
                     self.create_bullet(
                             enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 7, -5, -0.5, 10, "brown"
                         )
@@ -241,9 +245,12 @@ class BulletSystem:
                     self.create_bullet(
                             enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 7, -5, 0.5, 10, "brown"
                         )
-                    last_bullet_time_brown_ship = current_time
-                elif enemy_ship.ship_color == "white" and time_since_last_bullet_white >= delay:
-                    if(enemy_ship.bullet_change ==0):
+                    last_bullet_times = list(last_bullet_times)  # Convert tuple to list
+                    last_bullet_times[4] = current_time  # Update the fifth item
+                    last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
+
+                elif enemy_ship.ship_color == "white" and time_since_last_bullets[5] >= delay:
+                    if(enemy_ship.bullet_change == 0):
                         self.create_bullet(
                                 enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 9, -5, -1.25, 10, "white"
                             )
@@ -265,23 +272,77 @@ class BulletSystem:
                         self.create_bullet(
                                 enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 9, -5, 1.25, 10, "white"
                             )
-                        enemy_ship.bullet_change += 1
-                        last_bullet_time_white_ship = current_time
+                        enemy_ship.bullet_change = random.randint(0,2)
+                        last_bullet_times = list(last_bullet_times)  # Convert tuple to list
+                        last_bullet_times[5] = current_time  # Update the sixth item
+                        last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
                     elif(enemy_ship.bullet_change == 1):
+                        if(enemy_ship.bullet_beam == 0):
+                            enemy_ship.beam_1_y_position=random.randint(minimum_y_value,maximum_y_value)
+                            enemy_ship.beam_2_y_position=random.randint(minimum_y_value,maximum_y_value)
+                            enemy_ship.beam_3_y_position=random.randint(minimum_y_value,maximum_y_value)
+                            enemy_ship.beam_4_y_position=random.randint(minimum_y_value,maximum_y_value)
+                            enemy_ship.beam_5_y_position=random.randint(minimum_y_value,maximum_y_value)
+
                         self.create_bullet(
-                                enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0, 10, "white"
+                                enemy_ship.position.x - 5, enemy_ship.beam_2_y_position - 5, -5, 0, 10, "white"
+                            )
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.beam_2_y_position, -5, 0, 10, "white"
+                            )
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.beam_1_y_position - 5, -5, 0, 10, "white"
+                            )
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.beam_1_y_position, -5, 0, 10, "white"
+                            )
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.beam_3_y_position - 5, -5, 0, 10, "white"
+                            )
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.beam_3_y_position, -5, 0, 10, "white"
+                            )
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.beam_4_y_position - 5, -5, 0, 10, "white"
+                            )
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.beam_4_y_position, -5, 0, 10, "white"
+                            )
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.beam_5_y_position - 5, -5, 0, 10, "white"
+                            )
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, enemy_ship.beam_5_y_position, -5, 0, 10, "white"
                             )
                         
-                        enemy_ship.bullet_change = 0
-                        last_bullet_time_white_ship = current_time
+                        enemy_ship.bullet_beam += 1
+                        if enemy_ship.bullet_beam == 60:
+                            enemy_ship.bullet_change = random.randint(0,2)
+                            enemy_ship.bullet_beam = 0
+                            last_bullet_times = list(last_bullet_times)  # Convert tuple to list
+                            last_bullet_times[5] = current_time  # Update the sixth item
+                            last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
+                            
+                    elif(enemy_ship.bullet_change == 2):
+                        self.create_bullet(
+                                enemy_ship.position.x - 5, random.randint(5,495), -5, 0, 10, "white"
+                            )
+                        enemy_ship.bullet_count +=1
+                        if enemy_ship.bullet_count == enemy_ship.bullet_count_limit:
+                            enemy_ship.bullet_count = 0
+                            enemy_ship.bullet_count_limit = random.randint(20,35)
+                            enemy_ship.bullet_change = random.randint(0,2)
+                            last_bullet_times = list(last_bullet_times)  # Convert tuple to list
+                            last_bullet_times[5] = current_time  # Update the sixth item
+                            last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
+        return last_bullet_times
 
 
-                
+        
 
 
-        return last_bullet_time_green_ship, last_bullet_time_orange_ship,last_bullet_time_purple_ship ,last_bullet_time_blue_ship,last_bullet_time_brown_ship, last_bullet_time_white_ship
-    
-    
+
+
     
     def update_bullets_and_check_collisions(self, enemy_ships, WIDTH, yellow, red, player_count, background, HEIGHT, scoreboard, explosions):
         

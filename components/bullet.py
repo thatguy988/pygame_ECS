@@ -1,4 +1,5 @@
 import pygame
+import random
 WIDTH = 10
 HEIGHT = 10
 class Bullet:
@@ -21,7 +22,7 @@ class Bullet:
 
     def get_bullet_damage(self):
         if self.owner == "yellow":
-            return 10  # Set the damage value for yellow bullets
+            return 5  # Set the damage value for yellow bullets
         elif self.owner == "red":
             return 5  # Set the damage value for red bullets
         elif self.owner == "green":
@@ -35,6 +36,11 @@ class Bullet:
         elif self.owner == "brown":
             return 7  # Set the damage value for brown bullets
         elif self.owner == "white":
-            return 12  # Set the damage value for white bullets
+            return 10  # Set the damage value for white bullets
         else:
             return 0  # Default damage value if owner is not recognized
+
+
+
+
+    

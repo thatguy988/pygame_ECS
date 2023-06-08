@@ -7,10 +7,10 @@ from components.ship import ShipCreation
 
 # Spawn rates for different enemy ships and asteroids
 spawn_rates = {
-    "green": 8000,
+    "green": 3000,
     "orange": 5000,
     "purple": 10000,
-    "blue": 20000,
+    "blue": 2000,
     "brown": 30000,
     "grey": 3000,
 }
@@ -46,7 +46,6 @@ ship_numbers = {
     "grey": {
         0: (1,2),
         1: (1, 2),
-        7: (2,10),
         8: (1, 2),
     },
 }
