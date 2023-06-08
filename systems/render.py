@@ -114,13 +114,13 @@ class RenderSystem:
 
         
     @staticmethod
-    def draw_window(entities, bullet_system, background, color):
+    def draw_window(entities, bullet_system, background):
         WIN.blit(background, (0, 0))
         
         for entity in entities:
             RenderSystem.render(entity, WIN)
         
-        bullet_system.render_bullets(WIN, color)
+        bullet_system.render_bullets(WIN)
         
 
 
