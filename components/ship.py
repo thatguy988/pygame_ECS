@@ -5,7 +5,7 @@ import pygame
 from components.position import PositionComponent
 GREY = (128,128,128)
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
-BOSS_SHIP_WIDTH, BOSS_SHIP_HEIGHT = 200,200
+BOSS_SHIP_WIDTH, BOSS_SHIP_HEIGHT = 100,100
 WIDTH, HEIGHT = 1400, 500
 maximum_y_value = HEIGHT - 25
 minimum_y_value = HEIGHT - maximum_y_value
@@ -153,17 +153,21 @@ class BrownEnemyShip(Ship):
         self.velocity = brown_enemy_ship_velocity
 
 class BossEnemyShip(Ship):
+    
     enemy_ship_image = pygame.transform.scale(
         pygame.image.load(os.path.join('assets/PNG_Parts&Spriter_Animation/Ship3', 'Ship3.png')),
-        (BOSS_SHIP_WIDTH, BOSS_SHIP_HEIGHT)
+        (BOSS_SHIP_WIDTH,BOSS_SHIP_HEIGHT)
     )
 
     def __init__(self, position):
         super().__init__(position, pygame.transform.flip(self.enemy_ship_image, True, False))
+        
         self.initial_health = boss_enemy_ship_health
         self.health=self.initial_health
         self.ship_color = 'white'
         self.velocity = boss_enemy_ship_velocity
+        self.width=BOSS_SHIP_WIDTH
+        self.height=BOSS_SHIP_HEIGHT
         #attributes for bullet behavior of ship
         self.bullet_change = random.randint(0,2)
         self.bullet_beam = 0
@@ -174,6 +178,8 @@ class BossEnemyShip(Ship):
         self.beam_5_y_position=0
         self.bullet_count= 0
         self.bullet_count_limit = random.randint(20,35)
+    
+        
         
         
 
@@ -219,7 +225,7 @@ class ShipCreation:
     
     @staticmethod
     def create_boss_enemy_ship():
-        return BossEnemyShip(PositionComponent(WIDTH, HEIGHT / 2))
+        return BossEnemyShip(PositionComponent(WIDTH, HEIGHT / 3))
     
     @staticmethod
     def create_asteroid():

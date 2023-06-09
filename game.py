@@ -1,6 +1,5 @@
 import pygame
 import sys
-import os
 
 
 from systems.movement import MovementSystem
@@ -8,6 +7,7 @@ from systems.render import RenderSystem
 from systems.bullet_system import BulletSystem
 from systems.ship_system import create_ships
 from systems.menu_input_system import MenuHandling
+from systems.music_system import MusicSystem
 
 from components.explosion import Explosion, load_explosion_images
 from components.score import Score
@@ -25,9 +25,45 @@ RED = (255, 0, 0)
 FPS = 120
 VEL = 4
 
-ENEMY_SHIP_SPAWN_RATE = 120  # Adjust the spawn rate as needed
 
+music_system_instance = MusicSystem()
 
+music_system_instance.add_music_component("pause_menu_music", "Assets\\Music\\mixkit-space-game-668.mp3")
+music_system_instance.add_music_component("main_menu_music", "Assets\\Music\\mixkit-infected-vibes-157.mp3")
+
+def load_stage_music(stage):
+    music_mapping = {
+        1: "game_music_1",
+        2: "game_music_2",
+        3: "game_music_3",
+        4: "game_music_4",
+        5: "game_music_5",
+        6: "game_music_6",
+        7: "game_music_7",
+        0: "game_music_0"
+    }
+
+    if stage in music_mapping:
+        music_label = music_mapping[stage]
+        music_system_instance.add_music_component(music_label, f"Assets\\Music\\game-music-{stage}.wav")
+        return music_label
+
+def load_story_music(stage):
+    music_mapping = {
+        1: "story_music_1",
+        2: "story_music_2",
+        3: "story_music_3",
+        4: "story_music_4",
+        5: "story_music_5",
+        6: "story_music_6",
+        7: "story_music_7",
+        8: "story_music_8"
+    }
+
+    if stage in music_mapping:
+        music_label = music_mapping[stage]
+        music_system_instance.add_music_component(music_label, f"Assets\\Music\\story_music_{stage}.wav")
+        return music_label
 def select_players_screen():
     selected_option = 0
     while True:
@@ -86,6 +122,7 @@ def select_stage_screen():
 
 
 def main_menu():
+    music_system_instance.play_music("main_menu_music")
     selected_option = 0  # Default selected option
     while True:
         RenderSystem.display_menu(selected_option)
@@ -96,35 +133,36 @@ def main_menu():
                 stage = select_stage_screen()  # Select the stage
                 if(stage == 0):
                     continue #jump to next iteration of loop skip remaing code skips game_screen and selected option reset
-                print("hello from main menu method")
+                music_system_instance.stop_music("main_menu_music")
                 story_screen(player_count,stage)
             elif player_count == 2:
                 stage = select_stage_screen()  # Select the stage
                 if(stage == 0):
                     continue
+                music_system_instance.stop_music("main_menu_music")
                 story_screen(player_count,stage)
 
             selected_option = 0  # Reset the selected option for when player goes back to main menu
         elif selected_option == "tutorial":
             player_count = select_players_screen()
+            music_system_instance.stop_music("main_menu_music")
             game_screen(player_count,0)
             selected_option = 0
 
-
-def pause_menu():#main loop for pause menu
+def pause_menu(game_music):
+    music_system_instance.pause_music(game_music)
     selected_option = 0  # Default selected option
     while True:
         RenderSystem.display_pause_menu(selected_option)
         selected_option = MenuHandling.handle_pause_menu_events(selected_option)
         if selected_option == "resume_game":
+            music_system_instance.resume_music(game_music)
             return  # Resume the game
         elif selected_option == "main_menu":
             return "main_menu"  # Go back to the main menu
 
-
 def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, 
                       movement_system_instance, bullet_system_instance, render_system_instance, background,scoreboard,explosions):
-
     if player_count >= 1:
         movement_system_instance.move_player1(
             yellow, keys_pressed, WIDTH, HEIGHT, VEL, yellow.width, yellow.height
@@ -183,6 +221,9 @@ def next_stage_screen(player_count,stage):
                        return
 
 def story_screen(player_count,stage):
+    story_music=load_story_music(stage)
+    music_system_instance.play_music(story_music)
+    
     while True:
         RenderSystem.display_story_screen(stage)
         for event in pygame.event.get():
@@ -192,6 +233,7 @@ def story_screen(player_count,stage):
                 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_f:
+                    music_system_instance.stop_music(story_music)
                     if(stage != 8):
                         result = game_screen(player_count,stage)
                     else:
@@ -213,9 +255,16 @@ def game_screen(player_count, stage):
     if player_count == 2:
         red = ShipCreation.create_red_ship()
     
+
     movement_system_instance = MovementSystem()
     bullet_system_instance = BulletSystem()
     render_system_instance = RenderSystem()
+    
+    game_music=load_stage_music(stage)
+    music_system_instance.play_music(game_music)
+    
+    
+
     
     background = render_system_instance.background_render(stage,WIDTH,HEIGHT)
     
@@ -292,9 +341,10 @@ def game_screen(player_count, stage):
     last_red_health_change = pygame.time.get_ticks() - pause_duration - game_start_time if player_count == 2 else None
 
 
-
     
 
+    
+    
     while run:
         clock.tick(FPS)
         
@@ -314,7 +364,7 @@ def game_screen(player_count, stage):
                         pass
                     else: #press spacebar to continue game
                         game_paused = False
-                        result = pause_menu()
+                        result = pause_menu(game_music)
                         if result == "main_menu":
                             #never reached
                             return "main_menu"
@@ -322,19 +372,23 @@ def game_screen(player_count, stage):
                     if not pause_pressed and not game_paused:#game pause
                         pause_pressed = True
                         game_paused = True
+                        
+                        
                         pause_start_time=pygame.time.get_ticks()
-                        result = pause_menu()
+                        result = pause_menu(game_music)
                         if result == "resume_game":
                             pause_pressed = False
                             game_paused = False
                             result = None
                             
                         elif result == "main_menu":
-                            print("hello2")
-                            
+                            music_system_instance.stop_music(game_music)
+                            music_system_instance.play_music("main_menu_music")
+
                             return "main_menu"
 
         if game_paused:
+            
             game_paused = False
             pause_pressed = False
             result = None
@@ -342,16 +396,11 @@ def game_screen(player_count, stage):
             pause_duration += pause_end_time - pause_start_time
             
 
-
         keys_pressed = pygame.key.get_pressed()
         current_time = pygame.time.get_ticks() - pause_duration - game_start_time
               
         #print(pause_duration)
         #print(current_time)
-        
-
-
-        
 
         results = create_ships(enemy_ships, pause_duration, game_start_time, stage, last_spawn_time_green_ships, last_asteroid_spawn_time, last_spawn_time_orange_ships,
                        last_spawn_time_purple_ships, last_spawn_time_blue_ships, last_spawn_time_brown_ships)
