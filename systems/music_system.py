@@ -50,3 +50,39 @@ class MusicSystem:
         if component:
             component.volume = volume
             pygame.mixer.music.set_volume(component.volume)
+
+    def load_stage_music(self, stage):
+            music_mapping = {
+                1: "game_music_1",
+                2: "game_music_2",
+                3: "game_music_3",
+                4: "game_music_4",
+                5: "game_music_5",
+                6: "game_music_6",
+                7: "game_music_7",
+                0: "game_music_0"
+            }
+
+            if stage in music_mapping:
+                music_label = music_mapping[stage]
+                music_file = f"Assets\\Music\\game-music-{stage}.wav"
+                self.add_music_component(music_label, music_file)
+                return music_label
+
+    def load_story_music(self, stage):
+            music_mapping = {
+                1: "story_music_1",
+                2: "story_music_2",
+                3: "story_music_3",
+                4: "story_music_4",
+                5: "story_music_5",
+                6: "story_music_6",
+                7: "story_music_7",
+                8: "story_music_8"
+            }
+
+            if stage in music_mapping:
+                music_label = music_mapping[stage]
+                music_file = f"Assets\\Music\\story_music_{stage}.wav"
+                self.add_music_component(music_label, music_file)
+                return music_label

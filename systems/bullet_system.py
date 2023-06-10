@@ -5,6 +5,8 @@ from components.bullet import Bullet
 from components.score import Score
 from components.explosion import Explosion, load_explosion_images
 
+from systems.sound_effect_system import SoundEffectSystem
+
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -26,6 +28,21 @@ minimum_y_value = HEIGHT - maximum_y_value
 green_ship_points = 10
 asteroid_points = 5
 
+sound_system_instance = SoundEffectSystem()
+
+sound_system_instance.add_sound_effect_component("bulletshot","Assets\\Sound_Effects\\Bullet_Shoot.wav")
+
+sound_system_instance.add_sound_effect_component("enemyshot","Assets\\Sound_Effects\\Enemy_Bullet.wav")
+
+sound_system_instance.add_sound_effect_component("playerhit","Assets\\Sound_Effects\\Bullet_Hit_With_Player.wav")
+
+sound_system_instance.add_sound_effect_component("enemyhit","Assets\\Sound_Effects\\Bullet_Hit_With_Enemy.wav")
+
+sound_system_instance.add_sound_effect_component("playerdeath","Assets\\Sound_Effects\\Player_Ship_Destroyed.wav")
+
+
+
+
 
 
 class BulletSystem:
@@ -44,6 +61,7 @@ class BulletSystem:
 
         if time_since_last_bullet >= player_bullet_delay:
             # x, y, xvelocity, yvelocity, radius, owner
+            sound_system_instance.play_sound_effect("bulletshot")
             if stage <= 1:  # stage 0, 1
                 self.create_bullet(
                     player.position.x + player.width,
@@ -166,14 +184,19 @@ class BulletSystem:
                     self.create_bullet(
                         enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 10, -5, 0, 10, "green"
                     )
+                    sound_system_instance.play_sound_effect("enemyshot")
                     last_bullet_times = list(last_bullet_times)  # Convert tuple to list
                     last_bullet_times[0] = current_time  # Update the first item
                     last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
 
                 elif enemy_ship.ship_color == "orange" and time_since_last_bullets[1] >= delay:
+                    
+
                     self.create_bullet(
                         enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0, 10, "orange"
                     )
+                    sound_system_instance.play_sound_effect("enemyshot")
+
                     last_bullet_times = list(last_bullet_times)  # Convert tuple to list
                     last_bullet_times[1] = current_time  # Update the second item
                     last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
@@ -187,6 +210,8 @@ class BulletSystem:
                         self.create_bullet(
                             enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0.5, 10, "purple"
                         )
+                    sound_system_instance.play_sound_effect("enemyshot")
+
                     last_bullet_times = list(last_bullet_times)  # Convert tuple to list
                     last_bullet_times[2] = current_time  # Update the third item
                     last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
@@ -199,6 +224,8 @@ class BulletSystem:
                             self.create_bullet(
                                 enemy_ship.position.x + 10 , enemy_ship.position.y + enemy_ship.height // 2, 0, 1, 10, "blue"
                             )
+                            sound_system_instance.play_sound_effect("enemyshot")
+
                             last_bullet_times = list(last_bullet_times)  # Convert tuple to list
                             last_bullet_times[3] = current_time  # Update the fourth item
                             last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
@@ -212,6 +239,7 @@ class BulletSystem:
                     self.create_bullet(
                             enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 7, -5, 0.5, 10, "brown"
                         )
+                    sound_system_instance.play_sound_effect("enemyshot")
                     last_bullet_times = list(last_bullet_times)  # Convert tuple to list
                     last_bullet_times[4] = current_time  # Update the fifth item
                     last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
@@ -237,6 +265,8 @@ class BulletSystem:
                                 10,
                                 "white"
                             )
+                        sound_system_instance.play_sound_effect("enemyshot")
+
 
                         enemy_ship.bullet_change = random.randint(0, 2)
                         last_bullet_times = list(last_bullet_times)
@@ -271,6 +301,8 @@ class BulletSystem:
                             )
                         enemy_ship.bullet_count +=1
                         if enemy_ship.bullet_count == enemy_ship.bullet_count_limit:
+                            sound_system_instance.play_sound_effect("enemyshot")
+
                             enemy_ship.bullet_count = 0
                             enemy_ship.bullet_count_limit = random.randint(20,35)
                             enemy_ship.bullet_change = random.randint(0,2)
@@ -289,22 +321,27 @@ class BulletSystem:
                     # Collision detected with yellow spaceship bullet from enemy ship
                     yellow.health = max(0, yellow.health - bullet.get_bullet_damage())
                     self.remove_bullet(bullet)
+                    sound_system_instance.play_sound_effect("playerhit")
 
                     # Check if yellow spaceship's health reaches zero
                     if yellow.health == 0:
                         yellow.alive = False
                         yellow.visible = False
+                        sound_system_instance.play_sound_effect("playerdeath")
+
 
             if player_count == 2 and red.alive and red.visible and bullet.owner not in {"yellow", "red"}:
                 if red.position.x < bullet.x + bullet.radius < red.position.x + red.width and red.position.y < bullet.y < red.position.y + red.height:
                     # Collision detected with red spaceship
                     red.health = max(0, red.health - bullet.get_bullet_damage())
                     self.remove_bullet(bullet)
+                    sound_system_instance.play_sound_effect("playerhit")
 
                     # Check if red spaceship's health reaches zero
                     if red.health == 0:
                         red.alive = False
                         red.visible = False
+                        sound_system_instance.play_sound_effect("playerdeath")
 
             for enemy_ship in enemy_ships:
                 if bullet.owner not in ["green", "orange", "purple", "blue", "brown", "white","grey"]:
@@ -313,6 +350,7 @@ class BulletSystem:
                             # Collision detected with enemy spaceship
                             enemy_ship.health -= bullet.get_bullet_damage()
                             self.remove_bullet(bullet)
+                            sound_system_instance.play_sound_effect("enemyhit")
 
                             # Check if enemy spaceship's health reaches zero
                             if enemy_ship.health <= 0:

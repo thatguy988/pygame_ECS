@@ -1,3 +1,6 @@
+from systems.sound_effect_system import SoundEffectSystem
+
+
 
 max_points_stage_1 = 100
 max_points_stage_2 = 200
@@ -17,6 +20,8 @@ blue_ship_points = 5
 brown_ship_points = 5
 boss_ship_points = 1
 
+sound_effect_instance = SoundEffectSystem()
+sound_effect_instance.add_sound_effect_component("score","Assets\\Sound_Effects\\Add_Score_Sound.wav")
 
 
 class Score:
@@ -25,6 +30,7 @@ class Score:
         self.limit = limit
     
     def increase_score(self, amount):
+        sound_effect_instance.play_sound_effect("score")
         self.score += amount
     
     def reset_score(self):
@@ -36,7 +42,7 @@ class Score:
 
     def reward_points(self, ship_color):
         if ship_color == "grey":
-            self.increase_score(asteroid_points)
+            pass
         elif ship_color == "green":
             self.increase_score(green_ship_points)
         elif ship_color == "orange":

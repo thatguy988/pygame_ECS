@@ -1,5 +1,6 @@
 import pygame
 import sys
+import time
 
 
 from systems.movement import MovementSystem
@@ -8,6 +9,7 @@ from systems.bullet_system import BulletSystem
 from systems.ship_system import create_ships
 from systems.menu_input_system import MenuHandling
 from systems.music_system import MusicSystem
+from systems.sound_effect_system import SoundEffectSystem
 
 from components.explosion import Explosion, load_explosion_images
 from components.score import Score
@@ -31,60 +33,50 @@ music_system_instance = MusicSystem()
 music_system_instance.add_music_component("pause_menu_music", "Assets\\Music\\mixkit-space-game-668.mp3")
 music_system_instance.add_music_component("main_menu_music", "Assets\\Music\\mixkit-infected-vibes-157.mp3")
 
-def load_stage_music(stage):
-    music_mapping = {
-        1: "game_music_1",
-        2: "game_music_2",
-        3: "game_music_3",
-        4: "game_music_4",
-        5: "game_music_5",
-        6: "game_music_6",
-        7: "game_music_7",
-        0: "game_music_0"
-    }
 
-    if stage in music_mapping:
-        music_label = music_mapping[stage]
-        music_system_instance.add_music_component(music_label, f"Assets\\Music\\game-music-{stage}.wav")
-        return music_label
 
-def load_story_music(stage):
-    music_mapping = {
-        1: "story_music_1",
-        2: "story_music_2",
-        3: "story_music_3",
-        4: "story_music_4",
-        5: "story_music_5",
-        6: "story_music_6",
-        7: "story_music_7",
-        8: "story_music_8"
-    }
 
-    if stage in music_mapping:
-        music_label = music_mapping[stage]
-        music_system_instance.add_music_component(music_label, f"Assets\\Music\\story_music_{stage}.wav")
-        return music_label
+sound_system_instance = SoundEffectSystem()
+
+sound_system_instance.add_sound_effect_component("menu_scrolling","Assets\\Sound_Effects\\Menu_Scrolling.wav")
+
+sound_system_instance.add_sound_effect_component("press_button","Assets\\Sound_Effects\\Menu_Select_Press_2.wav")
+sound_system_instance.add_sound_effect_component("game_over","Assets\\Sound_Effects\\Game_Over_Sound.wav")
+sound_system_instance.add_sound_effect_component("start_up_1","Assets\\Sound_Effects\\sega-scream.mp3")
+sound_system_instance.add_sound_effect_component("start_up_2","Assets\\Sound_Effects\\sega-saturn-startup.mp3")
+
+
 def select_players_screen():
     selected_option = 0
     while True:
         RenderSystem.display_select_players_screen(selected_option)
         for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-
-                if event.type == pygame.KEYDOWN:
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_w:
+                        sound_system_instance.play_sound_effect("menu_scrolling")
+
                         selected_option = (selected_option - 1) % 3  # Move up in the options list
                     elif event.key == pygame.K_s:
+                        sound_system_instance.play_sound_effect("menu_scrolling")
+
                         selected_option = (selected_option + 1) % 3  # Move down in the options list
                     elif event.key == pygame.K_SPACE:
+                        sound_system_instance.play_sound_effect("press_button")
+
                         if selected_option == 0:
                             return 1  # 1 player selected
                         elif selected_option == 1:
                             return 2  # 2 players selected
                         elif selected_option == 2:
                             return 0  # Back to main menu
+        
+        
+        
+      
+        
 
 
 
@@ -99,10 +91,13 @@ def select_stage_screen():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_w:
+                    sound_system_instance.play_sound_effect("menu_scrolling")
                     selected_option = (selected_option - 1) % 8  # 7 for 7 options
                 elif event.key == pygame.K_s:
+                    sound_system_instance.play_sound_effect("menu_scrolling")
                     selected_option = (selected_option + 1) % 8  
                 elif event.key == pygame.K_SPACE:
+                    sound_system_instance.play_sound_effect("press_button")
                     if selected_option == 0:
                         return 1  # stage 1
                     elif selected_option == 1:
@@ -162,7 +157,7 @@ def pause_menu(game_music):
             return "main_menu"  # Go back to the main menu
 
 def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, 
-                      movement_system_instance, bullet_system_instance, render_system_instance, background,scoreboard,explosions):
+                      movement_system_instance, bullet_system_instance, render_system_instance, background,scoreboard,explosions,game_music):
     if player_count >= 1:
         movement_system_instance.move_player1(
             yellow, keys_pressed, WIDTH, HEIGHT, VEL, yellow.width, yellow.height
@@ -179,19 +174,21 @@ def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed,
         render_system_instance.draw_window([yellow] + enemy_ships,bullet_system_instance, background)
     if player_count == 2:
         bullet_system_instance.handle_enemyship_ship_collision(red, enemy_ships, WIDTH, HEIGHT,scoreboard)
-    else:
-        bullet_system_instance.handle_enemyship_ship_collision(yellow, enemy_ships, WIDTH, HEIGHT,scoreboard)
+
+    bullet_system_instance.handle_enemyship_ship_collision(yellow, enemy_ships, WIDTH, HEIGHT,scoreboard)
 
     bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, WIDTH, yellow, red, player_count,background,HEIGHT,scoreboard,explosions)
 
     if not yellow.alive and player_count == 1:
-            game_over_screen()
+            game_over_screen(game_music)
 
     if player_count == 2:
         if not red.alive and not yellow.alive:
-                game_over_screen()
+                game_over_screen(game_music)
 
-def game_over_screen():
+def game_over_screen(game_music):
+    music_system_instance.stop_music(game_music)
+    sound_system_instance.play_sound_effect("game_over")
     while True:
         RenderSystem.display_game_over_screen()
         for event in pygame.event.get():
@@ -201,11 +198,14 @@ def game_over_screen():
                 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
-                    main_menu()
-                    return 
+                    sound_system_instance.stop_sound_effect("game_over")
+                    sound_system_instance.play_sound_effect("press_button")
+                    return main_menu()
+                    
 
 
-def next_stage_screen(player_count,stage):
+def next_stage_screen(player_count,stage,game_music):
+    music_system_instance.stop_music(game_music)
     while True:
         RenderSystem.display_next_stage_screen()
         for event in pygame.event.get():
@@ -215,13 +215,14 @@ def next_stage_screen(player_count,stage):
                 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_f:
+                    sound_system_instance.play_sound_effect("press_button")
                     result = story_screen(player_count,stage)
                     if result == "main_menu":
                        main_menu()
                        return
 
 def story_screen(player_count,stage):
-    story_music=load_story_music(stage)
+    story_music=music_system_instance.load_story_music(stage)
     music_system_instance.play_music(story_music)
     
     while True:
@@ -234,6 +235,8 @@ def story_screen(player_count,stage):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_f:
                     music_system_instance.stop_music(story_music)
+                    sound_system_instance.play_sound_effect("press_button")
+
                     if(stage != 8):
                         result = game_screen(player_count,stage)
                     else:
@@ -259,8 +262,7 @@ def game_screen(player_count, stage):
     movement_system_instance = MovementSystem()
     bullet_system_instance = BulletSystem()
     render_system_instance = RenderSystem()
-    
-    game_music=load_stage_music(stage)
+    game_music=music_system_instance.load_stage_music(stage)
     music_system_instance.play_music(game_music)
     
     
@@ -350,7 +352,7 @@ def game_screen(player_count, stage):
         
         
         if scoreboard.has_score_limit_reached():
-            next_stage_screen(player_count,stage + 1)
+            next_stage_screen(player_count,stage + 1,game_music)
             run =False
             
             break
@@ -460,7 +462,7 @@ def game_screen(player_count, stage):
         last_bullet_time, last_bullet_time_2 = \
             bullet_system_instance.fire_bullets(yellow, red, player_count, last_bullet_time, last_bullet_time_2,pause_duration,game_start_time,stage)
         update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system_instance, 
-                          bullet_system_instance, render_system_instance, background,scoreboard,explosions)
+                          bullet_system_instance, render_system_instance, background,scoreboard,explosions,game_music)
         
         enemy_ships = [ship for ship in enemy_ships if ship.alive]#keep enemy_ship list from growing large and slowing game down
 
@@ -520,9 +522,41 @@ def game_screen(player_count, stage):
         clock.tick(FPS)
 
 
+
+
+
+
+
+def display_developer_screen():
+    #sound_system_instance.play_sound_effect("start_up_1")
+    #sound_system_instance.play_sound_effect("start_up_2")
+    display_duration = 8  # Duration in seconds
+    start_time = time.time()
+
+    while True:
+        current_time = time.time()
+        elapsed_time = current_time - start_time
+
+        if elapsed_time >= display_duration:
+            
+            main_menu()
+            return
+        RenderSystem.display_developer_screen()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_f:
+                    main_menu()
+                    return
+
+
 def main():
     pygame.init()
-    main_menu()
+    display_developer_screen()
     pygame.quit()
     sys.exit()
 

@@ -127,6 +127,19 @@ class RenderSystem:
     pygame.display.update()
 
 
+    @staticmethod
+    def display_developer_screen():
+        
+        WIN.fill((0, 0, 0))
+
+        font = pygame.font.Font(None, 36)
+        text = font.render("Developed by Kirby", True, (255, 255, 255))
+        text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        WIN.blit(text, text_rect)
+
+        pygame.display.flip()
+
+
 
 
 
@@ -141,7 +154,7 @@ class RenderSystem:
         
         # Render the title text
         title_font = pygame.font.SysFont(None, 60)
-        title_text = title_font.render("Main Menu", True, (255, 255, 255))
+        title_text = title_font.render("Starfire Assault", True, (255, 255, 255))
         title_rect = title_text.get_rect(center=(WIDTH // 2, HEIGHT // 4))
         WIN.blit(title_text, title_rect)
         
@@ -365,7 +378,7 @@ class RenderSystem:
 
         if stage == 1:    
             story_text = story_font.render("Stage 1: The Journey Begins", True, (255, 255, 255))
-            story_paragraph = "In the year 25XX, the galaxy was in turmoil as a group of space bandits terrorized its inhabitants. Three brave spaceships, piloted by our courageous heroes, rose to the occasion to put an end to their tyranny. Determined and armed with their advanced weaponry, they embarked on their mission, setting a course towards the bandits' home planet."
+            story_paragraph = "In the year 25XX, the galaxy was in turmoil as a group of space bandits terrorized its inhabitants. Two brave spaceships, piloted by our courageous heroes, rose to the occasion to put an end to their tyranny. Determined and armed with their advanced weaponry, they embarked on their mission, setting a course towards the bandits' home planet."
         elif stage == 2:
             story_text = story_font.render("Stage 2: The New Arsenal", True, (255, 255, 255))
             story_paragraph = "As they progressed through space, our heroes discovered a valuable upgrade for their ships—a cutting-edge weapon system that unleashed a barrage of double bullets. With this powerful new arsenal at their disposal, they became even more formidable. But the bandits were not ones to be easily defeated."
