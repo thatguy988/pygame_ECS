@@ -14,14 +14,14 @@ minimum_y_value = HEIGHT - maximum_y_value
 DEFAULT_HEALTH = 100
 
 
-purple_enemy_ship_health = 30
+purple_enemy_ship_health = 35
 purple_enemy_ship_velocity = 4
 
-blue_enemy_ship_health = 20
+blue_enemy_ship_health = 50
 blue_enemy_ship_velocity = 8
 
 
-brown_enemy_ship_health = 20
+brown_enemy_ship_health = 55
 brown_enemy_ship_velocity = 3
 
 
@@ -29,10 +29,10 @@ boss_enemy_ship_health = 1000
 boss_enemy_ship_velocity = 1
 
 
-GREEN_ENEMY_SHIP_HEALTH = 10
+GREEN_ENEMY_SHIP_HEALTH = 15
 GREEN_ENEMY_SHIP_VEL = 3
 
-orange_enemy_ship_health = 20
+orange_enemy_ship_health = 40
 orange_enemy_ship_vel = 2
 
 ASTEROID_VEL = 2

@@ -9,30 +9,30 @@ from components.ship import ShipCreation
 spawn_rates = {
     "green": 3000,
     "orange": 5000,
-    "purple": 10000,
-    "blue": 2000,
-    "brown": 30000,
+    "purple": 7000,
+    "blue": 6000,
+    "brown": 9000,
     "grey": 3000,
 }
 
 # Minimum and maximum numbers of ships for different stages
 ship_numbers = {
     "green": {
-        1: (1, 2),
-        2: (1, 2),
-        3: (1,3),
+        1: (1, 6),
+        2: (1, 6),
+        3: (1, 4),
     },
     "orange": {
         2: (1, 2),
-        3: (1, 1),
+        3: (1, 3),
         4: (1, 2),
         5: (1, 2),
     },
     "purple": {
-        3: (1, 3),
-        4: (1, 3),
-        5: (1, 3),
-        6: (1, 3),
+        3: (2, 3),
+        4: (2, 3),
+        5: (2, 3),
+        6: (2, 3),
     },
     "blue": {
         4: (1, 3),
@@ -40,11 +40,11 @@ ship_numbers = {
         6: (1, 3),
     },
     "brown": {
-        5: (1, 3),
-        6: (1, 3),
+        5: (2, 4),
+        6: (2, 6),
     },
     "grey": {
-        0: (1,2),
+        0: (1, 2),
         1: (1, 2),
         8: (1, 2),
     },

@@ -29,16 +29,8 @@ green_ship_points = 10
 asteroid_points = 5
 
 sound_system_instance = SoundEffectSystem()
+sound_system_instance.load_sound_effects()
 
-sound_system_instance.add_sound_effect_component("bulletshot","Assets\\Sound_Effects\\Bullet_Shoot.wav")
-
-sound_system_instance.add_sound_effect_component("enemyshot","Assets\\Sound_Effects\\Enemy_Bullet.wav")
-
-sound_system_instance.add_sound_effect_component("playerhit","Assets\\Sound_Effects\\Bullet_Hit_With_Player.wav")
-
-sound_system_instance.add_sound_effect_component("enemyhit","Assets\\Sound_Effects\\Bullet_Hit_With_Enemy.wav")
-
-sound_system_instance.add_sound_effect_component("playerdeath","Assets\\Sound_Effects\\Player_Ship_Destroyed.wav")
 
 
 
@@ -51,8 +43,9 @@ class BulletSystem:
         self.last_fire_times = {}  # Dictionary to store the last fire time for each entity
 
     
-    def create_bullet(self, x, y, x_velocity, y_velocity, radius, owner):
+    def create_bullet(self, x, y, x_velocity, y_velocity, radius, owner,width_increase = 0, height_increase = 0):
         bullet = Bullet(x, y, x_velocity, y_velocity, radius, owner)
+        bullet.increase_size(width_increase, height_increase)
         self.bullets.append(bullet)
     
     def fire_bullet(self, player, last_bullet_time, player_bullet_delay, stage,pause_duration,game_start_time, color):
@@ -126,9 +119,6 @@ class BulletSystem:
 
         return last_bullet_time, last_bullet_time_2
 
-    def move_bullets(self):
-        for bullet in self.bullets:
-            bullet.x += bullet.velocity
 
     def remove_bullet(self, bullet):
         if bullet in self.bullets:
@@ -156,12 +146,13 @@ class BulletSystem:
             else:
                 bullet_color = WHITE  # Default color (white)
 
-            pygame.draw.rect(surface, bullet_color, (bullet.x, bullet.y, 5, 5))
+            pygame.draw.rect(surface, bullet_color, (bullet.x, bullet.y, bullet.width, bullet.height))
         
     def update(self, width, color, surface):
-        self.move_bullets()
         self.remove_offscreen_bullets(width)
         self.render_bullets(surface, color)
+
+    
         
     def auto_fire(self, enemy_ships, pause_duration, game_start_time, *last_bullet_times):
         current_time = pygame.time.get_ticks() - pause_duration - game_start_time
@@ -262,23 +253,21 @@ class BulletSystem:
                                 enemy_ship.position.y + enemy_ship.height // 2 + y_speed * 9,
                                 x_offset,
                                 y_speed,
-                                10,
+                                100,
                                 "white"
                             )
                         sound_system_instance.play_sound_effect("enemyshot")
 
 
-                        enemy_ship.bullet_change = random.randint(0, 2)
+                        enemy_ship.bullet_change = random.randint(0, 3)
                         last_bullet_times = list(last_bullet_times)
                         last_bullet_times[5] = current_time
                         last_bullet_times = tuple(last_bullet_times)
                     elif enemy_ship.bullet_change == 1:
                         if enemy_ship.bullet_beam == 0:
-                            enemy_ship.beam_positions = [
-                                random.randint(minimum_y_value, maximum_y_value)
-                                for _ in range(random.randint(5, 8))
-                            ]
-
+                            num_positions = random.randint(5, 8)
+                            beam_height = 10
+                            enemy_ship.beam_positions = generate_random_y_positions(num_positions, beam_height)
                         for beam_y_position in enemy_ship.beam_positions:
                             self.create_bullet(
                                 enemy_ship.position.x - 5, beam_y_position - 5, -5, 0, 10, "white"
@@ -286,10 +275,9 @@ class BulletSystem:
                             self.create_bullet(
                                 enemy_ship.position.x - 5, beam_y_position, -5, 0, 10, "white"
                             )
-
                         enemy_ship.bullet_beam += 1
                         if enemy_ship.bullet_beam == 60:
-                            enemy_ship.bullet_change = random.randint(0, 2)
+                            enemy_ship.bullet_change = random.randint(0, 3)
                             enemy_ship.bullet_beam = 0
                             last_bullet_times = list(last_bullet_times)  # Convert tuple to list
                             last_bullet_times[5] = current_time  # Update the sixth item
@@ -297,7 +285,7 @@ class BulletSystem:
 
                     elif(enemy_ship.bullet_change == 2):
                         self.create_bullet(
-                                enemy_ship.position.x - 5, random.randint(5,495), -5, 0, 10, "white"
+                                enemy_ship.position.x - 5, random.randint(5,495), -5, 0, 10, "white" 
                             )
                         enemy_ship.bullet_count +=1
                         if enemy_ship.bullet_count == enemy_ship.bullet_count_limit:
@@ -305,16 +293,32 @@ class BulletSystem:
 
                             enemy_ship.bullet_count = 0
                             enemy_ship.bullet_count_limit = random.randint(20,35)
-                            enemy_ship.bullet_change = random.randint(0,2)
+                            enemy_ship.bullet_change = random.randint(0,3)
                             last_bullet_times = list(last_bullet_times)  # Convert tuple to list
                             last_bullet_times[5] = current_time  # Update the sixth item
                             last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
+
+                    elif(enemy_ship.bullet_change == 3):
+                        bullet_width = 40
+                        bullet_height = 40
+                        num_of_bullets = random.randint(3,5)
+                        y_positions = generate_random_y_positions(num_of_bullets,bullet_height)  
+                        for y in y_positions:
+                            self.create_bullet(
+                                enemy_ship.position.x - 5, y, -5, 0, 100, "white", bullet_width, bullet_height
+                            )
+                       
+                        enemy_ship.bullet_change = random.randint(0, 3)
+                        last_bullet_times = list(last_bullet_times)  # Convert tuple to list
+                        last_bullet_times[5] = current_time  # Update the sixth item
+                        last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
+
         return last_bullet_times
     
     def update_bullets_and_check_collisions(self, enemy_ships, WIDTH, yellow, red, player_count, background, HEIGHT, scoreboard, explosions):
-
+        
         for bullet in self.bullets:
-            bullet.update(WIDTH)
+            bullet.update()
 
             if yellow.alive and yellow.visible and bullet.owner not in {"red", "yellow"}:
                 if yellow.position.x < bullet.x + bullet.radius < yellow.position.x + yellow.width and yellow.position.y < bullet.y < yellow.position.y + yellow.height:
@@ -349,25 +353,16 @@ class BulletSystem:
                         if enemy_ship.position.y < bullet.y < enemy_ship.position.y + enemy_ship.height:
                             # Collision detected with enemy spaceship
                             enemy_ship.health -= bullet.get_bullet_damage()
+                            health_reward = bullet.owner
                             self.remove_bullet(bullet)
                             sound_system_instance.play_sound_effect("enemyhit")
 
                             # Check if enemy spaceship's health reaches zero
                             if enemy_ship.health <= 0:
-                                '''
-                                # Create an explosion at (x, y) and add it to the list
+                                health(health_reward,yellow,red)
                                 explosion = Explosion(enemy_ship.position.x, enemy_ship.position.y)
-                                enemy_rect = pygame.Rect(enemy_ship.position.x, enemy_ship.position.y, enemy_ship.width, enemy_ship.height)
 
                                 explosions.append(explosion)
-
-    
-                                for explosion in explosions:
-                                    explosion.update()
-                                    explosion.draw(background)
-                                    # Update the game display
-                                    pygame.display.update(enemy_rect)
-                                '''
                                 enemy_ship.stop_moving()
                                 enemy_ship.alive = False
                                 enemy_ship.position.x = WIDTH
@@ -375,8 +370,11 @@ class BulletSystem:
 
                                 enemy_ship.health = enemy_ship.initial_health
                                 scoreboard.reward_points(enemy_ship.ship_color)
+                                #sound_system_instance.play_sound_effect("explosion")
 
-
+       
+    
+    
 
 
 
@@ -406,3 +404,19 @@ class BulletSystem:
                         enemy_ship.health = enemy_ship.initial_health
                         enemy_ship.visible = True
                         scoreboard.reward_points(enemy_ship.ship_color)
+
+
+
+def health(health_reward,yellow,red):
+        if health_reward == "yellow":
+            yellow.health += 5
+        elif health_reward == "red":
+            red.health += 5
+
+def generate_random_y_positions(num_positions, bullet_height):
+    positions = []
+    while len(positions) < num_positions:
+        y = random.randint(5, 495)
+        if all(abs(y - existing_y) > bullet_height for existing_y in positions) and all(abs(y - existing_y) != bullet_height for existing_y in positions):
+            positions.append(y)
+    return positions

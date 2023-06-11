@@ -15,20 +15,12 @@ class Explosion:
         self.images = explosion_images
         self.frame_index = 0
         self.frame_count = 0
-    
+        
     def update(self):
-        print("framecount")
-        print(self.frame_count)
         self.frame_count += 1
         if self.frame_count >= 10:
             self.frame_index += 1
             self.frame_count = 0
-    
-    def draw(self, surface):
-        if self.frame_index < len(self.images):
-            print("frameindex")
-            print(self.frame_index)
-            surface.blit(self.images[self.frame_index], (self.x, self.y))
 
     def is_finished(self):
         return self.frame_index >= len(self.images)

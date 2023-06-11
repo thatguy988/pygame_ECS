@@ -1,7 +1,7 @@
 import pygame
 import random
-WIDTH = 10
-HEIGHT = 10
+WIDTH = 5
+HEIGHT = 5
 class Bullet:
     
     def __init__(self, x, y, x_velocity, y_velocity, radius, owner):
@@ -10,15 +10,25 @@ class Bullet:
         self.x_velocity = x_velocity
         self.y_velocity = y_velocity
         self.radius = radius
-        self.rect = pygame.Rect(self.x, self.y, WIDTH, HEIGHT) 
+        self.width = WIDTH
+        self.height = HEIGHT
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height) 
         self.active=True
         self.owner = owner
 
 
-    def update(self, WIDTH):
+    def update(self):
         self.x += self.x_velocity
         self.y += self.y_velocity
         self.rect.x = self.x
+        self.rect.y = self.y
+
+
+    def increase_size(self, width_increase, height_increase):
+        self.width += width_increase
+        self.height += height_increase
+
+
 
     def get_bullet_damage(self):
         if self.owner == "yellow":
@@ -26,15 +36,15 @@ class Bullet:
         elif self.owner == "red":
             return 5  # Set the damage value for red bullets
         elif self.owner == "green":
-            return 8  # Set the damage value for green bullets
+            return 10  # Set the damage value for green bullets
         elif self.owner == "orange":
-            return 7  # Set the damage value for orange bullets
+            return 25  # Set the damage value for orange bullets
         elif self.owner == "purple":
-            return 6  # Set the damage value for purple bullets
+            return 20  # Set the damage value for purple bullets
         elif self.owner == "blue":
-            return 9  # Set the damage value for blue bullets
+            return 15# Set the damage value for blue bullets
         elif self.owner == "brown":
-            return 7  # Set the damage value for brown bullets
+            return 20  # Set the damage value for brown bullets
         elif self.owner == "white":
             return 10  # Set the damage value for white bullets
         else:

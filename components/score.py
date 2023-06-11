@@ -2,26 +2,26 @@ from systems.sound_effect_system import SoundEffectSystem
 
 
 
-max_points_stage_1 = 100
-max_points_stage_2 = 200
-max_points_stage_3 = 300 
-max_points_stage_4 = 400
-max_points_stage_5 = 500
-max_points_stage_6 = 600
+max_points_stage_1 = 300
+max_points_stage_2 = 400
+max_points_stage_3 = 500 
+max_points_stage_4 = 800
+max_points_stage_5 = 1000
+max_points_stage_6 = 1500
 max_points_stage_7 = 1
 max_points_stage_tutorial = 99999
 
 
 asteroid_points = 0
-green_ship_points = 20
-orange_ship_points = 5
+green_ship_points = 10
+orange_ship_points = 10
 purple_ship_points = 5
-blue_ship_points = 5
-brown_ship_points = 5
+blue_ship_points = 20
+brown_ship_points = 20
 boss_ship_points = 1
 
 sound_effect_instance = SoundEffectSystem()
-sound_effect_instance.add_sound_effect_component("score","Assets\\Sound_Effects\\Add_Score_Sound.wav")
+sound_effect_instance.load_sound_effects()
 
 
 class Score:

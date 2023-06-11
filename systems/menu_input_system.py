@@ -4,12 +4,7 @@ from systems.sound_effect_system import SoundEffectSystem
 
 
 sound_system_instance = SoundEffectSystem()
-
-sound_system_instance.add_sound_effect_component("menu_scrolling","Assets\\Sound_Effects\\Menu_Scrolling.wav")
-
-sound_system_instance.add_sound_effect_component("press_button","Assets\\Sound_Effects\\Menu_Select_Press_2.wav")
-
-
+sound_system_instance.load_sound_effects()
 
 class MenuHandling:
     def handle_menu_events(selected_option): #responsible for handling the user input events related to the main menu

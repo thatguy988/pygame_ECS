@@ -11,7 +11,7 @@ from systems.menu_input_system import MenuHandling
 from systems.music_system import MusicSystem
 from systems.sound_effect_system import SoundEffectSystem
 
-from components.explosion import Explosion, load_explosion_images
+from components.explosion import load_explosion_images
 from components.score import Score
 from components.ship import ShipCreation
 
@@ -35,15 +35,9 @@ music_system_instance.add_music_component("main_menu_music", "Assets\\Music\\mix
 
 
 
-
 sound_system_instance = SoundEffectSystem()
+sound_system_instance.load_sound_effects()
 
-sound_system_instance.add_sound_effect_component("menu_scrolling","Assets\\Sound_Effects\\Menu_Scrolling.wav")
-
-sound_system_instance.add_sound_effect_component("press_button","Assets\\Sound_Effects\\Menu_Select_Press_2.wav")
-sound_system_instance.add_sound_effect_component("game_over","Assets\\Sound_Effects\\Game_Over_Sound.wav")
-sound_system_instance.add_sound_effect_component("start_up_1","Assets\\Sound_Effects\\sega-scream.mp3")
-sound_system_instance.add_sound_effect_component("start_up_2","Assets\\Sound_Effects\\sega-saturn-startup.mp3")
 
 
 def select_players_screen():
@@ -74,12 +68,6 @@ def select_players_screen():
                             return 0  # Back to main menu
         
         
-        
-      
-        
-
-
-
 def select_stage_screen():
     selected_option = 0
     while True:
@@ -118,6 +106,8 @@ def select_stage_screen():
 
 def main_menu():
     music_system_instance.play_music("main_menu_music")
+    music_system_instance.set_music_volume("main_menu_music", 0.3)
+
     selected_option = 0  # Default selected option
     while True:
         RenderSystem.display_menu(selected_option)
@@ -185,6 +175,8 @@ def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed,
     if player_count == 2:
         if not red.alive and not yellow.alive:
                 game_over_screen(game_music)
+    
+
 
 def game_over_screen(game_music):
     music_system_instance.stop_music(game_music)
@@ -224,6 +216,7 @@ def next_stage_screen(player_count,stage,game_music):
 def story_screen(player_count,stage):
     story_music=music_system_instance.load_story_music(stage)
     music_system_instance.play_music(story_music)
+    music_system_instance.set_music_volume(story_music, 0.4)
     
     while True:
         RenderSystem.display_story_screen(stage)
@@ -264,6 +257,7 @@ def game_screen(player_count, stage):
     render_system_instance = RenderSystem()
     game_music=music_system_instance.load_stage_music(stage)
     music_system_instance.play_music(game_music)
+    music_system_instance.set_music_volume(game_music, 0.3)
     
     
 
@@ -279,7 +273,7 @@ def game_screen(player_count, stage):
 
 
     load_explosion_images()
-    explosions=[]
+    explosions=[] #List to store explosions
 
     
     last_asteroid_spawn_time = 0 #last spawn time of asteroid
@@ -400,9 +394,6 @@ def game_screen(player_count, stage):
 
         keys_pressed = pygame.key.get_pressed()
         current_time = pygame.time.get_ticks() - pause_duration - game_start_time
-              
-        #print(pause_duration)
-        #print(current_time)
 
         results = create_ships(enemy_ships, pause_duration, game_start_time, stage, last_spawn_time_green_ships, last_asteroid_spawn_time, last_spawn_time_orange_ships,
                        last_spawn_time_purple_ships, last_spawn_time_blue_ships, last_spawn_time_brown_ships)
@@ -496,35 +487,18 @@ def game_screen(player_count, stage):
         if stage == 0:
             render_system_instance.display_tutorial_instructions(player_count)
 
-        
     
-        pygame.display.flip()
-        '''
-        # Create an explosion at (x, y) and add it to the list
-        explosion = Explosion(200, 200)
-        explosions.append(explosion)
-
-        
-
         for explosion in explosions:
             explosion.update()
-            explosion.draw(background)
+            render_system_instance.render_explosion(explosion, WIN)
             
 
-          
-
-        # Update the game display
+            if explosion.is_finished():
+                explosion.remove(explosions)
+            
         pygame.display.update()
-        
-        '''
-        
        
         clock.tick(FPS)
-
-
-
-
-
 
 
 def display_developer_screen():

@@ -60,9 +60,10 @@ class MovementSystem:
                     entity.position.x -= entity.velocity  # Move other enemy ships with default
 
                 if entity.position.x < -width:
-                    # Enemy ship reached the left side, generate a new random y-axis position
-                    entity.position.x = width  # Reset x-coordinate to the right side
-                    entity.position.y = random.randint(minimum_y_value, maximum_y_value)  # Generate a new random y-coordinate
+                    entity.stop_moving()
+                    entity.alive = False
+                    entity.position.x = WIDTH
+                    entity.position.y = HEIGHT
     
 
     

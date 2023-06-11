@@ -19,8 +19,25 @@ class RenderSystem:
             prev_score = scoreboard.score
             last_score_change = current_time
         return score_text, last_score_change, prev_score,
+
+    @staticmethod    
+    
+    def render_explosion(explosion, surface):
+        if explosion.frame_index < len(explosion.images):
+            explosion_image = explosion.images[explosion.frame_index]
+            explosion_rect = explosion_image.get_rect()
+            explosion_rect.center = (explosion.x, explosion.y)
+
             
-   
+            temp_surface = surface.copy()
+
+            
+            temp_surface.blit(explosion_image, explosion_rect, special_flags=pygame.BLEND_RGBA_MULT)
+
+            
+            surface.blit(temp_surface, (0, 0))
+    
+
 
     @staticmethod
     def update_health_text(current_time, yellow, red, prev_yellow_health, prev_red_health, font,
