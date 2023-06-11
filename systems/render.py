@@ -91,11 +91,11 @@ class RenderSystem:
     @staticmethod    
     def background_render(stage,WIDTH,HEIGHT):
         if(stage == 1):
-            background = pygame.image.load(os.path.join('assets', 'space.png'))
+            background = pygame.image.load(os.path.join('assets', 'Blue_Nebula_Stage_1.png'))
             background = pygame.transform.scale(background, (WIDTH, HEIGHT))
             return background
         elif(stage == 2):
-            background = pygame.image.load(os.path.join('assets', 'Purple_Nebula_Stage_2.png'))
+            background = pygame.image.load(os.path.join('assets', 'Purple_Nebula_Game.png'))
             background = pygame.transform.scale(background, (WIDTH, HEIGHT))
             return background
         elif(stage == 3):

@@ -163,11 +163,13 @@ def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed,
     else:
         render_system_instance.draw_window([yellow] + enemy_ships,bullet_system_instance, background)
     if player_count == 2:
-        bullet_system_instance.handle_enemyship_ship_collision(red, enemy_ships, WIDTH, HEIGHT,scoreboard)
+        bullet_system_instance.handle_enemyship_ship_collision(red, enemy_ships,scoreboard, explosions)
 
-    bullet_system_instance.handle_enemyship_ship_collision(yellow, enemy_ships, WIDTH, HEIGHT,scoreboard)
+    bullet_system_instance.handle_enemyship_ship_collision(yellow, enemy_ships, scoreboard,explosions)
 
     bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, WIDTH, yellow, red, player_count,background,HEIGHT,scoreboard,explosions)
+
+    bullet_system_instance.remove_offscreen_bullets(WIDTH,HEIGHT)
 
     if not yellow.alive and player_count == 1:
             game_over_screen(game_music)
@@ -240,6 +242,7 @@ def story_screen(player_count,stage):
              
 
 def game_screen(player_count, stage):
+
     yellow = ShipCreation.create_yellow_ship()
     red = None
     
@@ -325,6 +328,7 @@ def game_screen(player_count, stage):
 
     clock = pygame.time.Clock() # reset clock
 
+
     
     pause_duration = 0
     game_start_time = pygame.time.get_ticks()
@@ -344,6 +348,7 @@ def game_screen(player_count, stage):
     while run:
         clock.tick(FPS)
         
+
         
         if scoreboard.has_score_limit_reached():
             next_stage_screen(player_count,stage + 1,game_music)
@@ -445,7 +450,7 @@ def game_screen(player_count, stage):
         elif stage == 0:
             last_asteroid_spawn_time = results[0]
 
-
+        
 
         movement_system_instance.move_enemy_ships(enemy_ships, WIDTH)  # Move all enemy ships
         
@@ -455,7 +460,8 @@ def game_screen(player_count, stage):
         update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system_instance, 
                           bullet_system_instance, render_system_instance, background,scoreboard,explosions,game_music)
         
-        enemy_ships = [ship for ship in enemy_ships if ship.alive]#keep enemy_ship list from growing large and slowing game down
+       
+
 
         if(player_count==1):
             yellow_health_text, last_yellow_health_change, prev_yellow_health = \
@@ -491,11 +497,20 @@ def game_screen(player_count, stage):
         for explosion in explosions:
             explosion.update()
             render_system_instance.render_explosion(explosion, WIN)
-            
+        
 
             if explosion.is_finished():
-                explosion.remove(explosions)
+                explosions.remove(explosion)
+
             
+
+        # Render FPS counter
+        fps = clock.get_fps()
+        fps_text = font.render("FPS: " + str(int(fps)), True, (255, 255, 255))
+        fps_rect = fps_text.get_rect(topright=(WIDTH - 10, 10))
+        WIN.blit(fps_text, fps_rect)
+        
+        
         pygame.display.update()
        
         clock.tick(FPS)

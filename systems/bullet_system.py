@@ -40,7 +40,7 @@ sound_system_instance.load_sound_effects()
 class BulletSystem:
     def __init__(self):
         self.bullets = []
-        self.last_fire_times = {}  # Dictionary to store the last fire time for each entity
+        #self.last_fire_times = {}  # Dictionary to store the last fire time for each entity
 
     
     def create_bullet(self, x, y, x_velocity, y_velocity, radius, owner,width_increase = 0, height_increase = 0):
@@ -118,15 +118,28 @@ class BulletSystem:
                 )
 
         return last_bullet_time, last_bullet_time_2
+    
+    def remove_offscreen_bullets(self, width, height):
+        '''
+        removed_bullets = [
+            bullet for bullet in self.bullets
+            if bullet.x < 0 or bullet.x > width or bullet.y < 0 or bullet.y > height
+        ]
+        '''
+
+        self.bullets = [
+            bullet for bullet in self.bullets
+            if 0 <= bullet.x <= width and 0 <= bullet.y <= height
+        ]
+
+        
 
 
+    
     def remove_bullet(self, bullet):
         if bullet in self.bullets:
             self.bullets.remove(bullet)
-        
-    def remove_offscreen_bullets(self, width):
-        self.bullets = [bullet for bullet in self.bullets if bullet.x < width]
-
+    
     def render_bullets(self, surface):
         for bullet in self.bullets:
             if bullet.owner == "yellow":
@@ -147,11 +160,11 @@ class BulletSystem:
                 bullet_color = WHITE  # Default color (white)
 
             pygame.draw.rect(surface, bullet_color, (bullet.x, bullet.y, bullet.width, bullet.height))
-        
+    '''  
     def update(self, width, color, surface):
         self.remove_offscreen_bullets(width)
         self.render_bullets(surface, color)
-
+    '''
     
         
     def auto_fire(self, enemy_ships, pause_duration, game_start_time, *last_bullet_times):
@@ -365,12 +378,21 @@ class BulletSystem:
                                 explosions.append(explosion)
                                 enemy_ship.stop_moving()
                                 enemy_ship.alive = False
-                                enemy_ship.position.x = WIDTH
-                                enemy_ship.position.y = HEIGHT
-
-                                enemy_ship.health = enemy_ship.initial_health
+                                #print("Before removal:", enemy_ships)
                                 scoreboard.reward_points(enemy_ship.ship_color)
+
+
+
+
+
+
+                                enemy_ships.remove(enemy_ship)
+                                #print("After removal:", enemy_ships)
+                                
+
                                 #sound_system_instance.play_sound_effect("explosion")
+            
+
 
        
     
@@ -378,7 +400,7 @@ class BulletSystem:
 
 
 
-    def handle_enemyship_ship_collision(self, ship, enemy_ships, WIDTH, HEIGHT,scoreboard):
+    def handle_enemyship_ship_collision(self, ship, enemy_ships,scoreboard,explosions):
         for enemy_ship in enemy_ships:
             if ship.alive and ship.visible and enemy_ship.alive and enemy_ship.visible:
                 if ship.position.x < enemy_ship.position.x + enemy_ship.width and \
@@ -395,15 +417,16 @@ class BulletSystem:
                         # Handle yellow player ship's destruction
 
                     if enemy_ship.health <= 0:
-                        
-                        enemy_ship.stop_moving()
-                        enemy_ship.visible = False
+                        explosion = Explosion(enemy_ship.position.x, enemy_ship.position.y)
 
-                        enemy_ship.position.x = WIDTH
-                        enemy_ship.position.y = HEIGHT
-                        enemy_ship.health = enemy_ship.initial_health
-                        enemy_ship.visible = True
+                        explosions.append(explosion)
+                        enemy_ship.stop_moving()
+                        enemy_ship.alive = False
+                        #print("Before removal:", enemy_ships)
                         scoreboard.reward_points(enemy_ship.ship_color)
+
+                        enemy_ships.remove(enemy_ship)
+                       # print("After removal:", enemy_ships)
 
 
 
