@@ -1,9 +1,7 @@
 import pygame
 import random
-import time
+
 from components.bullet import Bullet
-from components.score import Score
-from components.explosion import Explosion, load_explosion_images
 
 from systems.sound_effect_system import SoundEffectSystem
 
@@ -23,26 +21,18 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 maximum_y_value = HEIGHT - 25
 minimum_y_value = HEIGHT - maximum_y_value
 
-
-
-green_ship_points = 10
-asteroid_points = 5
-
 sound_system_instance = SoundEffectSystem()
 sound_system_instance.load_sound_effects()
 
 
-
-
-
-
-
 class BulletSystem:
-    def __init__(self):
+    def __init__(self,explosion_system_instance):
         self.bullets = []
-        
+        self.explosion_system = explosion_system_instance
 
-    
+    def reset(self):
+        self.bullets = []
+
     def create_bullet(self, x, y, x_velocity, y_velocity, radius, owner,width_increase = 0, height_increase = 0):
         bullet = Bullet(x, y, x_velocity, y_velocity, radius, owner)
         bullet.increase_size(width_increase, height_increase)
@@ -120,22 +110,11 @@ class BulletSystem:
         return last_bullet_time, last_bullet_time_2
     
     def remove_offscreen_bullets(self, width, height):
-        '''
-        removed_bullets = [
-            bullet for bullet in self.bullets
-            if bullet.x < 0 or bullet.x > width or bullet.y < 0 or bullet.y > height
-        ]
-        '''
-
         self.bullets = [
             bullet for bullet in self.bullets
             if 0 <= bullet.x <= width and 0 <= bullet.y <= height
         ]
 
-        
-
-
-    
     def remove_bullet(self, bullet):
         if bullet in self.bullets:
             self.bullets.remove(bullet)
@@ -167,12 +146,12 @@ class BulletSystem:
         current_time = pygame.time.get_ticks() - pause_duration - game_start_time
         time_since_last_bullets = [current_time - last_bullet_time for last_bullet_time in last_bullet_times]
         color_delays = {
-            "green": 2000,  
-            "orange": 1500,  
-            "purple": 1200,
+            "green": 3000,  
+            "orange": 2000,  
+            "purple": 1500,
             "blue": 500,
             "brown": 1600,
-            "white": 1800,
+            "white": 1200,
         }
         for enemy_ship in enemy_ships:
             if hasattr(enemy_ship, "ship_color") and enemy_ship.ship_color in color_delays:
@@ -324,7 +303,7 @@ class BulletSystem:
 
         return last_bullet_times
     
-    def update_bullets_and_check_collisions(self, enemy_ships, WIDTH, yellow, red, player_count, background, HEIGHT, scoreboard, explosions):
+    def update_bullets_and_check_collisions(self, enemy_ships, yellow, red, player_count, scoreboard):
         
         for bullet in self.bullets:
             bullet.update()
@@ -337,8 +316,9 @@ class BulletSystem:
                     sound_system_instance.play_sound_effect("playerhit")
 
                     # Check if yellow spaceship's health reaches zero
-                    if yellow.health == 0:
+                    if yellow.health <= 0 and yellow.alive:
                         yellow.alive = False
+                        #explosion_system_instance.create_explosion(yellow.position.x, yellow.position.y)
                         yellow.visible = False
                         sound_system_instance.play_sound_effect("playerdeath")
 
@@ -351,8 +331,9 @@ class BulletSystem:
                     sound_system_instance.play_sound_effect("playerhit")
 
                     # Check if red spaceship's health reaches zero
-                    if red.health == 0:
+                    if red.health <= 0 and red.alive:
                         red.alive = False
+                        #explosion_system_instance.create_explosion(red.position.x, red.position.y)
                         red.visible = False
                         sound_system_instance.play_sound_effect("playerdeath")
 
@@ -369,34 +350,14 @@ class BulletSystem:
                             # Check if enemy spaceship's health reaches zero
                             if enemy_ship.health <= 0:
                                 health(health_reward,yellow,red)
-                                explosion = Explosion(enemy_ship.position.x, enemy_ship.position.y)
-
-                                explosions.append(explosion)
+                                self.explosion_system.create_explosion(enemy_ship.position.x, enemy_ship.position.y)
                                 enemy_ship.stop_moving()
-                                enemy_ship.alive = False
-                                #print("Before removal:", enemy_ships)
+                                #enemy_ship.alive = False
                                 scoreboard.reward_points(enemy_ship.ship_color)
-
-
-
-
-
-
                                 enemy_ships.remove(enemy_ship)
-                                #print("After removal:", enemy_ships)
-                                
-
                                 #sound_system_instance.play_sound_effect("explosion")
-            
-
-
-       
-    
-    
-
-
-
-    def handle_enemyship_ship_collision(self, ship, enemy_ships,scoreboard,explosions):
+        
+    def handle_enemyship_ship_collision(self, ship, enemy_ships,scoreboard):
         for enemy_ship in enemy_ships:
             if ship.alive and ship.visible and enemy_ship.alive and enemy_ship.visible:
                 if ship.position.x < enemy_ship.position.x + enemy_ship.width and \
@@ -413,16 +374,11 @@ class BulletSystem:
                         # Handle yellow player ship's destruction
 
                     if enemy_ship.health <= 0:
-                        explosion = Explosion(enemy_ship.position.x, enemy_ship.position.y)
-
-                        explosions.append(explosion)
+                        #self.explosion_system.create_explosion(enemy_ship.position.x, enemy_ship.position.y)
                         enemy_ship.stop_moving()
                         enemy_ship.alive = False
-                        #print("Before removal:", enemy_ships)
                         scoreboard.reward_points(enemy_ship.ship_color)
-
                         enemy_ships.remove(enemy_ship)
-                       # print("After removal:", enemy_ships)
 
 
 

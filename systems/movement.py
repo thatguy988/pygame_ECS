@@ -1,5 +1,5 @@
 import pygame
-import random
+
 WIDTH, HEIGHT = 1400, 500
 maximum_y_value = HEIGHT - 25
 minimum_y_value = HEIGHT - maximum_y_value

@@ -2,18 +2,15 @@ import pygame
 import sys
 import time
 
+from game_manager import GameManager
 
-from systems.movement import MovementSystem
 from systems.render import RenderSystem
-from systems.bullet_system import BulletSystem
 from systems.ship_system import create_ships
 from systems.menu_input_system import MenuHandling
 from systems.music_system import MusicSystem
 from systems.sound_effect_system import SoundEffectSystem
 
-from components.explosion import load_explosion_images
-from components.score import Score
-from components.ship import ShipCreation
+from components.explosion import Explosion 
 
 WIDTH, HEIGHT = 1400, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -27,6 +24,7 @@ RED = (255, 0, 0)
 FPS = 120
 VEL = 4
 
+game_manager=GameManager()
 
 music_system_instance = MusicSystem()
 
@@ -37,6 +35,8 @@ music_system_instance.add_music_component("main_menu_music", "Assets\\Music\\mix
 
 sound_system_instance = SoundEffectSystem()
 sound_system_instance.load_sound_effects()
+
+Explosion.load_explosion_images()
 
 
 
@@ -104,7 +104,7 @@ def select_stage_screen():
                         return 0 # back
 
 
-def main_menu():
+def main_menu(game_manager):
     music_system_instance.play_music("main_menu_music")
     music_system_instance.set_music_volume("main_menu_music", 0.3)
 
@@ -119,19 +119,18 @@ def main_menu():
                 if(stage == 0):
                     continue #jump to next iteration of loop skip remaing code skips game_screen and selected option reset
                 music_system_instance.stop_music("main_menu_music")
-                story_screen(player_count,stage)
+                story_screen(player_count,stage,game_manager)
             elif player_count == 2:
                 stage = select_stage_screen()  # Select the stage
                 if(stage == 0):
                     continue
                 music_system_instance.stop_music("main_menu_music")
-                story_screen(player_count,stage)
-
+                story_screen(player_count,stage,game_manager)
             selected_option = 0  # Reset the selected option for when player goes back to main menu
         elif selected_option == "tutorial":
             player_count = select_players_screen()
             music_system_instance.stop_music("main_menu_music")
-            game_screen(player_count,0)
+            game_screen(player_count,0,game_manager)
             selected_option = 0
 
 def pause_menu(game_music):
@@ -146,41 +145,7 @@ def pause_menu(game_music):
         elif selected_option == "main_menu":
             return "main_menu"  # Go back to the main menu
 
-def update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, 
-                      movement_system_instance, bullet_system_instance, render_system_instance, background,scoreboard,explosions,game_music):
-    if player_count >= 1:
-        movement_system_instance.move_player1(
-            yellow, keys_pressed, WIDTH, HEIGHT, VEL, yellow.width, yellow.height
-        )
-
-    if player_count == 2:
-        movement_system_instance.move_player2(
-            red, keys_pressed, WIDTH, HEIGHT, VEL, yellow.width, yellow.height
-        )
-
-    if player_count == 2:
-        render_system_instance.draw_window([yellow, red] + enemy_ships, bullet_system_instance, background)
-    else:
-        render_system_instance.draw_window([yellow] + enemy_ships,bullet_system_instance, background)
-    if player_count == 2:
-        bullet_system_instance.handle_enemyship_ship_collision(red, enemy_ships,scoreboard, explosions)
-
-    bullet_system_instance.handle_enemyship_ship_collision(yellow, enemy_ships, scoreboard,explosions)
-
-    bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, WIDTH, yellow, red, player_count,background,HEIGHT,scoreboard,explosions)
-
-    bullet_system_instance.remove_offscreen_bullets(WIDTH,HEIGHT)
-
-    if not yellow.alive and player_count == 1:
-            game_over_screen(game_music)
-
-    if player_count == 2:
-        if not red.alive and not yellow.alive:
-                game_over_screen(game_music)
-    
-
-
-def game_over_screen(game_music):
+def game_over_screen(game_music,game_manager):
     music_system_instance.stop_music(game_music)
     sound_system_instance.play_sound_effect("game_over")
     while True:
@@ -194,11 +159,11 @@ def game_over_screen(game_music):
                 if event.key == pygame.K_r:
                     sound_system_instance.stop_sound_effect("game_over")
                     sound_system_instance.play_sound_effect("press_button")
-                    return main_menu()
+                    return main_menu(game_manager)
                     
 
 
-def next_stage_screen(player_count,stage,game_music):
+def next_stage_screen(player_count,stage,game_music,game_manager):
     music_system_instance.stop_music(game_music)
     while True:
         RenderSystem.display_next_stage_screen()
@@ -210,12 +175,12 @@ def next_stage_screen(player_count,stage,game_music):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_f:
                     sound_system_instance.play_sound_effect("press_button")
-                    result = story_screen(player_count,stage)
+                    result = story_screen(player_count,stage,game_manager)
                     if result == "main_menu":
-                       main_menu()
+                       main_menu(game_manager)
                        return
 
-def story_screen(player_count,stage):
+def story_screen(player_count,stage,game_manager):
     story_music=music_system_instance.load_story_music(stage)
     music_system_instance.play_music(story_music)
     music_system_instance.set_music_volume(story_music, 0.4)
@@ -233,290 +198,179 @@ def story_screen(player_count,stage):
                     sound_system_instance.play_sound_effect("press_button")
 
                     if(stage != 8):
-                        result = game_screen(player_count,stage)
+                        result = game_screen(player_count,stage,game_manager)
                     else:
-                        result = main_menu()
+                        result = main_menu(game_manager)
                     if result == "main_menu":
-                        main_menu()
+                        main_menu(game_manager)
                         return
              
 
-def game_screen(player_count, stage):
+def game_screen(player_count,stage,game_manager):
 
-    yellow = ShipCreation.create_yellow_ship()
-    red = None
-    
-    score_limit = Score.set_score_limit(stage)
-    scoreboard = Score(score_limit)
-
-    enemy_ships = []  # List to store enemy ships
-    
-    if player_count == 2:
-        red = ShipCreation.create_red_ship()
-    
-
-    movement_system_instance = MovementSystem()
-    bullet_system_instance = BulletSystem()
-    render_system_instance = RenderSystem()
+    game_manager.reset_game(player_count,stage)
     game_music=music_system_instance.load_stage_music(stage)
     music_system_instance.play_music(game_music)
     music_system_instance.set_music_volume(game_music, 0.3)
-    
-    
 
-    
-    background = render_system_instance.background_render(stage,WIDTH,HEIGHT)
-    
-    last_bullet_time = 0
-    last_bullet_time_2 = 0
-    
-    if stage == 7:
-        boss=ShipCreation.create_boss_enemy_ship()
-        enemy_ships.append(boss)
-
-
-    load_explosion_images()
-    explosions=[] #List to store explosions
-
-    
-    last_asteroid_spawn_time = 0 #last spawn time of asteroid
-
-
-    last_spawn_time_green_ships = 0  # Variable to track the last spawn time of green enemy ship
-    last_spawn_time_orange_ships = 0
-    last_spawn_time_purple_ships = 0
-    last_spawn_time_blue_ships = 0
-    last_spawn_time_brown_ships = 0
-
-
-    last_bullet_time_green_ship = 0 
-    last_bullet_time_orange_ship = 0
-    last_bullet_time_purple_ship = 0
-    last_bullet_time_blue_ship = 0
-    last_bullet_time_brown_ship = 0
-    last_bullet_time_white_ship = 0
-
-    
-    
-    pause_pressed = False
-    game_paused = False
-
-    
-
-    font = pygame.font.Font(None, 24)  # Load a font
-    text_display_duration= 5000  # In milliseconds
-
-    prev_score=scoreboard.score
-    
-
-    score_text = font.render("Score: " + str(scoreboard.score), True, (255, 255, 255))
-    score_rect = score_text.get_rect(midtop=(WIDTH // 2, 10))
-
-    prev_yellow_health = yellow.health
-    prev_red_health = red.health if player_count == 2 else None
-
-    
-    yellow_health_text = font.render("Yellow Health: " + str(yellow.health), True, (255, 255, 255))
-    
-    red_health_text = None 
-
-    if player_count == 2:
-        red_health_text = font.render("Red Health: " + str(red.health), True, (255, 255, 255))
-
-    run = True
-    
-
-    clock = pygame.time.Clock() # reset clock
-
-
-    
-    pause_duration = 0
-    game_start_time = pygame.time.get_ticks()
-    current_time = pygame.time.get_ticks() - pause_duration - game_start_time
-    
-    last_score_change = pygame.time.get_ticks() - pause_duration - game_start_time
-
-    last_yellow_health_change = pygame.time.get_ticks() - pause_duration - game_start_time
-
-    last_red_health_change = pygame.time.get_ticks() - pause_duration - game_start_time if player_count == 2 else None
-
-
-    
-
-    
-    
-    while run:
-        clock.tick(FPS)
+    while game_manager.run:
+        game_manager.clock.tick(FPS)
         
-
-        
-        if scoreboard.has_score_limit_reached():
-            next_stage_screen(player_count,stage + 1,game_music)
-            run =False
-            
+        if game_manager.scoreboard.has_score_limit_reached():
+            next_stage_screen(player_count,stage + 1,game_music,game_manager)
+            game_manager.run =False
             break
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                run = False
+                game_manager.run = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    if not pause_pressed and not game_paused:#in game screen is running we are pressing spacebar to shoot
+                    if not game_manager.pause_pressed and not game_manager.game_paused:#in game screen is running we are pressing spacebar to shoot
                         pass
-                    else: #press spacebar to continue game
-                        game_paused = False
+                    else: #press spacebar to resume game
+                        game_manager.game_paused = False
                         result = pause_menu(game_music)
                         if result == "main_menu":
                             #never reached
                             return "main_menu"
                 elif event.key == pygame.K_p:
-                    if not pause_pressed and not game_paused:#game pause
-                        pause_pressed = True
-                        game_paused = True
-                        
-                        
-                        pause_start_time=pygame.time.get_ticks()
+                    if not game_manager.pause_pressed and not game_manager.game_paused:#game pause
+                        game_manager.pause_pressed = True
+                        game_manager.game_paused = True
+                        game_manager.pause_start_time=pygame.time.get_ticks()
                         result = pause_menu(game_music)
                         if result == "resume_game":
-                            pause_pressed = False
-                            game_paused = False
-                            result = None
-                            
+                            game_manager.pause_pressed = False
+                            game_manager.game_paused = False
+                            result = None   
                         elif result == "main_menu":
                             music_system_instance.stop_music(game_music)
                             music_system_instance.play_music("main_menu_music")
-
                             return "main_menu"
 
-        if game_paused:
-            
-            game_paused = False
-            pause_pressed = False
+        if game_manager.game_paused:
+            game_manager.game_paused = False
+            game_manager.pause_pressed = False
             result = None
-            pause_end_time=pygame.time.get_ticks()
-            pause_duration += pause_end_time - pause_start_time
+            game_manager.pause_end_time=pygame.time.get_ticks()
+            game_manager.pause_duration += game_manager.pause_end_time - game_manager.pause_start_time
             
 
         keys_pressed = pygame.key.get_pressed()
-        current_time = pygame.time.get_ticks() - pause_duration - game_start_time
+        game_manager.current_time = pygame.time.get_ticks() - game_manager.pause_duration - game_manager.game_start_time
 
-        results = create_ships(enemy_ships, pause_duration, game_start_time, stage, last_spawn_time_green_ships, last_asteroid_spawn_time, last_spawn_time_orange_ships,
-                       last_spawn_time_purple_ships, last_spawn_time_blue_ships, last_spawn_time_brown_ships)
+        results = create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, 
+                               game_manager.last_spawn_time_green_ships, game_manager.last_asteroid_spawn_time, 
+                               game_manager.last_spawn_time_orange_ships,game_manager.last_spawn_time_purple_ships, 
+                               game_manager.last_spawn_time_blue_ships, game_manager.last_spawn_time_brown_ships)
+        
         (
-                last_bullet_time_green_ship,
-                last_bullet_time_orange_ship,
-                last_bullet_time_purple_ship,
-                last_bullet_time_blue_ship,
-                last_bullet_time_brown_ship,
-                last_bullet_time_white_ship,
-            ) = bullet_system_instance.auto_fire(
-                enemy_ships,
-                pause_duration,
-                game_start_time,
-                last_bullet_time_green_ship,
-                last_bullet_time_orange_ship,
-                last_bullet_time_purple_ship,
-                last_bullet_time_blue_ship,
-                last_bullet_time_brown_ship,
-                last_bullet_time_white_ship,
+                game_manager.last_bullet_time_green_ship,
+                game_manager.last_bullet_time_orange_ship,
+                game_manager.last_bullet_time_purple_ship,
+                game_manager.last_bullet_time_blue_ship,
+                game_manager.last_bullet_time_brown_ship,
+                game_manager.last_bullet_time_white_ship,
+            ) = game_manager.bullet_system_instance.auto_fire(
+                game_manager.enemy_ships,
+                game_manager.pause_duration,
+                game_manager.game_start_time,
+                game_manager.last_bullet_time_green_ship,
+                game_manager.last_bullet_time_orange_ship,
+                game_manager.last_bullet_time_purple_ship,
+                game_manager.last_bullet_time_blue_ship,
+                game_manager.last_bullet_time_brown_ship,
+                game_manager.last_bullet_time_white_ship,
             )
 
         if stage == 1:
-            last_spawn_time_green_ships = results[0]
-            last_asteroid_spawn_time = results[1]
-
+            game_manager.last_spawn_time_green_ships = results[0]
+            game_manager.last_asteroid_spawn_time = results[1]
         elif stage == 2:
-            last_spawn_time_green_ships = results[0]
-            last_spawn_time_orange_ships = results[1]
+            game_manager.last_spawn_time_green_ships = results[0]
+            game_manager.last_spawn_time_orange_ships = results[1]
         elif stage == 3:
-            last_spawn_time_green_ships = results[0]
-            last_spawn_time_orange_ships = results[1]
-            last_spawn_time_purple_ships = results[2]
+            game_manager.last_spawn_time_green_ships = results[0]
+            game_manager.last_spawn_time_orange_ships = results[1]
+            game_manager.last_spawn_time_purple_ships = results[2]
         elif stage == 4:
-            last_spawn_time_orange_ships = results[0]
-            last_spawn_time_purple_ships = results[1]
-            last_spawn_time_blue_ships = results[2]
+            game_manager.last_spawn_time_orange_ships = results[0]
+            game_manager.last_spawn_time_purple_ships = results[1]
+            game_manager.last_spawn_time_blue_ships = results[2]
         elif stage == 5:
-            last_spawn_time_orange_ships = results[0]
-            last_spawn_time_purple_ships = results[1]
-            last_spawn_time_blue_ships = results[2]
-            last_spawn_time_brown_ships = results[3]
+            game_manager.last_spawn_time_orange_ships = results[0]
+            game_manager.last_spawn_time_purple_ships = results[1]
+            game_manager.last_spawn_time_blue_ships = results[2]
+            game_manager.last_spawn_time_brown_ships = results[3]
         elif stage == 6:
-            last_spawn_time_purple_ships = results[0]
-            last_spawn_time_blue_ships = results[1]
-            last_spawn_time_brown_ships = results[2]
-        #elif stage == 7:
-         #   last_asteroid_spawn_time= results[0]
+            game_manager.last_spawn_time_purple_ships = results[0]
+            game_manager.last_spawn_time_blue_ships = results[1]
+            game_manager.last_spawn_time_brown_ships = results[2]
         elif stage == 0:
-            last_asteroid_spawn_time = results[0]
+            game_manager.last_asteroid_spawn_time = results[0]
+        
+        
+        game_manager.last_bullet_time, game_manager.last_bullet_time_2 = \
+            game_manager.bullet_system_instance.fire_bullets(game_manager.yellow, game_manager.red, player_count, 
+                                                             game_manager.last_bullet_time, game_manager.last_bullet_time_2,
+                                                             game_manager.pause_duration,game_manager.game_start_time,stage)
+        
+        game_manager.update_game_state(game_manager.yellow, game_manager.red, game_manager.enemy_ships, player_count, keys_pressed, 
+                                       game_manager.background,game_manager.scoreboard)
+        
+        if not game_manager.yellow.alive and player_count == 1:
+            game_over_screen(game_music,game_manager)
 
-        
-
-        movement_system_instance.move_enemy_ships(enemy_ships, WIDTH)  # Move all enemy ships
-        
-        
-        last_bullet_time, last_bullet_time_2 = \
-            bullet_system_instance.fire_bullets(yellow, red, player_count, last_bullet_time, last_bullet_time_2,pause_duration,game_start_time,stage)
-        update_game_state(yellow, red, enemy_ships, player_count, keys_pressed, movement_system_instance, 
-                          bullet_system_instance, render_system_instance, background,scoreboard,explosions,game_music)
+        if player_count == 2:
+            if not game_manager.red.alive and not game_manager.yellow.alive:
+                game_over_screen(game_music,game_manager)
         
        
-
-
         if(player_count==1):
-            yellow_health_text, last_yellow_health_change, prev_yellow_health = \
-                render_system_instance.update_health_text(current_time, yellow, red, prev_yellow_health, prev_red_health, font,
-                            last_yellow_health_change,last_red_health_change,yellow_health_text,red_health_text,player_count)
+            game_manager.yellow_health_text, game_manager.last_yellow_health_change, game_manager.prev_yellow_health = \
+                game_manager.render_system_instance.update_health_text(game_manager.current_time, game_manager.yellow, game_manager.red, 
+                            game_manager.prev_yellow_health, game_manager.prev_red_health, game_manager.font, game_manager.last_yellow_health_change,
+                            game_manager.last_red_health_change,game_manager.yellow_health_text,game_manager.red_health_text,player_count)
             
-            score_text, last_score_change, prev_score = \
-                render_system_instance.render_score(scoreboard, font,prev_score,
-                                          last_score_change,current_time,score_text) 
+            game_manager.score_text, game_manager.last_score_change, game_manager.prev_score = \
+                game_manager.render_system_instance.render_score(game_manager.scoreboard, game_manager.font,game_manager.prev_score,
+                                          game_manager.last_score_change,game_manager.current_time,game_manager.score_text) 
 
         else:
-            yellow_health_text, last_yellow_health_change, prev_yellow_health, red_health_text, last_red_health_change, prev_red_health = \
-                render_system_instance.update_health_text(current_time, yellow, red, prev_yellow_health, prev_red_health, font,
-                            last_yellow_health_change,last_red_health_change,yellow_health_text, red_health_text, player_count)
-            score_text, last_score_change, prev_score = \
-                render_system_instance.render_score(scoreboard, font,prev_score,last_score_change,current_time,score_text) 
-
-
-        if current_time - last_score_change < text_display_duration:
-            WIN.blit(score_text, score_rect)
-
-
-        
-        if current_time - last_yellow_health_change < text_display_duration:
-            WIN.blit(yellow_health_text, (10, 10))
-
-        if player_count == 2 and current_time - last_red_health_change < text_display_duration:  
-            WIN.blit(red_health_text, (WIDTH - red_health_text.get_width() - 10, 10))
-        if stage == 0:
-            render_system_instance.display_tutorial_instructions(player_count)
-
-    
-        for explosion in explosions:
-            explosion.update()
-            render_system_instance.render_explosion(explosion, WIN)
-        
-
-            if explosion.is_finished():
-                explosions.remove(explosion)
-
+            game_manager.yellow_health_text, game_manager.last_yellow_health_change, game_manager.prev_yellow_health, game_manager.red_health_text, game_manager.last_red_health_change, game_manager.prev_red_health = \
+                game_manager.render_system_instance.update_health_text(game_manager.current_time, game_manager.yellow, game_manager.red, 
+                            game_manager.prev_yellow_health, game_manager.prev_red_health, game_manager.font,game_manager.last_yellow_health_change,
+                            game_manager.last_red_health_change,game_manager.yellow_health_text, game_manager.red_health_text, player_count)
             
+            game_manager.score_text, game_manager.last_score_change, game_manager.prev_score = \
+                game_manager.render_system_instance.render_score(game_manager.scoreboard, game_manager.font,game_manager.prev_score,
+                                                                 game_manager.last_score_change,game_manager.current_time,game_manager.score_text) 
 
-        # Render FPS counter
-        fps = clock.get_fps()
-        fps_text = font.render("FPS: " + str(int(fps)), True, (255, 255, 255))
-        fps_rect = fps_text.get_rect(topright=(WIDTH - 10, 10))
-        WIN.blit(fps_text, fps_rect)
+        if game_manager.current_time - game_manager.last_score_change < game_manager.text_display_duration:
+            WIN.blit(game_manager.score_text, game_manager.score_rect)
+
+        if game_manager.current_time - game_manager.last_yellow_health_change < game_manager.text_display_duration:
+            WIN.blit(game_manager.yellow_health_text, (10, 10))
+
+        if player_count == 2 and game_manager.current_time - game_manager.last_red_health_change < game_manager.text_display_duration:  
+            WIN.blit(game_manager.red_health_text, (10, 30))
+        if stage == 0:
+            game_manager.render_system_instance.display_tutorial_instructions(player_count)
+        
+
+        game_manager.fps = game_manager.clock.get_fps()
+        game_manager.fps_text = game_manager.font.render("FPS: " + str(int(game_manager.fps)), True, (255, 255, 255))
+        game_manager.fps_rect = game_manager.fps_text.get_rect(topright=(WIDTH - 10, 10))
+        WIN.blit(game_manager.fps_text, game_manager.fps_rect)
         
         
         pygame.display.update()
        
-        clock.tick(FPS)
+        game_manager.clock.tick(FPS)
 
 
-def display_developer_screen():
+def display_developer_screen(game_manager):
     #sound_system_instance.play_sound_effect("start_up_1")
     #sound_system_instance.play_sound_effect("start_up_2")
     display_duration = 8  # Duration in seconds
@@ -528,28 +382,27 @@ def display_developer_screen():
 
         if elapsed_time >= display_duration:
             
-            main_menu()
+            main_menu(game_manager)
             return
         RenderSystem.display_developer_screen()
 
-        for event in pygame.event.get():
+        for event in pygame.event.get(): 
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_f:
-                    main_menu()
+                    main_menu(game_manager)
                     return
 
 
 def main():
     pygame.init()
-    display_developer_screen()
+    game_manager = GameManager()
+    display_developer_screen(game_manager)
     pygame.quit()
     sys.exit()
-
-
 
 if __name__ == "__main__":
     main()

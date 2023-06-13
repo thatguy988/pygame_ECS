@@ -18,8 +18,8 @@ spawn_rates = {
 # Minimum and maximum numbers of ships for different stages
 ship_numbers = {
     "green": {
-        1: (0, 5),
-        2: (0, 5),
+        1: (0, 4),
+        2: (0, 4),
         3: (0, 1),
     },
     "orange": {
@@ -41,7 +41,7 @@ ship_numbers = {
     },
     "brown": {
         5: (2, 4),
-        6: (2, 6),
+        6: (2, 5),
     },
     "grey": {
         0: (1, 2),

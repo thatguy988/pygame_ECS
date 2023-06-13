@@ -38,7 +38,7 @@ class Bullet:
         elif self.owner == "green":
             return 10  # Set the damage value for green bullets
         elif self.owner == "orange":
-            return 25  # Set the damage value for orange bullets
+            return 15  # Set the damage value for orange bullets
         elif self.owner == "purple":
             return 20  # Set the damage value for purple bullets
         elif self.owner == "blue":
