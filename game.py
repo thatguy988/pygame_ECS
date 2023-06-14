@@ -256,7 +256,6 @@ def game_screen(player_count,stage,game_manager):
             
 
         keys_pressed = pygame.key.get_pressed()
-        game_manager.current_time = pygame.time.get_ticks() - game_manager.pause_duration - game_manager.game_start_time
         '''
         results = create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, 
                                game_manager.last_spawn_time_green_ships, game_manager.last_asteroid_spawn_time, 
@@ -345,6 +344,7 @@ def game_screen(player_count,stage,game_manager):
                 game_over_screen(game_music,game_manager)
         
        
+            
         if(player_count==1):
             game_manager.yellow_health_text, game_manager.last_yellow_health_change, game_manager.prev_yellow_health = \
                 game_manager.render_system_instance.update_health_text(game_manager.current_time, game_manager.yellow, game_manager.red, 
@@ -370,9 +370,7 @@ def game_screen(player_count,stage,game_manager):
         game_manager.update_game_state(game_manager.yellow, game_manager.red, game_manager.enemy_ships, player_count, keys_pressed, 
                                         game_manager.pre_rendered_background,game_manager.scoreboard)
         
-
-        
-        
+        game_manager.current_time = pygame.time.get_ticks() - game_manager.pause_duration - game_manager.game_start_time
         if game_manager.current_time - game_manager.last_score_change < game_manager.text_display_duration:
             config.WIN.blit(game_manager.score_text, game_manager.score_rect)
 
@@ -390,15 +388,10 @@ def game_screen(player_count,stage,game_manager):
         game_manager.fps_rect = game_manager.fps_text.get_rect(topright=(config.DISPLAY_WIDTH - 10, 10))
         config.WIN.blit(game_manager.fps_text, game_manager.fps_rect)
         
-        
-        
-        
-        
-        
+
         pygame.display.update()
        
         game_manager.clock.tick(config.FPS)
-
 
 def display_developer_screen(game_manager):
     #sound_system_instance.play_sound_effect("start_up_1")

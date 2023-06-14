@@ -1,14 +1,14 @@
 import os
 import random
 import pygame
-
+import config
 from components.position import PositionComponent
 GREY = (128,128,128)
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
 BOSS_SHIP_WIDTH, BOSS_SHIP_HEIGHT = 100,100
-WIDTH, HEIGHT = 1400, 500
-maximum_y_value = HEIGHT - 25
-minimum_y_value = HEIGHT - maximum_y_value
+
+maximum_y_value = config.DISPLAY_HEIGHT - 25
+minimum_y_value = config.DISPLAY_HEIGHT - maximum_y_value
 
 VEL=4
 DEFAULT_HEALTH = 100
@@ -206,29 +206,29 @@ class ShipCreation:
 
     @staticmethod
     def create_green_enemy_ship():
-        return GreenEnemyShip(PositionComponent(WIDTH, random.randint(minimum_y_value, maximum_y_value)))
+        return GreenEnemyShip(PositionComponent(config.DISPLAY_WIDTH, random.randint(minimum_y_value, maximum_y_value)))
     
     @staticmethod
     def create_orange_enemy_ship():
-        return OrangeEnemyShip(PositionComponent(WIDTH, random.randint(minimum_y_value, maximum_y_value)))
+        return OrangeEnemyShip(PositionComponent(config.DISPLAY_WIDTH, random.randint(minimum_y_value, maximum_y_value)))
     
     @staticmethod
     def create_purple_enemy_ship():
-        return PurpleEnemyShip(PositionComponent(WIDTH, random.randint(minimum_y_value, maximum_y_value)))
+        return PurpleEnemyShip(PositionComponent(config.DISPLAY_WIDTH, random.randint(minimum_y_value, maximum_y_value)))
     
     @staticmethod
     def create_blue_enemy_ship():
-        return BlueEnemyShip(PositionComponent(WIDTH, random.randint(minimum_y_value, maximum_y_value)))
+        return BlueEnemyShip(PositionComponent(config.DISPLAY_WIDTH, random.randint(minimum_y_value, maximum_y_value)))
     
     @staticmethod
     def create_brown_enemy_ship():
-        return BrownEnemyShip(PositionComponent(WIDTH, random.randint(minimum_y_value, maximum_y_value)))
+        return BrownEnemyShip(PositionComponent(config.DISPLAY_WIDTH, random.randint(minimum_y_value, maximum_y_value)))
     
     @staticmethod
     def create_boss_enemy_ship():
-        return BossEnemyShip(PositionComponent(WIDTH, HEIGHT / 3))
+        return BossEnemyShip(PositionComponent(config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT / 3))
     
     @staticmethod
     def create_asteroid():
-        return Asteroid(PositionComponent(WIDTH, random.randint(minimum_y_value, maximum_y_value)))
+        return Asteroid(PositionComponent(config.DISPLAY_WIDTH, random.randint(minimum_y_value, maximum_y_value)))
     

@@ -32,8 +32,8 @@ class BulletSystem:
     def reset(self):
         self.bullets = []
 
-    def create_bullet(self, x, y, x_velocity, y_velocity, radius, owner,width_increase = 0, height_increase = 0):
-        bullet = Bullet(x, y, x_velocity, y_velocity, radius, owner)
+    def create_bullet(self, x, y, x_velocity, y_velocity, owner,width_increase = 0, height_increase = 0):
+        bullet = Bullet(x, y, x_velocity, y_velocity, owner)
         bullet.increase_size(width_increase, height_increase)
         self.bullets.append(bullet)
     
@@ -48,40 +48,40 @@ class BulletSystem:
                 self.create_bullet(
                     player.position.x + player.width,
                     player.position.y + player.height // 2,
-                    5, 0, 10, color
+                    5, 0, color
                 )
             if stage >= 2:  # stage 2, 3
                 self.create_bullet(
                     player.position.x + player.width,
                     player.position.y + player.height // 2 - 5,
-                    5, 0, 10, color
+                    5, 0, color
                 )
                 self.create_bullet(
                     player.position.x + player.width,
                     player.position.y + player.height // 2 + 10,
-                    5, 0, 10, color
+                    5, 0, color
                 )
             if stage >= 4:  # stage 4, 5
                 self.create_bullet(
                     player.position.x + player.width,
                     player.position.y + player.height // 2 - 7,
-                    5, -0.25, 10, color
+                    5, -0.25, color
                 )
                 self.create_bullet(
                     player.position.x + player.width,
                     player.position.y + player.height // 2 + 12,
-                    5, 0.25, 10, color
+                    5, 0.25, color
                 )
             if stage >= 6:  # stage 6, 7
                 self.create_bullet(
                     player.position.x + player.width,
                     player.position.y + player.height // 2 - 7,
-                    5, -0.5, 10, color
+                    5, -0.5, color
                 )
                 self.create_bullet(
                     player.position.x + player.width,
                     player.position.y + player.height // 2 + 12,
-                    5, 0.5, 10, color
+                    5, 0.5, color
                 )
 
             last_bullet_time = current_time
@@ -108,10 +108,10 @@ class BulletSystem:
 
         return last_bullet_time, last_bullet_time_2
     
-    def remove_offscreen_bullets(self, width, height):
+    def remove_offscreen_bullets(self):
         self.bullets = [
             bullet for bullet in self.bullets
-            if 0 <= bullet.x <= width and 0 <= bullet.y <= height
+            if 0 <= bullet.x <= config.DISPLAY_WIDTH and 0 <= bullet.y <= config.DISPLAY_HEIGHT
         ]
 
     def remove_bullet(self, bullet):
@@ -154,13 +154,13 @@ class BulletSystem:
         }
         for enemy_ship in enemy_ships:
             if hasattr(enemy_ship, "ship_color") and enemy_ship.ship_color in color_delays:
-                delay = color_delays[enemy_ship.ship_color]
+                delay = color_delays[enemy_ship.ship_color] 
                 if enemy_ship.ship_color == "green" and time_since_last_bullets[0] >= delay:
                     self.create_bullet(
-                        enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 10, -5, 0, 10, "green"
+                        enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 10, -5, 0, "green"
                     )
                     self.create_bullet(
-                        enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 10, -5, 0, 10, "green"
+                        enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 10, -5, 0, "green"
                     )
                     sound_system_instance.play_sound_effect("enemyshot")
                     last_bullet_times = list(last_bullet_times)  # Convert tuple to list
@@ -171,7 +171,7 @@ class BulletSystem:
                     
 
                     self.create_bullet(
-                        enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0, 10, "orange"
+                        enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0, "orange"
                     )
                     sound_system_instance.play_sound_effect("enemyshot")
 
@@ -182,11 +182,11 @@ class BulletSystem:
                 elif enemy_ship.ship_color == "purple" and time_since_last_bullets[2] >= delay:
                     if enemy_ship.bullet_switch:
                         self.create_bullet(
-                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, -0.5, 10, "purple"
+                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, -0.5, "purple"
                         )
                     else:
                         self.create_bullet(
-                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0.5, 10, "purple"
+                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0.5, "purple"
                         )
                     sound_system_instance.play_sound_effect("enemyshot")
 
@@ -197,10 +197,10 @@ class BulletSystem:
 
                 elif enemy_ship.ship_color == "blue" and time_since_last_bullets[3] >= delay:
                             self.create_bullet(
-                                enemy_ship.position.x + 10 , enemy_ship.position.y + enemy_ship.height // 2, 0, 1, 10, "blue"
+                                enemy_ship.position.x + 10 , enemy_ship.position.y + enemy_ship.height // 2, 0, 1, "blue"
                             )
                             self.create_bullet(
-                                enemy_ship.position.x + 10 , enemy_ship.position.y + enemy_ship.height // 2, 0, 1, 10, "blue"
+                                enemy_ship.position.x + 10 , enemy_ship.position.y + enemy_ship.height // 2, 0, 1, "blue"
                             )
                             sound_system_instance.play_sound_effect("enemyshot")
 
@@ -209,13 +209,13 @@ class BulletSystem:
                             last_bullet_times = tuple(last_bullet_times)  # Convert list back to tuple
                 elif enemy_ship.ship_color == "brown" and time_since_last_bullets[4] >= delay:
                     self.create_bullet(
-                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 7, -5, -0.5, 10, "brown"
+                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 7, -5, -0.5, "brown"
                         )
                     self.create_bullet(
-                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0, 10, "brown"
+                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2, -5, 0, "brown"
                         )
                     self.create_bullet(
-                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 7, -5, 0.5, 10, "brown"
+                            enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 + 7, -5, 0.5, "brown"
                         )
                     sound_system_instance.play_sound_effect("enemyshot")
                     last_bullet_times = list(last_bullet_times)  # Convert tuple to list
@@ -257,10 +257,10 @@ class BulletSystem:
                             enemy_ship.beam_positions = generate_random_y_positions(num_positions, beam_height)
                         for beam_y_position in enemy_ship.beam_positions:
                             self.create_bullet(
-                                enemy_ship.position.x - 5, beam_y_position - 5, -5, 0, 10, "white"
+                                enemy_ship.position.x - 5, beam_y_position - 5, -5, 0, "white"
                             )
                             self.create_bullet(
-                                enemy_ship.position.x - 5, beam_y_position, -5, 0, 10, "white"
+                                enemy_ship.position.x - 5, beam_y_position, -5, 0, "white"
                             )
                         enemy_ship.bullet_beam += 1
                         if enemy_ship.bullet_beam == 60:
@@ -272,7 +272,7 @@ class BulletSystem:
 
                     elif(enemy_ship.bullet_change == 2):
                         self.create_bullet(
-                                enemy_ship.position.x - 5, random.randint(5,495), -5, 0, 10, "white" 
+                                enemy_ship.position.x - 5, random.randint(5,495), -5, 0, "white" 
                             )
                         enemy_ship.bullet_count +=1
                         if enemy_ship.bullet_count == enemy_ship.bullet_count_limit:
@@ -292,7 +292,7 @@ class BulletSystem:
                         y_positions = generate_random_y_positions(num_of_bullets,bullet_height)  
                         for y in y_positions:
                             self.create_bullet(
-                                enemy_ship.position.x - 5, y, -5, 0, 100, "white", bullet_width, bullet_height
+                                enemy_ship.position.x - 5, y, -5, 0, "white", bullet_width, bullet_height
                             )
                        
                         enemy_ship.bullet_change = random.randint(0, 3)
@@ -302,84 +302,82 @@ class BulletSystem:
 
         return last_bullet_times
     
+
+    def check_bullet_collision(self, bullet, entity):
+        bullet_offset = 5  # Adjust this value as needed
+
+        bullet_rect = pygame.Rect(bullet.x - bullet.width/2, bullet.y - bullet.height/2, bullet.width, bullet.height)
+        entity_rect = pygame.Rect(entity.position.x + bullet_offset, entity.position.y, entity.width - bullet_offset, entity.height)
+        return bullet_rect.colliderect(entity_rect)
+    
+
+    def check_ship_collision(self, entity1, entity2):
+        entity1_rect = pygame.Rect(entity1.position.x, entity1.position.y, entity1.width, entity1.height)
+        entity2_rect = pygame.Rect(entity2.position.x, entity2.position.y, entity2.width, entity2.height)
+        return entity1_rect.colliderect(entity2_rect)
+
+    
+
+    #bounding box algorithm
+    
     def update_bullets_and_check_collisions(self, enemy_ships, yellow, red, player_count, scoreboard):
-        
         for bullet in self.bullets:
             bullet.update()
 
             if yellow.alive and yellow.visible and bullet.owner not in {"red", "yellow"}:
-                if yellow.position.x < bullet.x + bullet.radius < yellow.position.x + yellow.width and yellow.position.y < bullet.y < yellow.position.y + yellow.height:
-                    # Collision detected with yellow spaceship bullet from enemy ship
+                if self.check_bullet_collision(bullet, yellow):
                     yellow.health = max(0, yellow.health - bullet.get_bullet_damage())
                     self.remove_bullet(bullet)
                     sound_system_instance.play_sound_effect("playerhit")
 
-                    # Check if yellow spaceship's health reaches zero
                     if yellow.health <= 0 and yellow.alive:
                         yellow.alive = False
-                        #explosion_system_instance.create_explosion(yellow.position.x, yellow.position.y)
                         yellow.visible = False
                         sound_system_instance.play_sound_effect("playerdeath")
 
-
             if player_count == 2 and red.alive and red.visible and bullet.owner not in {"yellow", "red"}:
-                if red.position.x < bullet.x + bullet.radius < red.position.x + red.width and red.position.y < bullet.y < red.position.y + red.height:
-                    # Collision detected with red spaceship
+                if self.check_bullet_collision(bullet, red):
                     red.health = max(0, red.health - bullet.get_bullet_damage())
                     self.remove_bullet(bullet)
                     sound_system_instance.play_sound_effect("playerhit")
 
-                    # Check if red spaceship's health reaches zero
                     if red.health <= 0 and red.alive:
                         red.alive = False
-                        #explosion_system_instance.create_explosion(red.position.x, red.position.y)
                         red.visible = False
                         sound_system_instance.play_sound_effect("playerdeath")
 
             for enemy_ship in enemy_ships:
-                if bullet.owner not in ["green", "orange", "purple", "blue", "brown", "white","grey"]:
-                    if enemy_ship.position.x < bullet.x + bullet.radius < enemy_ship.position.x + enemy_ship.width:
-                        if enemy_ship.position.y < bullet.y < enemy_ship.position.y + enemy_ship.height:
-                            # Collision detected with enemy spaceship
-                            enemy_ship.health -= bullet.get_bullet_damage()
-                            health_reward = bullet.owner
-                            self.remove_bullet(bullet)
-                            sound_system_instance.play_sound_effect("enemyhit")
+                if bullet.owner not in ["green", "orange", "purple", "blue", "brown", "white", "grey"]:
+                    if self.check_bullet_collision(bullet, enemy_ship):
+                        enemy_ship.health -= bullet.get_bullet_damage()
+                        health_reward = bullet.owner
+                        self.remove_bullet(bullet)
+                        sound_system_instance.play_sound_effect("enemyhit")
 
-                            # Check if enemy spaceship's health reaches zero
-                            if enemy_ship.health <= 0:
-                                health(health_reward,yellow,red)
-                                self.explosion_system.create_explosion(enemy_ship.position.x, enemy_ship.position.y)
-                                enemy_ship.stop_moving()
-                                #enemy_ship.alive = False
-                                scoreboard.reward_points(enemy_ship.ship_color)
-                                enemy_ships.remove(enemy_ship)
-                                #sound_system_instance.play_sound_effect("explosion")
-        
-    def handle_enemyship_ship_collision(self, ship, enemy_ships,scoreboard):
+                        if enemy_ship.health <= 0:
+                            health(health_reward, yellow, red)
+                            self.explosion_system.create_explosion(enemy_ship.position.x, enemy_ship.position.y)
+                            enemy_ship.stop_moving()
+                            scoreboard.reward_points(enemy_ship.ship_color)
+                            enemy_ships.remove(enemy_ship)
+    
+    def handle_enemyship_ship_collision(self, ship, enemy_ships, scoreboard):
         for enemy_ship in enemy_ships:
             if ship.alive and ship.visible and enemy_ship.alive and enemy_ship.visible:
-                if ship.position.x < enemy_ship.position.x + enemy_ship.width and \
-                        ship.position.x + ship.width > enemy_ship.position.x and \
-                        ship.position.y < enemy_ship.position.y + enemy_ship.height and \
-                        ship.position.y + ship.height > enemy_ship.position.y:
-                    # Collision detected between yellow player ship and enemy ship
-                    ship.health -= enemy_ship.collision_damage  # Reduce yellow player ship's health based on enemy ship's damage
-                    enemy_ship.health -= ship.collision_damage  # Reduce enemy ship's health based on yellow player ship's damage
+                if self.check_ship_collision(ship, enemy_ship):
+                    ship.health -= enemy_ship.collision_damage
+                    enemy_ship.health -= ship.collision_damage
 
                     if ship.health <= 0:
                         ship.alive = False
                         ship.visible = False
-                        # Handle yellow player ship's destruction
 
                     if enemy_ship.health <= 0:
-                        #self.explosion_system.create_explosion(enemy_ship.position.x, enemy_ship.position.y)
+                        # self.explosion_system.create_explosion(enemy_ship.position.x, enemy_ship.position.y)
                         enemy_ship.stop_moving()
                         enemy_ship.alive = False
                         scoreboard.reward_points(enemy_ship.ship_color)
                         enemy_ships.remove(enemy_ship)
-
-
 
 def health(health_reward,yellow,red):
         if health_reward == "yellow":

@@ -78,7 +78,9 @@ class GameManager:
 
         self.pause_duration = 0
         self.game_start_time = None
+
         self.current_time = None
+
         self.last_score_change = None
         self.last_yellow_health_change = None
         self.last_red_health_change = None
@@ -92,9 +94,7 @@ class GameManager:
         # Reset instances
         self.explosion_system_instance.reset()
         self.bullet_system_instance.reset()
-        
-
-
+    
         # Reset game-specific variables
         self.yellow = ShipCreation.create_yellow_ship()
         self.red = ShipCreation.create_red_ship() if player_count == 2 else None
@@ -152,23 +152,16 @@ class GameManager:
         self.fps = self.clock.get_fps()
         self.fps_text = self.font.render("FPS: " + str(int(self.fps)), True, (255, 255, 255))
         self.fps_rect = self.fps_text.get_rect(topright=(config.DISPLAY_WIDTH - 10, 10))
-        
-
-                
-        
-
-        
-
-
-        
-        
 
         self.pause_start_time = pygame.time.get_ticks()
         self.pause_end_time = pygame.time.get_ticks()
         self.pause_duration += self.pause_end_time - self.pause_start_time
 
         self.game_start_time = pygame.time.get_ticks()
+
         self.current_time = pygame.time.get_ticks() - self.pause_duration - self.game_start_time
+
+
         self.last_score_change = pygame.time.get_ticks() - self.pause_duration - self.game_start_time
         self.last_yellow_health_change = pygame.time.get_ticks() - self.pause_duration - self.game_start_time
         self.last_red_health_change = pygame.time.get_ticks() - self.pause_duration - self.game_start_time if player_count == 2 else None
@@ -176,14 +169,14 @@ class GameManager:
     def update_game_state(self, yellow, red, enemy_ships, player_count, keys_pressed, pre_rendered_background, scoreboard):
         if player_count >= 1:
             self.movement_system_instance.move_player1(
-                yellow, keys_pressed, config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT, yellow.velocity, yellow.width, yellow.height
+                yellow, keys_pressed, yellow.velocity, yellow.width, yellow.height
             )
 
         if player_count == 2:
             self.movement_system_instance.move_player2(
-                red, keys_pressed, config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT, red.velocity, red.width, red.height
+                red, keys_pressed, red.velocity, red.width, red.height
             )
-        self.movement_system_instance.move_enemy_ships(enemy_ships, config.DISPLAY_WIDTH)  # Move all enemy ships
+        self.movement_system_instance.move_enemy_ships(enemy_ships)  # Move all enemy ships
 
 
         if player_count == 2:
@@ -196,9 +189,8 @@ class GameManager:
 
         self.bullet_system_instance.handle_enemyship_ship_collision(yellow, enemy_ships, scoreboard)
         self.bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, yellow, red, player_count, scoreboard)
-        self.bullet_system_instance.remove_offscreen_bullets(config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT)
+        self.bullet_system_instance.remove_offscreen_bullets()
         if self.explosion_system_instance.explosions:
             self.explosion_system_instance.update_explosions()
-            self.render_system_instance.render_explosion(self.explosion_system_instance, config.WIN)
-
+            self.render_system_instance.render_explosion(self.explosion_system_instance)
 
