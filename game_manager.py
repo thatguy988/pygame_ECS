@@ -1,4 +1,8 @@
 import pygame
+import config
+from pygame import freetype
+
+
 
 from components.ship import ShipCreation
 from components.score import Score
@@ -11,9 +15,8 @@ from systems.movement import MovementSystem
 from systems.render import RenderSystem
 
 
-WIDTH, HEIGHT = 1400, 500
-VEL = 4
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+
+
 
 
 
@@ -27,7 +30,11 @@ class GameManager:
 
         self.enemy_ships = []
         self.background = None
+        self.pre_rendered_background = None
+        self.text_backbuffer = pygame.Surface((config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
 
+
+        
         self.last_bullet_time = 0
         self.last_bullet_time_2 = 0
 
@@ -97,7 +104,10 @@ class GameManager:
 
         self.enemy_ships = []
 
-        self.background = self.render_system_instance.background_render(stage, WIDTH, HEIGHT)
+        self.background = self.render_system_instance.background_render(stage, config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT)
+        self.pre_rendered_background = pygame.Surface((config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
+        scaled_background = pygame.transform.scale(self.background, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
+        self.pre_rendered_background.blit(scaled_background, (0, 0))
 
         self.last_bullet_time = 0
         self.last_bullet_time_2 = 0
@@ -122,12 +132,14 @@ class GameManager:
 
         self.pause_pressed = False
         self.game_paused = False
-
+       
+        
         self.font = pygame.font.Font(None, 24)
         self.text_display_duration = 5000
+        
         self.prev_score = self.scoreboard.score
         self.score_text = self.font.render("Score: " + str(self.scoreboard.score), True, (255, 255, 255))
-        self.score_rect = self.score_text.get_rect(midtop=(WIDTH // 2, 10))
+        self.score_rect = self.score_text.get_rect(midtop=(config.DISPLAY_WIDTH // 2, 10))
 
         self.prev_yellow_health = self.yellow.health
         self.prev_red_health = self.red.health if player_count == 2 else None
@@ -139,7 +151,13 @@ class GameManager:
 
         self.fps = self.clock.get_fps()
         self.fps_text = self.font.render("FPS: " + str(int(self.fps)), True, (255, 255, 255))
-        self.fps_rect = self.fps_text.get_rect(topright=(WIDTH - 10, 10))
+        self.fps_rect = self.fps_text.get_rect(topright=(config.DISPLAY_WIDTH - 10, 10))
+        
+
+                
+        
+
+        
 
 
         
@@ -154,32 +172,33 @@ class GameManager:
         self.last_score_change = pygame.time.get_ticks() - self.pause_duration - self.game_start_time
         self.last_yellow_health_change = pygame.time.get_ticks() - self.pause_duration - self.game_start_time
         self.last_red_health_change = pygame.time.get_ticks() - self.pause_duration - self.game_start_time if player_count == 2 else None
-
-    def update_game_state(self, yellow, red, enemy_ships, player_count, keys_pressed, background, scoreboard):
+    #@profile
+    def update_game_state(self, yellow, red, enemy_ships, player_count, keys_pressed, pre_rendered_background, scoreboard):
         if player_count >= 1:
             self.movement_system_instance.move_player1(
-                yellow, keys_pressed, WIDTH, HEIGHT, VEL, yellow.width, yellow.height
+                yellow, keys_pressed, config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT, yellow.velocity, yellow.width, yellow.height
             )
 
         if player_count == 2:
             self.movement_system_instance.move_player2(
-                red, keys_pressed, WIDTH, HEIGHT, VEL, yellow.width, yellow.height
+                red, keys_pressed, config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT, red.velocity, red.width, red.height
             )
-        self.movement_system_instance.move_enemy_ships(enemy_ships, WIDTH)  # Move all enemy ships
+        self.movement_system_instance.move_enemy_ships(enemy_ships, config.DISPLAY_WIDTH)  # Move all enemy ships
 
 
         if player_count == 2:
-            self.render_system_instance.draw_window([yellow, red] + enemy_ships, self.bullet_system_instance, background)
+            self.render_system_instance.draw_window([yellow, red] + enemy_ships, self.bullet_system_instance, pre_rendered_background)
         else:
-            self.render_system_instance.draw_window([yellow] + enemy_ships, self.bullet_system_instance, background)
+            self.render_system_instance.draw_window([yellow] + enemy_ships, self.bullet_system_instance, pre_rendered_background)
 
         if player_count == 2:
             self.bullet_system_instance.handle_enemyship_ship_collision(red, enemy_ships, scoreboard)
 
         self.bullet_system_instance.handle_enemyship_ship_collision(yellow, enemy_ships, scoreboard)
         self.bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, yellow, red, player_count, scoreboard)
-        self.bullet_system_instance.remove_offscreen_bullets(WIDTH, HEIGHT)
-        self.explosion_system_instance.update_explosions()
-        self.render_system_instance.render_explosion(self.explosion_system_instance, WIN)
+        self.bullet_system_instance.remove_offscreen_bullets(config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT)
+        if self.explosion_system_instance.explosions:
+            self.explosion_system_instance.update_explosions()
+            self.render_system_instance.render_explosion(self.explosion_system_instance, config.WIN)
 
 

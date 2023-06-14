@@ -21,7 +21,7 @@ class Explosion:
         
     def update(self):
         self.frame_count += 1
-        if self.frame_count >= 10:
+        if self.frame_count >= 7:
             self.frame_index += 1
             self.frame_count = 0
 

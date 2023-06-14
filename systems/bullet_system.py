@@ -1,6 +1,6 @@
 import pygame
 import random
-
+import config
 from components.bullet import Bullet
 
 from systems.sound_effect_system import SoundEffectSystem
@@ -15,11 +15,10 @@ ORANGE = (255, 165, 0)
 PURPLE = (128, 0, 128)
 BLUE = (0, 0, 255)
 BROWN = (165, 42, 42)
-WIDTH, HEIGHT = 1400, 500
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 
-maximum_y_value = HEIGHT - 25
-minimum_y_value = HEIGHT - maximum_y_value
+
+maximum_y_value = config.DISPLAY_HEIGHT - 25
+minimum_y_value = config.DISPLAY_HEIGHT - maximum_y_value
 
 sound_system_instance = SoundEffectSystem()
 sound_system_instance.load_sound_effects()

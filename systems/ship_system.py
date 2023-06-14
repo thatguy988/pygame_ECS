@@ -25,11 +25,11 @@ ship_numbers = {
     "orange": {
         2: (1, 3),
         3: (1, 3),
-        4: (1, 2),
+        4: (2, 4),
         5: (1, 2),
     },
     "purple": {
-        3: (2, 3),
+        3: (2, 4),
         4: (2, 3),
         5: (2, 3),
         6: (2, 3),
@@ -61,6 +61,7 @@ ship_numbers_dict = {
 
 
 
+
 def create_ships(enemy_ships, pause_duration, game_start_time, stage, *args):
     last_spawn_times = []
     #print(f"Args: {args}")
@@ -70,6 +71,11 @@ def create_ships(enemy_ships, pause_duration, game_start_time, stage, *args):
         last_spawn_time_green_ships = SpawnSystem.spawn_green_enemy_ships(enemy_ships, args[0], stage, pause_duration, game_start_time)
         last_spawn_times.append(last_spawn_time_green_ships)
         #print(last_spawn_times)
+    
+
+    if stage in ship_numbers_dict["grey"]:
+        last_asteroid_spawn_time = SpawnSystem.spawn_asteroids(enemy_ships, args[1], stage, pause_duration, game_start_time)
+        last_spawn_times.append(last_asteroid_spawn_time)
 
         
     if stage in ship_numbers_dict["orange"]:
@@ -92,10 +98,6 @@ def create_ships(enemy_ships, pause_duration, game_start_time, stage, *args):
         last_spawn_times.append(last_spawn_time_brown_ships)
         #print(last_spawn_times)
 
-    if stage in ship_numbers_dict["grey"]:
-        last_asteroid_spawn_time = SpawnSystem.spawn_asteroids(enemy_ships, args[1], stage, pause_duration, game_start_time)
-        last_spawn_times.append(last_asteroid_spawn_time)
-        #print(last_spawn_times)
 
 
     return tuple(last_spawn_times)

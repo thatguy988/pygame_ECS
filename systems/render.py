@@ -1,8 +1,7 @@
 import pygame
 import os
+import config
 
-WIDTH, HEIGHT = 1400, 500
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 
 class RenderSystem:
     @staticmethod
@@ -62,8 +61,8 @@ class RenderSystem:
             
             instructions_font = pygame.font.SysFont(None, 40)
             instructions_text = instructions_font.render("Player 1: Press W A S D to move and press spacebar to shoot", True, (255, 255, 255))
-            instructions_rect = instructions_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
-            WIN.blit(instructions_text, instructions_rect)
+            instructions_rect = instructions_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 2 + 100))
+            config.WIN.blit(instructions_text, instructions_rect)
 
             
             pygame.display.update(instructions_rect)
@@ -73,11 +72,11 @@ class RenderSystem:
             instructions_text1 = instructions_font.render("Player 1: Press W A S D to move and press spacebar to shoot", True, (255, 255, 255))
             instructions_text2 = instructions_font.render("Player 2: Press I J K L to move and press enter to shoot", True, (255, 255, 255))
 
-            instructions_rect1 = instructions_text1.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
-            instructions_rect2 = instructions_text2.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 140))
+            instructions_rect1 = instructions_text1.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 2 + 100))
+            instructions_rect2 = instructions_text2.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 2 + 140))
 
-            WIN.blit(instructions_text1, instructions_rect1)
-            WIN.blit(instructions_text2, instructions_rect2)
+            config.WIN.blit(instructions_text1, instructions_rect1)
+            config.WIN.blit(instructions_text2, instructions_rect2)
 
             
             pygame.display.update([instructions_rect1, instructions_rect2])
@@ -126,30 +125,41 @@ class RenderSystem:
 
             return background
 
-        
+    
     @staticmethod
-    def draw_window(entities, bullet_system, background):
-        WIN.blit(background, (0, 0))
+    #@profile
+    def draw_window(entities, bullet_system, pre_rendered_background):
         
+
+        # Create a separate surface for drawing
+        surface = pygame.Surface((config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT)) 
+
+        # Draw the pre-rendered background onto the surface
+        surface.blit(pre_rendered_background, (0, 0))
+
+
         for entity in entities:
-            RenderSystem.render(entity, WIN)
-        
-        bullet_system.render_bullets(WIN)
-        
+            RenderSystem.render(entity, surface)
 
+        bullet_system.render_bullets(surface)
 
-    pygame.display.update()
+        config.WIN.blit(surface, (0, 0))
+        pygame.display.update()
+    
 
+    
+
+   
 
     @staticmethod
     def display_developer_screen():
         
-        WIN.fill((0, 0, 0))
+        config.WIN.fill((0, 0, 0))
 
         font = pygame.font.Font(None, 36)
         text = font.render("Developed by Kirby", True, (255, 255, 255))
-        text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-        WIN.blit(text, text_rect)
+        text_rect = text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 2))
+        config.WIN.blit(text, text_rect)
 
         pygame.display.flip()
 
@@ -161,27 +171,27 @@ class RenderSystem:
         
 
         # Clear the screen
-        WIN.fill((0, 0, 0))
+        config.WIN.fill((0, 0, 0))
         background = pygame.image.load(os.path.join('assets', 'Starfield_Menu_Background.png'))
-        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-        WIN.blit(background, (0, 0))
+        background = pygame.transform.scale(background, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
+        config.WIN.blit(background, (0, 0))
         
         # Render the title text
         title_font = pygame.font.SysFont(None, 60)
         title_text = title_font.render("Starfire Assault", True, (255, 255, 255))
-        title_rect = title_text.get_rect(center=(WIDTH // 2, HEIGHT // 4))
-        WIN.blit(title_text, title_rect)
+        title_rect = title_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 4))
+        config.WIN.blit(title_text, title_rect)
         
         # Render the menu options
         menu_font = pygame.font.SysFont(None, 40)
         options = ["Start Game", "Tutorial", "Quit"]
-        option_y = HEIGHT // 2
+        option_y = config.DISPLAY_HEIGHT // 2
         option_spacing = 60
         
         for i, option in enumerate(options):
             option_text = menu_font.render(option, True, (255, 255, 255))
-            option_rect = option_text.get_rect(center=(WIDTH // 2, option_y))
-            WIN.blit(option_text, option_rect)
+            option_rect = option_text.get_rect(center=(config.DISPLAY_WIDTH // 2, option_y))
+            config.WIN.blit(option_text, option_rect)
             
 
         # Display cursor image for selected option
@@ -192,13 +202,13 @@ class RenderSystem:
                 cursor_rect = cursor_image.get_rect() 
                 
                 if option == "Start Game":
-                    cursor_rect.center = (WIDTH // 2 - 100, option_y)  # Cursor position for "Resume Game"
+                    cursor_rect.center = (config.DISPLAY_WIDTH // 2 - 100, option_y)  # Cursor position for "Resume Game"
                 elif option == "Tutorial":
-                    cursor_rect.center = (WIDTH // 2 - 80, option_y)  # Cursor position for "Tutorial"
+                    cursor_rect.center = (config.DISPLAY_WIDTH // 2 - 80, option_y)  # Cursor position for "Tutorial"
                 elif option == "Quit":
-                    cursor_rect.center = (WIDTH // 2 - 60, option_y) # Cursor position for "Quit"
+                    cursor_rect.center = (config.DISPLAY_WIDTH // 2 - 60, option_y) # Cursor position for "Quit"
 
-                WIN.blit(cursor_image, cursor_rect)
+                config.WIN.blit(cursor_image, cursor_rect)
 
             option_y += option_spacing #space out main menu options vertically
         
@@ -206,27 +216,27 @@ class RenderSystem:
 
 
     def display_select_stage_screen(selected_option):
-        WIN.fill((0, 0, 0))  #clear
+        config.WIN.fill((0, 0, 0))  #clear
         background = pygame.image.load(os.path.join('assets', 'Starfield_Menu_Background.png'))
-        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-        WIN.blit(background, (0, 0))
+        background = pygame.transform.scale(background, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
+        config.WIN.blit(background, (0, 0))
 
         # Render the title text
         title_font = pygame.font.SysFont(None, 60)
         title_text = title_font.render("Select Stage", True, (255, 255, 255))
-        title_rect = title_text.get_rect(center=(WIDTH // 2, HEIGHT // 12))
-        WIN.blit(title_text, title_rect)
+        title_rect = title_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 12))
+        config.WIN.blit(title_text, title_rect)
 
         # Render the stage options
         menu_font = pygame.font.SysFont(None, 40)
         stages = ["Stage 1", "Stage 2", "Stage 3", "Stage 4", "Stage 5", "Stage 6", "Boss Level", "Back"]
-        option_y = HEIGHT // 6
+        option_y = config.DISPLAY_HEIGHT // 6
         option_spacing = 50
 
         for i, stage in enumerate(stages):
             stage_text = menu_font.render(stage, True, (255, 255, 255))
-            stage_rect = stage_text.get_rect(center=(WIDTH // 2, option_y))
-            WIN.blit(stage_text, stage_rect)
+            stage_rect = stage_text.get_rect(center=(config.DISPLAY_WIDTH // 2, option_y))
+            config.WIN.blit(stage_text, stage_rect)
 
             # Display cursor image for selected option
             if i == selected_option:
@@ -234,9 +244,9 @@ class RenderSystem:
                 cursor_image = pygame.transform.scale(cursor_image, (50, 30))
                 cursor_image = pygame.transform.rotate(cursor_image, 90)
                 cursor_rect = cursor_image.get_rect()
-                cursor_rect.center = (WIDTH // 2 - 100, option_y)  # Cursor position for other options
+                cursor_rect.center = (config.DISPLAY_WIDTH // 2 - 100, option_y)  # Cursor position for other options
 
-                WIN.blit(cursor_image, cursor_rect)
+                config.WIN.blit(cursor_image, cursor_rect)
 
             option_y += option_spacing
 
@@ -245,27 +255,27 @@ class RenderSystem:
 
     def display_pause_menu(selected_option):
         # Clear the screen
-        WIN.fill((0, 0, 0))
+        config.WIN.fill((0, 0, 0))
         background = pygame.image.load(os.path.join('assets', 'Starfield_Menu_Background.png'))
-        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-        WIN.blit(background, (0, 0))
+        background = pygame.transform.scale(background, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
+        config.WIN.blit(background, (0, 0))
         
         # Render the title text
         title_font = pygame.font.SysFont(None, 60)
         title_text = title_font.render("Pause Menu", True, (255, 255, 255))
-        title_rect = title_text.get_rect(center=(WIDTH // 2, HEIGHT // 4))
-        WIN.blit(title_text, title_rect)
+        title_rect = title_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 4))
+        config.WIN.blit(title_text, title_rect)
         
         # Render the menu options
         menu_font = pygame.font.SysFont(None, 40)
         options = ["Resume Game", "Main Menu"]
-        option_y = HEIGHT // 2
+        option_y = config.DISPLAY_HEIGHT // 2
         option_spacing = 60
         
         for i, option in enumerate(options):
             option_text = menu_font.render(option, True, (255, 255, 255))
-            option_rect = option_text.get_rect(center=(WIDTH // 2, option_y))
-            WIN.blit(option_text, option_rect)
+            option_rect = option_text.get_rect(center=(config.DISPLAY_WIDTH // 2, option_y))
+            config.WIN.blit(option_text, option_rect)
             
             # Display cursor image for selected option
             if i == selected_option:
@@ -275,38 +285,38 @@ class RenderSystem:
                 cursor_rect = cursor_image.get_rect() 
                 
                 if option == "Resume Game":
-                    cursor_rect.center = (WIDTH // 2 - 120, option_y)  # Cursor position for "Resume Game"
+                    cursor_rect.center = (config.DISPLAY_WIDTH // 2 - 120, option_y)  # Cursor position for "Resume Game"
                 elif option == "Main Menu":
-                    cursor_rect.center = (WIDTH // 2 - 100, option_y)  # Cursor position for other options
+                    cursor_rect.center = (config.DISPLAY_WIDTH // 2 - 100, option_y)  # Cursor position for other options
                 
-                WIN.blit(cursor_image, cursor_rect)
+                config.WIN.blit(cursor_image, cursor_rect)
 
             option_y += option_spacing
         
         pygame.display.update()
 
     def display_select_players_screen(selected_option):
-        WIN.fill((0, 0, 0))  # Clear screen
+        config.WIN.fill((0, 0, 0))  # Clear screen
         background = pygame.image.load(os.path.join('assets', 'Starfield_Menu_Background.png'))
-        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-        WIN.blit(background, (0, 0))
+        background = pygame.transform.scale(background, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
+        config.WIN.blit(background, (0, 0))
 
         # Render the title text
         title_font = pygame.font.SysFont(None, 60)
         title_text = title_font.render("Select Players", True, (255, 255, 255))
-        title_rect = title_text.get_rect(center=(WIDTH // 2, HEIGHT // 4))
-        WIN.blit(title_text, title_rect)
+        title_rect = title_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 4))
+        config.WIN.blit(title_text, title_rect)
 
         # Render the menu options
         menu_font = pygame.font.SysFont(None, 40)
         options = ["1 Player", "2 Players", "Back"]
-        option_y = HEIGHT // 2
+        option_y = config.DISPLAY_HEIGHT // 2
         option_spacing = 60
 
         for i, option in enumerate(options):
             option_text = menu_font.render(option, True, (255, 255, 255))
-            option_rect = option_text.get_rect(center=(WIDTH // 2, option_y))
-            WIN.blit(option_text, option_rect)
+            option_rect = option_text.get_rect(center=(config.DISPLAY_WIDTH // 2, option_y))
+            config.WIN.blit(option_text, option_rect)
 
             # Display cursor image for selected option
             if i == selected_option:
@@ -316,77 +326,77 @@ class RenderSystem:
                 cursor_rect = cursor_image.get_rect() 
                     
                 if option == "1 Player":
-                    cursor_rect.center = (WIDTH // 2 - 80, option_y)  # Cursor position for "Resume Game"
+                    cursor_rect.center = (config.DISPLAY_WIDTH // 2 - 80, option_y)  # Cursor position for "Resume Game"
                 elif option == "2 Players":
-                    cursor_rect.center = (WIDTH // 2 - 100, option_y)  # Cursor position for other options
+                    cursor_rect.center = (config.DISPLAY_WIDTH // 2 - 100, option_y)  # Cursor position for other options
                 elif option == "Back":
-                    cursor_rect.center = (WIDTH // 2 - 60, option_y) # Cursor position for "Back"
+                    cursor_rect.center = (config.DISPLAY_WIDTH // 2 - 60, option_y) # Cursor position for "Back"
                     
-                WIN.blit(cursor_image, cursor_rect)
+                config.WIN.blit(cursor_image, cursor_rect)
 
             option_y += option_spacing
             
         pygame.display.update()
 
     def display_game_over_screen():
-        WIN.fill((0, 0, 0))  # Clear the screen
+        config.WIN.fill((0, 0, 0))  # Clear the screen
         background = pygame.image.load(os.path.join('assets', 'Starfield_Menu_Background.png'))
-        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-        WIN.blit(background, (0, 0))
+        background = pygame.transform.scale(background, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
+        config.WIN.blit(background, (0, 0))
         
         
         # Render the game over message
         game_over_font = pygame.font.SysFont(None, 60)
         game_over_text = game_over_font.render("Game Over", True, (255, 255, 255))
-        game_over_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-        WIN.blit(game_over_text, game_over_rect)
+        game_over_rect = game_over_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 2))
+        config.WIN.blit(game_over_text, game_over_rect)
         
         # Render the instructions
         instructions_font = pygame.font.SysFont(None, 40)
         instructions_text = instructions_font.render("Press R to return to the main menu", True, (255, 255, 255))
-        instructions_rect = instructions_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
-        WIN.blit(instructions_text, instructions_rect)
+        instructions_rect = instructions_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 2 + 100))
+        config.WIN.blit(instructions_text, instructions_rect)
         
         pygame.display.update()
 
     def display_next_stage_screen():
-        WIN.fill((0, 0, 0))  # Clear the screen
+        config.WIN.fill((0, 0, 0))  # Clear the screen
         background = pygame.image.load(os.path.join('assets', 'Starfield_Menu_Background.png'))
-        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-        WIN.blit(background, (0, 0))
+        background = pygame.transform.scale(background, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
+        config.WIN.blit(background, (0, 0))
             
             
         # Render Stage Complete
         game_over_font = pygame.font.SysFont(None, 60)
         game_over_text = game_over_font.render("Stage Complete", True, (255, 255, 255))
-        game_over_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-        WIN.blit(game_over_text, game_over_rect)
+        game_over_rect = game_over_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 2))
+        config.WIN.blit(game_over_text, game_over_rect)
             
         # Render instructions
         instructions_font = pygame.font.SysFont(None, 40)
         instructions_text = instructions_font.render("Press F to continue", True, (255, 255, 255))
-        instructions_rect = instructions_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
-        WIN.blit(instructions_text, instructions_rect)
+        instructions_rect = instructions_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 2 + 100))
+        config.WIN.blit(instructions_text, instructions_rect)
             
         pygame.display.update()
 
 
 
     def display_story_screen(stage):
-        WIN.fill((0, 0, 0))  # Clear the screen
+        config.WIN.fill((0, 0, 0))  # Clear the screen
         background = pygame.image.load(os.path.join('assets', 'cool_pixel_art_background.png'))
-        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-        WIN.blit(background, (0, 0))
+        background = pygame.transform.scale(background, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
+        config.WIN.blit(background, (0, 0))
             
         story_font = pygame.font.SysFont(None, 60)
-        story_rect = story_font.render("", True, (255, 255, 255)).get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        story_rect = story_font.render("", True, (255, 255, 255)).get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 2))
         instructions_font = pygame.font.SysFont(None, 40)
         instructions_text = instructions_font.render("", True, (255, 255, 255))
-        instructions_rect = instructions_text.get_rect(center=(WIDTH // 2 - 175, HEIGHT // 2 + 100)) #adjust instruction position
+        instructions_rect = instructions_text.get_rect(center=(config.DISPLAY_WIDTH // 2 - 175, config.DISPLAY_HEIGHT // 2 + 100)) #adjust instruction position
         instructions_text = instructions_font.render("Press F to go to next stage", True, (255, 255, 255))
 
-        story_rect.centerx = WIDTH // 2 - 280 # Move story_text width
-        story_rect.centery = HEIGHT // 2 - 100  # Move story_text height
+        story_rect.centerx = config.DISPLAY_WIDTH // 2 - 280 # Move story_text width
+        story_rect.centery = config.DISPLAY_HEIGHT // 2 - 100  # Move story_text height
 
 
 
@@ -417,7 +427,7 @@ class RenderSystem:
             instructions_text = instructions_font.render("Press F to go to main menu", True, (255, 255, 255))
             
 
-        WIN.blit(story_text, story_rect)
+        config.WIN.blit(story_text, story_rect)
 
         # Render the story paragraph with word wrapping to avoid spliting words
         paragraph_font = pygame.font.SysFont(None, 30)
@@ -427,7 +437,7 @@ class RenderSystem:
         for word in paragraph_words[1:]:
             test_line = current_line + " " + word
             test_width, _ = paragraph_font.size(test_line)
-            if test_width < WIDTH - 200:  # Adjust the width limit here
+            if test_width < config.DISPLAY_WIDTH - 200:  # Adjust the width limit here
                 current_line = test_line
             else:
                 paragraph_lines.append(current_line)
@@ -437,10 +447,10 @@ class RenderSystem:
         paragraph_y = story_rect.bottom + 20
         for line in paragraph_lines:
             paragraph_text = paragraph_font.render(line, True, (255, 255, 255))
-            paragraph_rect = paragraph_text.get_rect(center=(WIDTH // 2, paragraph_y))
-            WIN.blit(paragraph_text, paragraph_rect)
+            paragraph_rect = paragraph_text.get_rect(center=(config.DISPLAY_WIDTH // 2, paragraph_y))
+            config.WIN.blit(paragraph_text, paragraph_rect)
             paragraph_y += 30
-        WIN.blit(instructions_text, instructions_rect)
+        config.WIN.blit(instructions_text, instructions_rect)
 
 
         pygame.display.update()

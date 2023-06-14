@@ -10,7 +10,7 @@ WIDTH, HEIGHT = 1400, 500
 maximum_y_value = HEIGHT - 25
 minimum_y_value = HEIGHT - maximum_y_value
 
-
+VEL=4
 DEFAULT_HEALTH = 100
 
 
@@ -60,6 +60,7 @@ class Ship:
         self.position = position
         self.image = image
         self.health = DEFAULT_HEALTH
+        self.velocity=4
         self.alive = True
         self.visible = True
         self.width = SPACESHIP_WIDTH
