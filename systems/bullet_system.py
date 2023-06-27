@@ -143,18 +143,20 @@ class BulletSystem:
         
     def auto_fire(self, enemy_ships, pause_duration, game_start_time, *last_bullet_times):
         current_time = pygame.time.get_ticks() - pause_duration - game_start_time
+        #delta_time = current_time - previous_time
+        #previous_time = current_time
         time_since_last_bullets = [current_time - last_bullet_time for last_bullet_time in last_bullet_times]
         color_delays = {
             "green": 3000,  
             "orange": 2000,  
             "purple": 1500,
             "blue": 500,
-            "brown": 1600,
+            "brown": 1800,
             "white": 1200,
         }
         for enemy_ship in enemy_ships:
             if hasattr(enemy_ship, "ship_color") and enemy_ship.ship_color in color_delays:
-                delay = color_delays[enemy_ship.ship_color] 
+                delay = color_delays[enemy_ship.ship_color] #* (delta_time / 1000.0) 
                 if enemy_ship.ship_color == "green" and time_since_last_bullets[0] >= delay:
                     self.create_bullet(
                         enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 10, -5, 0, "green"
@@ -240,8 +242,7 @@ class BulletSystem:
                                 enemy_ship.position.y + enemy_ship.height // 2 + y_speed * 9,
                                 x_offset,
                                 y_speed,
-                                100,
-                                "white"
+                                "white",0,0
                             )
                         sound_system_instance.play_sound_effect("enemyshot")
 
@@ -257,10 +258,10 @@ class BulletSystem:
                             enemy_ship.beam_positions = generate_random_y_positions(num_positions, beam_height)
                         for beam_y_position in enemy_ship.beam_positions:
                             self.create_bullet(
-                                enemy_ship.position.x - 5, beam_y_position - 5, -5, 0, "white"
+                                enemy_ship.position.x - 5, beam_y_position - 5, -5, 0, "white",0,0
                             )
                             self.create_bullet(
-                                enemy_ship.position.x - 5, beam_y_position, -5, 0, "white"
+                                enemy_ship.position.x - 5, beam_y_position, -5, 0, "white",0,0
                             )
                         enemy_ship.bullet_beam += 1
                         if enemy_ship.bullet_beam == 60:
@@ -272,7 +273,7 @@ class BulletSystem:
 
                     elif(enemy_ship.bullet_change == 2):
                         self.create_bullet(
-                                enemy_ship.position.x - 5, random.randint(5,495), -5, 0, "white" 
+                                enemy_ship.position.x - 5, random.randint(5,495), -5, 0, "white",0,0 
                             )
                         enemy_ship.bullet_count +=1
                         if enemy_ship.bullet_count == enemy_ship.bullet_count_limit:
@@ -304,10 +305,10 @@ class BulletSystem:
     
 
     def check_bullet_collision(self, bullet, entity):
-        bullet_offset = 5  # Adjust this value as needed
+        bullet_offset = 15 # Adjust this value as needed
 
         bullet_rect = pygame.Rect(bullet.x - bullet.width/2, bullet.y - bullet.height/2, bullet.width, bullet.height)
-        entity_rect = pygame.Rect(entity.position.x + bullet_offset, entity.position.y, entity.width - bullet_offset, entity.height)
+        entity_rect = pygame.Rect(entity.position.x - bullet_offset, entity.position.y, entity.width - bullet_offset, entity.height)
         return bullet_rect.colliderect(entity_rect)
     
 
@@ -320,9 +321,9 @@ class BulletSystem:
 
     #bounding box algorithm
     
-    def update_bullets_and_check_collisions(self, enemy_ships, yellow, red, player_count, scoreboard):
+    def update_bullets_and_check_collisions(self, enemy_ships, yellow, red, player_count, scoreboard , dt):
         for bullet in self.bullets:
-            bullet.update()
+            bullet.update(dt * 100)
 
             if yellow.alive and yellow.visible and bullet.owner not in {"red", "yellow"}:
                 if self.check_bullet_collision(bullet, yellow):

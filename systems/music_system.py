@@ -27,7 +27,7 @@ class MusicSystem:
             pygame.mixer.music.set_volume(component.volume)
             pygame.mixer.music.play(-1)  # Play the music indefinitely
             component.playing = True
-
+    #pause and resume not working correctly
     def pause_music(self, label):
         if pygame.mixer.music.get_busy():
             pygame.mixer.music.pause()
@@ -35,9 +35,12 @@ class MusicSystem:
             self.paused_position[label] = pygame.mixer.music.get_pos()
     
     def resume_music(self, label):
-        if self.paused[label]:
-            pygame.mixer.music.unpause()
-            self.paused[label] = False
+       if self.paused[label]:
+           pygame.mixer.music.unpause()
+           self.paused[label] = False
+    
+
+
 
     def stop_music(self, label):
         component = self.get_music_component(label)

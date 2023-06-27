@@ -9,15 +9,16 @@ from components.ship import ShipCreation
 spawn_rates = {
     "green": 3000,
     "orange": 5000,
-    "purple": 7000,
+    "purple": 8500,
     "blue": 6000,
-    "brown": 9000,
+    "brown": 11000,
     "grey": 3000,
 }
 
 # Minimum and maximum numbers of ships for different stages
 ship_numbers = {
     "green": {
+        0: (0, 0),
         1: (0, 4),
         2: (0, 4),
         3: (0, 1),
@@ -26,13 +27,13 @@ ship_numbers = {
         2: (1, 3),
         3: (1, 3),
         4: (2, 4),
-        5: (1, 2),
+        6: (1, 2),
     },
     "purple": {
         3: (2, 4),
         4: (2, 3),
-        5: (2, 3),
-        6: (2, 3),
+        5: (1, 4),
+        6: (1, 4),
     },
     "blue": {
         4: (1, 3),
@@ -97,8 +98,10 @@ def create_ships(enemy_ships, pause_duration, game_start_time, stage, *args):
         last_spawn_time_brown_ships = SpawnSystem.spawn_brown_enemy_ships(enemy_ships, args[5], stage, pause_duration, game_start_time)
         last_spawn_times.append(last_spawn_time_brown_ships)
         #print(last_spawn_times)
-
-
+    # If only one ship type is spawned, add a default value for the second last spawn time
+    if len(last_spawn_times) == 1:
+        last_spawn_times.append(0)  # Replace 0 with an appropriate default value
+        
 
     return tuple(last_spawn_times)
 

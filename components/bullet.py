@@ -16,17 +16,16 @@ class Bullet:
         self.owner = owner
 
 
-    def update(self):
-        self.x += self.x_velocity
-        self.y += self.y_velocity
-        self.rect.x = self.x
+    def update(self , dt):
+        self.x += self.x_velocity * dt
+        self.y += self.y_velocity * dt
+        self.rect.x = self.x 
         self.rect.y = self.y
 
 
     def increase_size(self, width_increase, height_increase):
         self.width += width_increase
         self.height += height_increase
-
 
 
     def get_bullet_damage(self):

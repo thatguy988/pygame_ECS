@@ -127,20 +127,24 @@ def main_menu(game_manager):
             selected_option = 0  # Reset the selected option for when player goes back to main menu
         elif selected_option == "tutorial":
             player_count = select_players_screen()
-            music_system_instance.stop_music("main_menu_music")
-            game_screen(player_count,0,game_manager)
+            if player_count == 1 or player_count == 2:
+                music_system_instance.stop_music("main_menu_music")
+                game_screen(player_count,0,game_manager)
             selected_option = 0
 
 def pause_menu(game_music):
-    music_system_instance.pause_music(game_music)
+    music_system_instance.stop_music(game_music)
+    music_system_instance.play_music("pause_menu_music")
     selected_option = 0  # Default selected option
     while True:
         RenderSystem.display_pause_menu(selected_option)
         selected_option = MenuHandling.handle_pause_menu_events(selected_option)
         if selected_option == "resume_game":
-            music_system_instance.resume_music(game_music)
-            return  # Resume the game
+            music_system_instance.stop_music("pause_menu_music")
+            music_system_instance.play_music(game_music)
+            return "resume_game"  # Resume the game
         elif selected_option == "main_menu":
+            music_system_instance.stop_music("pause_menu_music")
             return "main_menu"  # Go back to the main menu
 
 def game_over_screen(game_music,game_manager):
@@ -213,6 +217,8 @@ def game_screen(player_count,stage,game_manager):
 
     while game_manager.run:
         game_manager.clock.tick(config.FPS)
+        game_manager.dt = game_manager.clock.tick(60) / 1000.0  # Calculate delta time
+
         
         if game_manager.scoreboard.has_score_limit_reached():
             next_stage_screen(player_count,stage + 1,game_music,game_manager)
@@ -263,7 +269,7 @@ def game_screen(player_count,stage,game_manager):
                                game_manager.last_spawn_time_blue_ships, game_manager.last_spawn_time_brown_ships)
         '''
         
-        (
+        (       
                 game_manager.last_bullet_time_green_ship,
                 game_manager.last_bullet_time_orange_ship,
                 game_manager.last_bullet_time_purple_ship,
@@ -307,26 +313,31 @@ def game_screen(player_count,stage,game_manager):
                                game_manager.last_spawn_time_blue_ships,0)
             
         elif stage == 5:
-            game_manager.last_spawn_time_orange_ships, game_manager.last_spawn_time_purple_ships, game_manager.last_spawn_time_blue_ships, game_manager.last_spawn_time_brown_ships = \
+            game_manager.last_spawn_time_purple_ships, game_manager.last_spawn_time_blue_ships, game_manager.last_spawn_time_brown_ships = \
                 create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, 
-                                0,0,
-                               game_manager.last_spawn_time_orange_ships, 
+                                0,0,0, 
                                game_manager.last_spawn_time_purple_ships, 
                                game_manager.last_spawn_time_blue_ships,
                                game_manager.last_spawn_time_brown_ships)
             
         elif stage == 6:
-            game_manager.last_spawn_time_purple_ships, game_manager.last_spawn_time_blue_ships, game_manager.last_spawn_time_brown_ships = \
+            game_manager.last_spawn_time_orange_ships, game_manager.last_spawn_time_purple_ships, game_manager.last_spawn_time_blue_ships, game_manager.last_spawn_time_brown_ships = \
                 create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, 
-                             0,0,0,
+                             0,0, 
+                               game_manager.last_spawn_time_orange_ships,
                                game_manager.last_spawn_time_purple_ships, 
                                game_manager.last_spawn_time_blue_ships,
                                game_manager.last_spawn_time_brown_ships)
             
         elif stage == 0:
-            game_manager.last_asteroid_spawn_time = \
-                create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, 
-                             game_manager.last_asteroid_spawn_time)
+            # game_manager.last_asteroid_spawn_time = \
+            #     create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, 
+            #                  0, game_manager.last_asteroid_spawn_time,
+            #                  0,0,0,0)
+            game_manager.last_spawn_time_green_ships, game_manager.last_asteroid_spawn_time = \
+                 create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, 
+                              game_manager.last_spawn_time_green_ships, game_manager.last_asteroid_spawn_time,
+                              0,0,0,0)
             
         
         
@@ -368,7 +379,7 @@ def game_screen(player_count,stage,game_manager):
 
 
         game_manager.update_game_state(game_manager.yellow, game_manager.red, game_manager.enemy_ships, player_count, keys_pressed, 
-                                        game_manager.pre_rendered_background,game_manager.scoreboard)
+                                        game_manager.pre_rendered_background,game_manager.scoreboard,game_manager.dt)
         
         game_manager.current_time = pygame.time.get_ticks() - game_manager.pause_duration - game_manager.game_start_time
         if game_manager.current_time - game_manager.last_score_change < game_manager.text_display_duration:

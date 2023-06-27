@@ -1,7 +1,5 @@
 import pygame
 import config
-from pygame import freetype
-
 
 
 from components.ship import ShipCreation
@@ -13,10 +11,7 @@ from systems.explosion_system import ExplosionSystem
 from systems.bullet_system import BulletSystem
 from systems.movement import MovementSystem
 from systems.render import RenderSystem
-
-
-
-
+from systems.music_system import MusicSystem
 
 
 
@@ -80,6 +75,7 @@ class GameManager:
         self.game_start_time = None
 
         self.current_time = None
+        self.previous_time_auto_fire = None
 
         self.last_score_change = None
         self.last_yellow_health_change = None
@@ -101,6 +97,7 @@ class GameManager:
 
         self.score_limit = Score.set_score_limit(stage)
         self.scoreboard = Score(self.score_limit)
+
 
         self.enemy_ships = []
 
@@ -160,23 +157,28 @@ class GameManager:
         self.game_start_time = pygame.time.get_ticks()
 
         self.current_time = pygame.time.get_ticks() - self.pause_duration - self.game_start_time
+        self.previous_time_auto_fire = 0
 
 
         self.last_score_change = pygame.time.get_ticks() - self.pause_duration - self.game_start_time
         self.last_yellow_health_change = pygame.time.get_ticks() - self.pause_duration - self.game_start_time
         self.last_red_health_change = pygame.time.get_ticks() - self.pause_duration - self.game_start_time if player_count == 2 else None
+
+
+        self.dt = self.clock.tick(60) / 1000.0  # Calculate delta time
+
     #@profile
-    def update_game_state(self, yellow, red, enemy_ships, player_count, keys_pressed, pre_rendered_background, scoreboard):
+    def update_game_state(self, yellow, red, enemy_ships, player_count, keys_pressed, pre_rendered_background, scoreboard,dt):
         if player_count >= 1:
             self.movement_system_instance.move_player1(
-                yellow, keys_pressed, yellow.velocity, yellow.width, yellow.height
+                yellow, keys_pressed, yellow.velocity, yellow.width, yellow.height,dt * 100
             )
 
         if player_count == 2:
             self.movement_system_instance.move_player2(
-                red, keys_pressed, red.velocity, red.width, red.height
+                red, keys_pressed, red.velocity, red.width, red.height,dt * 100
             )
-        self.movement_system_instance.move_enemy_ships(enemy_ships)  # Move all enemy ships
+        self.movement_system_instance.move_enemy_ships(enemy_ships,dt * 100)  # Move all enemy ships
 
 
         if player_count == 2:
@@ -188,7 +190,7 @@ class GameManager:
             self.bullet_system_instance.handle_enemyship_ship_collision(red, enemy_ships, scoreboard)
 
         self.bullet_system_instance.handle_enemyship_ship_collision(yellow, enemy_ships, scoreboard)
-        self.bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, yellow, red, player_count, scoreboard)
+        self.bullet_system_instance.update_bullets_and_check_collisions(enemy_ships, yellow, red, player_count, scoreboard , dt)
         self.bullet_system_instance.remove_offscreen_bullets()
         if self.explosion_system_instance.explosions:
             self.explosion_system_instance.update_explosions()
