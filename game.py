@@ -219,6 +219,7 @@ def game_screen(player_count,stage,game_manager):
         game_manager.clock.tick(config.FPS)
         game_manager.dt = game_manager.clock.tick(60) / 1000.0  # Calculate delta time
         game_manager.dt = game_manager.dt * 100
+        
 
         
         if game_manager.scoreboard.has_score_limit_reached():
@@ -281,6 +282,7 @@ def game_screen(player_count,stage,game_manager):
                 game_manager.enemy_ships,
                 game_manager.pause_duration,
                 game_manager.game_start_time,
+                game_manager.dt,
                 game_manager.last_bullet_time_green_ship,
                 game_manager.last_bullet_time_orange_ship,
                 game_manager.last_bullet_time_purple_ship,
@@ -291,23 +293,23 @@ def game_screen(player_count,stage,game_manager):
         
         if stage == 1:
             game_manager.last_spawn_time_green_ships,game_manager.last_asteroid_spawn_time = \
-                create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, 
+                create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, game_manager.dt, 
                                game_manager.last_spawn_time_green_ships, game_manager.last_asteroid_spawn_time, 
                                0,0,0,0)
         elif stage == 2:
              game_manager.last_spawn_time_green_ships,game_manager.last_spawn_time_orange_ships = \
-                create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, 
+                create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage,  game_manager.dt,
                                game_manager.last_spawn_time_green_ships, 0, 
                                game_manager.last_spawn_time_orange_ships,0,0,0)
         elif stage == 3:
             game_manager.last_spawn_time_green_ships,game_manager.last_spawn_time_orange_ships, game_manager.last_spawn_time_purple_ships = \
-                create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, 
+                create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, game_manager.dt,
                                game_manager.last_spawn_time_green_ships, 0, 
                                game_manager.last_spawn_time_orange_ships,
                                game_manager.last_spawn_time_purple_ships,0,0)
         elif stage == 4:
             game_manager.last_spawn_time_orange_ships, game_manager.last_spawn_time_purple_ships, game_manager.last_spawn_time_blue_ships = \
-                create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, 
+                create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, game_manager.dt,
                                0,0, 
                                game_manager.last_spawn_time_orange_ships, 
                                game_manager.last_spawn_time_purple_ships,
@@ -315,7 +317,7 @@ def game_screen(player_count,stage,game_manager):
             
         elif stage == 5:
             game_manager.last_spawn_time_purple_ships, game_manager.last_spawn_time_blue_ships, game_manager.last_spawn_time_brown_ships = \
-                create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, 
+                create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, game_manager.dt,
                                 0,0,0, 
                                game_manager.last_spawn_time_purple_ships, 
                                game_manager.last_spawn_time_blue_ships,
@@ -323,7 +325,7 @@ def game_screen(player_count,stage,game_manager):
             
         elif stage == 6:
             game_manager.last_spawn_time_orange_ships, game_manager.last_spawn_time_purple_ships, game_manager.last_spawn_time_blue_ships, game_manager.last_spawn_time_brown_ships = \
-                create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, 
+                create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, game_manager.dt,
                              0,0, 
                                game_manager.last_spawn_time_orange_ships,
                                game_manager.last_spawn_time_purple_ships, 
@@ -336,7 +338,7 @@ def game_screen(player_count,stage,game_manager):
             #                  0, game_manager.last_asteroid_spawn_time,
             #                  0,0,0,0)
             game_manager.last_spawn_time_green_ships, game_manager.last_asteroid_spawn_time = \
-                 create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, 
+                 create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage,game_manager.dt, 
                               game_manager.last_spawn_time_green_ships, game_manager.last_asteroid_spawn_time,
                               0,0,0,0)
             
@@ -345,7 +347,8 @@ def game_screen(player_count,stage,game_manager):
         game_manager.last_bullet_time, game_manager.last_bullet_time_2 = \
             game_manager.bullet_system_instance.fire_bullets(game_manager.yellow, game_manager.red, player_count, 
                                                              game_manager.last_bullet_time, game_manager.last_bullet_time_2,
-                                                             game_manager.pause_duration,game_manager.game_start_time,stage)
+                                                             game_manager.pause_duration,game_manager.game_start_time,stage,
+                                                             game_manager.dt)
         
         
         if not game_manager.yellow.alive and player_count == 1:

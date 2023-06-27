@@ -8,10 +8,10 @@ from components.ship import ShipCreation
 # Spawn rates for different enemy ships and asteroids
 spawn_rates = {
     "green": 3000,
-    "orange": 5000,
-    "purple": 8500,
-    "blue": 6000,
-    "brown": 11000,
+    "orange": 2000,
+    "purple": 4000,
+    "blue": 3500,
+    "brown": 7000,
     "grey": 3000,
 }
 
@@ -63,44 +63,41 @@ ship_numbers_dict = {
 
 
 
-def create_ships(enemy_ships, pause_duration, game_start_time, stage, *args):
+def create_ships(enemy_ships, pause_duration, game_start_time, stage, dt, *args):
     last_spawn_times = []
     #print(f"Args: {args}")
 
     
     if stage in ship_numbers_dict["green"]:
-        last_spawn_time_green_ships = SpawnSystem.spawn_green_enemy_ships(enemy_ships, args[0], stage, pause_duration, game_start_time)
+        last_spawn_time_green_ships = SpawnSystem.spawn_green_enemy_ships(enemy_ships, args[0], stage, pause_duration, game_start_time,dt)
         last_spawn_times.append(last_spawn_time_green_ships)
         #print(last_spawn_times)
     
 
     if stage in ship_numbers_dict["grey"]:
-        last_asteroid_spawn_time = SpawnSystem.spawn_asteroids(enemy_ships, args[1], stage, pause_duration, game_start_time)
+        last_asteroid_spawn_time = SpawnSystem.spawn_asteroids(enemy_ships, args[1], stage, pause_duration, game_start_time, dt)
         last_spawn_times.append(last_asteroid_spawn_time)
 
         
     if stage in ship_numbers_dict["orange"]:
-        last_spawn_time_orange_ships = SpawnSystem.spawn_orange_enemy_ships(enemy_ships, args[2], stage, pause_duration, game_start_time)
+        last_spawn_time_orange_ships = SpawnSystem.spawn_orange_enemy_ships(enemy_ships, args[2], stage, pause_duration, game_start_time, dt)
         last_spawn_times.append(last_spawn_time_orange_ships)
         #print(last_spawn_times)
  
     if stage in ship_numbers_dict["purple"]:
-        last_spawn_time_purple_ships = SpawnSystem.spawn_purple_enemy_ships(enemy_ships, args[3], stage, pause_duration, game_start_time)
+        last_spawn_time_purple_ships = SpawnSystem.spawn_purple_enemy_ships(enemy_ships, args[3], stage, pause_duration, game_start_time, dt)
         last_spawn_times.append(last_spawn_time_purple_ships)
         #print(last_spawn_times)
 
     if stage in ship_numbers_dict["blue"]:
-        last_spawn_time_blue_ships = SpawnSystem.spawn_blue_enemy_ships(enemy_ships, args[4], stage, pause_duration, game_start_time)
+        last_spawn_time_blue_ships = SpawnSystem.spawn_blue_enemy_ships(enemy_ships, args[4], stage, pause_duration, game_start_time, dt)
         last_spawn_times.append(last_spawn_time_blue_ships)
         #print(last_spawn_times)
 
     if stage in ship_numbers_dict["brown"]:
-        last_spawn_time_brown_ships = SpawnSystem.spawn_brown_enemy_ships(enemy_ships, args[5], stage, pause_duration, game_start_time)
+        last_spawn_time_brown_ships = SpawnSystem.spawn_brown_enemy_ships(enemy_ships, args[5], stage, pause_duration, game_start_time, dt)
         last_spawn_times.append(last_spawn_time_brown_ships)
         #print(last_spawn_times)
-    # If only one ship type is spawned, add a default value for the second last spawn time
-    if len(last_spawn_times) == 1:
-        last_spawn_times.append(0)  # Replace 0 with an appropriate default value
         
 
     return tuple(last_spawn_times)
@@ -109,9 +106,12 @@ def create_ships(enemy_ships, pause_duration, game_start_time, stage, *args):
 
 class SpawnSystem:
     @staticmethod
-    def spawn_ship(entities, last_spawn_time, stage, pause_duration, game_start_time, ship_creation_func, ship_type):
+    def spawn_ship(entities, last_spawn_time, stage, pause_duration, game_start_time, ship_creation_func, ship_type, dt):
         current_time = pygame.time.get_ticks() - pause_duration - game_start_time
-        if stage in ship_numbers_dict[ship_type] and current_time - last_spawn_time > spawn_rate_dict[ship_type]:
+        spawn_rate = spawn_rate_dict[ship_type] * dt
+
+        # if stage in ship_numbers_dict[ship_type] and current_time - last_spawn_time > spawn_rate_dict[ship_type]:
+        if stage in ship_numbers_dict[ship_type] and current_time - last_spawn_time > spawn_rate:
             min_ships, max_ships = ship_numbers_dict[ship_type][stage]
             num_ships = random.randint(min_ships, max_ships)
             for _ in range(num_ships):
@@ -121,25 +121,25 @@ class SpawnSystem:
         return last_spawn_time
 
     @staticmethod
-    def spawn_green_enemy_ships(entities, last_spawn_time, stage, pause_duration, game_start_time):
-        return SpawnSystem.spawn_ship(entities, last_spawn_time, stage, pause_duration, game_start_time, ShipCreation.create_green_enemy_ship, "green")
+    def spawn_green_enemy_ships(entities, last_spawn_time, stage, pause_duration, game_start_time, dt):
+        return SpawnSystem.spawn_ship(entities, last_spawn_time, stage, pause_duration, game_start_time, ShipCreation.create_green_enemy_ship, "green", dt)
 
     @staticmethod
-    def spawn_orange_enemy_ships(entities, last_spawn_time, stage, pause_duration, game_start_time):
-        return SpawnSystem.spawn_ship(entities, last_spawn_time, stage, pause_duration, game_start_time, ShipCreation.create_orange_enemy_ship, "orange")
+    def spawn_orange_enemy_ships(entities, last_spawn_time, stage, pause_duration, game_start_time, dt):
+        return SpawnSystem.spawn_ship(entities, last_spawn_time, stage, pause_duration, game_start_time, ShipCreation.create_orange_enemy_ship, "orange", dt)
 
     @staticmethod
-    def spawn_purple_enemy_ships(entities, last_spawn_time, stage, pause_duration, game_start_time):
-        return SpawnSystem.spawn_ship(entities, last_spawn_time, stage, pause_duration, game_start_time, ShipCreation.create_purple_enemy_ship, "purple")
+    def spawn_purple_enemy_ships(entities, last_spawn_time, stage, pause_duration, game_start_time, dt):
+        return SpawnSystem.spawn_ship(entities, last_spawn_time, stage, pause_duration, game_start_time, ShipCreation.create_purple_enemy_ship, "purple", dt)
 
     @staticmethod
-    def spawn_blue_enemy_ships(entities, last_spawn_time, stage, pause_duration, game_start_time):
-        return SpawnSystem.spawn_ship(entities, last_spawn_time, stage, pause_duration, game_start_time, ShipCreation.create_blue_enemy_ship, "blue")
+    def spawn_blue_enemy_ships(entities, last_spawn_time, stage, pause_duration, game_start_time, dt):
+        return SpawnSystem.spawn_ship(entities, last_spawn_time, stage, pause_duration, game_start_time, ShipCreation.create_blue_enemy_ship, "blue", dt)
 
     @staticmethod
-    def spawn_brown_enemy_ships(entities, last_spawn_time, stage, pause_duration, game_start_time):
-        return SpawnSystem.spawn_ship(entities, last_spawn_time, stage, pause_duration, game_start_time, ShipCreation.create_brown_enemy_ship, "brown")
+    def spawn_brown_enemy_ships(entities, last_spawn_time, stage, pause_duration, game_start_time, dt):
+        return SpawnSystem.spawn_ship(entities, last_spawn_time, stage, pause_duration, game_start_time, ShipCreation.create_brown_enemy_ship, "brown", dt)
 
     @staticmethod
-    def spawn_asteroids(entities, last_spawn_time, stage, pause_duration, game_start_time):
-        return SpawnSystem.spawn_ship(entities, last_spawn_time, stage, pause_duration, game_start_time, ShipCreation.create_asteroid, "grey")
+    def spawn_asteroids(entities, last_spawn_time, stage, pause_duration, game_start_time, dt):
+        return SpawnSystem.spawn_ship(entities, last_spawn_time, stage, pause_duration, game_start_time, ShipCreation.create_asteroid, "grey", dt)

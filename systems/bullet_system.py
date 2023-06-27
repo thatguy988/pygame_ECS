@@ -89,8 +89,8 @@ class BulletSystem:
         return last_bullet_time
 
 
-    def fire_bullets(self, yellow, red, player_count, last_bullet_time, last_bullet_time_2, pause_duration,game_start_time, stage):
-        player_bullet_delay = 300
+    def fire_bullets(self, yellow, red, player_count, last_bullet_time, last_bullet_time_2, pause_duration,game_start_time, stage, dt):
+        player_bullet_delay = 300 * dt
 
         if player_count >= 1 and yellow.alive:
             bullet_pressed = pygame.key.get_pressed()[pygame.K_SPACE]
@@ -141,22 +141,22 @@ class BulletSystem:
     
     
         
-    def auto_fire(self, enemy_ships, pause_duration, game_start_time, *last_bullet_times):
+    def auto_fire(self, enemy_ships, pause_duration, game_start_time, dt, *last_bullet_times):
         current_time = pygame.time.get_ticks() - pause_duration - game_start_time
         #delta_time = current_time - previous_time
         #previous_time = current_time
         time_since_last_bullets = [current_time - last_bullet_time for last_bullet_time in last_bullet_times]
         color_delays = {
-            "green": 3000,  
-            "orange": 2000,  
-            "purple": 1500,
+            "green": 2500,  
+            "orange": 1800,  
+            "purple": 1000,
             "blue": 500,
-            "brown": 1800,
+            "brown": 1400,
             "white": 1200,
         }
         for enemy_ship in enemy_ships:
             if hasattr(enemy_ship, "ship_color") and enemy_ship.ship_color in color_delays:
-                delay = color_delays[enemy_ship.ship_color] #* (delta_time / 1000.0) 
+                delay = color_delays[enemy_ship.ship_color] * dt
                 if enemy_ship.ship_color == "green" and time_since_last_bullets[0] >= delay:
                     self.create_bullet(
                         enemy_ship.position.x - 5, enemy_ship.position.y + enemy_ship.height // 2 - 10, -5, 0, "green"
