@@ -218,6 +218,7 @@ def game_screen(player_count,stage,game_manager):
     while game_manager.run:
         game_manager.clock.tick(config.FPS)
         game_manager.dt = game_manager.clock.tick(60) / 1000.0  # Calculate delta time
+        game_manager.dt = game_manager.dt * 100
 
         
         if game_manager.scoreboard.has_score_limit_reached():

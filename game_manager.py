@@ -11,7 +11,6 @@ from systems.explosion_system import ExplosionSystem
 from systems.bullet_system import BulletSystem
 from systems.movement import MovementSystem
 from systems.render import RenderSystem
-from systems.music_system import MusicSystem
 
 
 
@@ -75,7 +74,6 @@ class GameManager:
         self.game_start_time = None
 
         self.current_time = None
-        self.previous_time_auto_fire = None
 
         self.last_score_change = None
         self.last_yellow_health_change = None
@@ -157,7 +155,6 @@ class GameManager:
         self.game_start_time = pygame.time.get_ticks()
 
         self.current_time = pygame.time.get_ticks() - self.pause_duration - self.game_start_time
-        self.previous_time_auto_fire = 0
 
 
         self.last_score_change = pygame.time.get_ticks() - self.pause_duration - self.game_start_time
@@ -171,14 +168,14 @@ class GameManager:
     def update_game_state(self, yellow, red, enemy_ships, player_count, keys_pressed, pre_rendered_background, scoreboard,dt):
         if player_count >= 1:
             self.movement_system_instance.move_player1(
-                yellow, keys_pressed, yellow.velocity, yellow.width, yellow.height,dt * 100
+                yellow, keys_pressed, yellow.velocity, yellow.width, yellow.height,dt
             )
 
         if player_count == 2:
             self.movement_system_instance.move_player2(
-                red, keys_pressed, red.velocity, red.width, red.height,dt * 100
+                red, keys_pressed, red.velocity, red.width, red.height,dt
             )
-        self.movement_system_instance.move_enemy_ships(enemy_ships,dt * 100)  # Move all enemy ships
+        self.movement_system_instance.move_enemy_ships(enemy_ships,dt)  # Move all enemy ships
 
 
         if player_count == 2:

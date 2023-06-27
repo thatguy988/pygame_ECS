@@ -323,7 +323,7 @@ class BulletSystem:
     
     def update_bullets_and_check_collisions(self, enemy_ships, yellow, red, player_count, scoreboard , dt):
         for bullet in self.bullets:
-            bullet.update(dt * 100)
+            bullet.update(dt)
 
             if yellow.alive and yellow.visible and bullet.owner not in {"red", "yellow"}:
                 if self.check_bullet_collision(bullet, yellow):
