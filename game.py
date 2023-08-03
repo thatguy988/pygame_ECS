@@ -264,12 +264,6 @@ def game_screen(player_count,stage,game_manager):
             
 
         keys_pressed = pygame.key.get_pressed()
-        '''
-        results = create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, 
-                               game_manager.last_spawn_time_green_ships, game_manager.last_asteroid_spawn_time, 
-                               game_manager.last_spawn_time_orange_ships,game_manager.last_spawn_time_purple_ships, 
-                               game_manager.last_spawn_time_blue_ships, game_manager.last_spawn_time_brown_ships)
-        '''
         
         (       
                 game_manager.last_bullet_time_green_ship,
@@ -316,14 +310,6 @@ def game_screen(player_count,stage,game_manager):
                                game_manager.last_spawn_time_blue_ships,0)
             
         elif stage == 5:
-            game_manager.last_spawn_time_purple_ships, game_manager.last_spawn_time_blue_ships, game_manager.last_spawn_time_brown_ships = \
-                create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, game_manager.dt,
-                                0,0,0, 
-                               game_manager.last_spawn_time_purple_ships, 
-                               game_manager.last_spawn_time_blue_ships,
-                               game_manager.last_spawn_time_brown_ships)
-            
-        elif stage == 6:
             game_manager.last_spawn_time_orange_ships, game_manager.last_spawn_time_purple_ships, game_manager.last_spawn_time_blue_ships, game_manager.last_spawn_time_brown_ships = \
                 create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, game_manager.dt,
                              0,0, 
@@ -332,18 +318,21 @@ def game_screen(player_count,stage,game_manager):
                                game_manager.last_spawn_time_blue_ships,
                                game_manager.last_spawn_time_brown_ships)
             
+        elif stage == 6:
+            game_manager.last_spawn_time_green_ships, game_manager.last_asteroid_spawn_time, game_manager.last_spawn_time_orange_ships, game_manager.last_spawn_time_purple_ships, game_manager.last_spawn_time_blue_ships, game_manager.last_spawn_time_brown_ships = \
+                create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, game_manager.dt,
+                            game_manager.last_spawn_time_green_ships,
+                            game_manager.last_asteroid_spawn_time, 
+                            game_manager.last_spawn_time_orange_ships,
+                            game_manager.last_spawn_time_purple_ships, 
+                            game_manager.last_spawn_time_blue_ships,
+                            game_manager.last_spawn_time_brown_ships)
         elif stage == 0:
-            # game_manager.last_asteroid_spawn_time = \
-            #     create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage, 
-            #                  0, game_manager.last_asteroid_spawn_time,
-            #                  0,0,0,0)
             game_manager.last_spawn_time_green_ships, game_manager.last_asteroid_spawn_time = \
                  create_ships(game_manager.enemy_ships, game_manager.pause_duration, game_manager.game_start_time, stage,game_manager.dt, 
                               game_manager.last_spawn_time_green_ships, game_manager.last_asteroid_spawn_time,
                               0,0,0,0)
-            
-        
-        
+
         game_manager.last_bullet_time, game_manager.last_bullet_time_2 = \
             game_manager.bullet_system_instance.fire_bullets(game_manager.yellow, game_manager.red, player_count, 
                                                              game_manager.last_bullet_time, game_manager.last_bullet_time_2,
@@ -430,7 +419,7 @@ def display_developer_screen(game_manager):
                 sys.exit()
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_f:
+                if event.key == pygame.K_SPACE:
                     main_menu(game_manager)
                     return
 

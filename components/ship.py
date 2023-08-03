@@ -25,7 +25,7 @@ brown_enemy_ship_health = 55
 brown_enemy_ship_velocity = 3
 
 
-boss_enemy_ship_health = 1000
+boss_enemy_ship_health = 3000
 boss_enemy_ship_velocity = 1
 
 
@@ -38,7 +38,7 @@ orange_enemy_ship_vel = 2
 ASTEROID_VEL = 2
 ASTEROID_RADIUS = 30
 ASTEROID_HEALTH_MIN = 5
-ASTEROID_HEALTH_MAX = 15
+ASTEROID_HEALTH_MAX = 50
 
 COLLISION_DAMAGE = 0.25
 

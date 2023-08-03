@@ -2,9 +2,9 @@ from systems.sound_effect_system import SoundEffectSystem
 
 
 
-max_points_stage_1 = 300
-max_points_stage_2 = 400
-max_points_stage_3 = 350 
+max_points_stage_1 = 250
+max_points_stage_2 = 300
+max_points_stage_3 = 500 
 max_points_stage_4 = 800
 max_points_stage_5 = 1000
 max_points_stage_6 = 1500

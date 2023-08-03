@@ -59,7 +59,7 @@ class RenderSystem:
         
         if player_count == 1:
             
-            instructions_font = pygame.font.SysFont(None, 40)
+            instructions_font = pygame.font.Font(None, 40)
             instructions_text = instructions_font.render("Player 1: Press W A S D to move and press spacebar to shoot", True, (255, 255, 255))
             instructions_rect = instructions_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 2 + 100))
             config.WIN.blit(instructions_text, instructions_rect)
@@ -67,7 +67,7 @@ class RenderSystem:
             
             pygame.display.update(instructions_rect)
         else:
-            instructions_font = pygame.font.SysFont(None, 40)
+            instructions_font = pygame.font.Font(None, 40)
 
             instructions_text1 = instructions_font.render("Player 1: Press W A S D to move and press spacebar to shoot", True, (255, 255, 255))
             instructions_text2 = instructions_font.render("Player 2: Press I J K L to move and press enter to shoot", True, (255, 255, 255))
@@ -177,13 +177,13 @@ class RenderSystem:
         config.WIN.blit(background, (0, 0))
         
         # Render the title text
-        title_font = pygame.font.SysFont(None, 60)
+        title_font = pygame.font.Font(None, 60)
         title_text = title_font.render("Starfire Assault", True, (255, 255, 255))
         title_rect = title_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 4))
         config.WIN.blit(title_text, title_rect)
         
         # Render the menu options
-        menu_font = pygame.font.SysFont(None, 40)
+        menu_font = pygame.font.Font(None, 40)
         options = ["Start Game", "Tutorial", "Quit"]
         option_y = config.DISPLAY_HEIGHT // 2
         option_spacing = 60
@@ -222,13 +222,13 @@ class RenderSystem:
         config.WIN.blit(background, (0, 0))
 
         # Render the title text
-        title_font = pygame.font.SysFont(None, 60)
+        title_font = pygame.font.Font(None, 60)
         title_text = title_font.render("Select Stage", True, (255, 255, 255))
         title_rect = title_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 12))
         config.WIN.blit(title_text, title_rect)
 
         # Render the stage options
-        menu_font = pygame.font.SysFont(None, 40)
+        menu_font = pygame.font.Font(None, 40)
         stages = ["Stage 1", "Stage 2", "Stage 3", "Stage 4", "Stage 5", "Stage 6", "Boss Level", "Back"]
         option_y = config.DISPLAY_HEIGHT // 6
         option_spacing = 50
@@ -261,13 +261,13 @@ class RenderSystem:
         config.WIN.blit(background, (0, 0))
         
         # Render the title text
-        title_font = pygame.font.SysFont(None, 60)
+        title_font = pygame.font.Font(None, 60)
         title_text = title_font.render("Pause Menu", True, (255, 255, 255))
         title_rect = title_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 4))
         config.WIN.blit(title_text, title_rect)
         
         # Render the menu options
-        menu_font = pygame.font.SysFont(None, 40)
+        menu_font = pygame.font.Font(None, 40)
         options = ["Resume Game", "Main Menu"]
         option_y = config.DISPLAY_HEIGHT // 2
         option_spacing = 60
@@ -302,13 +302,13 @@ class RenderSystem:
         config.WIN.blit(background, (0, 0))
 
         # Render the title text
-        title_font = pygame.font.SysFont(None, 60)
+        title_font = pygame.font.Font(None, 60)
         title_text = title_font.render("Select Players", True, (255, 255, 255))
         title_rect = title_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 4))
         config.WIN.blit(title_text, title_rect)
 
         # Render the menu options
-        menu_font = pygame.font.SysFont(None, 40)
+        menu_font = pygame.font.Font(None, 40)
         options = ["1 Player", "2 Players", "Back"]
         option_y = config.DISPLAY_HEIGHT // 2
         option_spacing = 60
@@ -346,13 +346,13 @@ class RenderSystem:
         
         
         # Render the game over message
-        game_over_font = pygame.font.SysFont(None, 60)
+        game_over_font = pygame.font.Font(None, 60)
         game_over_text = game_over_font.render("Game Over", True, (255, 255, 255))
         game_over_rect = game_over_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 2))
         config.WIN.blit(game_over_text, game_over_rect)
         
         # Render the instructions
-        instructions_font = pygame.font.SysFont(None, 40)
+        instructions_font = pygame.font.Font(None, 40)
         instructions_text = instructions_font.render("Press R to return to the main menu", True, (255, 255, 255))
         instructions_rect = instructions_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 2 + 100))
         config.WIN.blit(instructions_text, instructions_rect)
@@ -367,13 +367,13 @@ class RenderSystem:
             
             
         # Render Stage Complete
-        game_over_font = pygame.font.SysFont(None, 60)
+        game_over_font = pygame.font.Font(None, 60)
         game_over_text = game_over_font.render("Stage Complete", True, (255, 255, 255))
         game_over_rect = game_over_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 2))
         config.WIN.blit(game_over_text, game_over_rect)
             
         # Render instructions
-        instructions_font = pygame.font.SysFont(None, 40)
+        instructions_font = pygame.font.Font(None, 40)
         instructions_text = instructions_font.render("Press F to continue", True, (255, 255, 255))
         instructions_rect = instructions_text.get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 2 + 100))
         config.WIN.blit(instructions_text, instructions_rect)
@@ -388,9 +388,9 @@ class RenderSystem:
         background = pygame.transform.scale(background, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
         config.WIN.blit(background, (0, 0))
             
-        story_font = pygame.font.SysFont(None, 60)
+        story_font = pygame.font.Font(None, 60)
         story_rect = story_font.render("", True, (255, 255, 255)).get_rect(center=(config.DISPLAY_WIDTH // 2, config.DISPLAY_HEIGHT // 2))
-        instructions_font = pygame.font.SysFont(None, 40)
+        instructions_font = pygame.font.Font(None, 40)
         instructions_text = instructions_font.render("", True, (255, 255, 255))
         instructions_rect = instructions_text.get_rect(center=(config.DISPLAY_WIDTH // 2 - 175, config.DISPLAY_HEIGHT // 2 + 100)) #adjust instruction position
         instructions_text = instructions_font.render("Press F to go to next stage", True, (255, 255, 255))
@@ -430,7 +430,7 @@ class RenderSystem:
         config.WIN.blit(story_text, story_rect)
 
         # Render the story paragraph with word wrapping to avoid spliting words
-        paragraph_font = pygame.font.SysFont(None, 30)
+        paragraph_font = pygame.font.Font(None, 30)
         paragraph_words = story_paragraph.split()
         paragraph_lines = []
         current_line = paragraph_words[0]

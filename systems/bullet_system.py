@@ -61,7 +61,7 @@ class BulletSystem:
                     player.position.y + player.height // 2 + 10,
                     5, 0, color
                 )
-            if stage >= 4:  # stage 4, 5
+            if stage >= 4:  # stage 4
                 self.create_bullet(
                     player.position.x + player.width,
                     player.position.y + player.height // 2 - 7,
@@ -72,7 +72,7 @@ class BulletSystem:
                     player.position.y + player.height // 2 + 12,
                     5, 0.25, color
                 )
-            if stage >= 6:  # stage 6, 7
+            if stage >= 5:  # stage 5, 6, 7
                 self.create_bullet(
                     player.position.x + player.width,
                     player.position.y + player.height // 2 - 7,
@@ -143,8 +143,6 @@ class BulletSystem:
         
     def auto_fire(self, enemy_ships, pause_duration, game_start_time, dt, *last_bullet_times):
         current_time = pygame.time.get_ticks() - pause_duration - game_start_time
-        #delta_time = current_time - previous_time
-        #previous_time = current_time
         time_since_last_bullets = [current_time - last_bullet_time for last_bullet_time in last_bullet_times]
         color_delays = {
             "green": 2500,  
@@ -356,7 +354,8 @@ class BulletSystem:
                         sound_system_instance.play_sound_effect("enemyhit")
 
                         if enemy_ship.health <= 0:
-                            health(health_reward, yellow, red)
+                            if enemy_ship.ship_color != 'grey':
+                                gain_health(health_reward, yellow, red)
                             self.explosion_system.create_explosion(enemy_ship.position.x, enemy_ship.position.y)
                             enemy_ship.stop_moving()
                             scoreboard.reward_points(enemy_ship.ship_color)
@@ -380,7 +379,7 @@ class BulletSystem:
                         scoreboard.reward_points(enemy_ship.ship_color)
                         enemy_ships.remove(enemy_ship)
 
-def health(health_reward,yellow,red):
+def gain_health(health_reward,yellow,red):
         if health_reward == "yellow":
             yellow.health += 5
         elif health_reward == "red":
